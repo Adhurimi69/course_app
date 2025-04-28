@@ -1,33 +1,30 @@
 const express = require('express');
 const cors = require('cors');
-const { sequelize } = require('./config/db'); // Database connection
-const courseRoutes = require('./routes/courseRoutes'); // Import the routes
+const { sequelize } = require('./config/db');
+const courseRoutes = require('./routes/courseRoutes');
+const userRoutes = require('./routes/userRoutes');
+//const categoryRoutes = require('./routes/categoryRoutes');
+//const enrollmentRoutes = require('./routes/enrollmentRoutes');
+//const assignmentRoutes = require('./routes/assignmentRoutes');
 
-const app = express(); // << this must be declared before using app.get, app.post, etc.
+const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Test route
-app.get('/', (req, res) => {
-  res.send('Course Management System Backend is working!');
-});
+app.use('/api/courses', courseRoutes);
+app.use('/api/users', userRoutes);
+//app.use('/api/categories', categoryRoutes);
+//app.use('/api/enrollments', enrollmentRoutes);
+//app.use('/api/assignments', assignmentRoutes);
 
-// API Routes
-app.use('/api/courses', courseRoutes); // use the router from courseRoutes.js
-
-// Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   
   try {
-    // Check the database connection
     await sequelize.authenticate();
     console.log('Database connected successfully!');
-
-    // Sync the models (create tables if they don't exist)
     await sequelize.sync();
     console.log('Database tables created or synced!');
   } catch (error) {

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './App.css'; // Assuming you're going to add styles here
+import './App.css'; 
 
 function App() {
   const [courses, setCourses] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [editingId, setEditingId] = useState(null); // to track which course we are editing
 
   useEffect(() => {
     fetchCourses();
@@ -18,10 +19,30 @@ function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post('http://localhost:5000/api/courses', { title, description });
+    if (editingId) {
+      // Update course
+      await axios.put(`http://localhost:5000/api/courses/${editingId}`, { title, description });
+      setEditingId(null);
+    } else {
+      // Create new course
+      await axios.post('http://localhost:5000/api/courses', { title, description });
+    }
     setTitle('');
     setDescription('');
     fetchCourses();
+  };
+
+  const handleEdit = (course) => {
+    setEditingId(course.id);
+    setTitle(course.title);
+    setDescription(course.description);
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this course?')) {
+      await axios.delete(`http://localhost:5000/api/courses/${id}`);
+      fetchCourses();
+    }
   };
 
   return (
@@ -43,7 +64,9 @@ function App() {
           onChange={(e) => setDescription(e.target.value)}
           className="textarea"
         ></textarea>
-        <button type="submit" className="button">Add Course</button>
+        <button type="submit" className="button">
+          {editingId ? 'Update Course' : 'Add Course'}
+        </button>
       </form>
 
       <h2 className="courses-title">Courses List</h2>
@@ -52,6 +75,8 @@ function App() {
           <li key={course.id} className="course-item">
             <h3 className="course-title">{course.title}</h3>
             <p className="course-description">{course.description}</p>
+            <button onClick={() => handleEdit(course)} className="button edit-button">Edit</button>
+            <button onClick={() => handleDelete(course.id)} className="button delete-button">Delete</button>
           </li>
         ))}
       </ul>

@@ -4,15 +4,19 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 import './App.css';
 import Users from './Views/Users';
-import Departments from './Views/Departments'; // ✅ Import i komponentit të ri
+import Departments from './Views/Departments';
+import Lectures from './Views/Lectures'; // ✅ Shtimi i komponentit të Lectures
 
 function App() {
   const [courses, setCourses] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [title, setTitle] = useState('');
+  const [departmentId, setDepartmentId] = useState('');
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchCourses();
+    fetchDepartments();
   }, []);
 
   const fetchCourses = async () => {
@@ -20,21 +24,36 @@ function App() {
     setCourses(res.data);
   };
 
+  const fetchDepartments = async () => {
+    const res = await axios.get('http://localhost:5000/api/departments');
+    setDepartments(res.data);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!departmentId) {
+      alert('Please select a department.');
+      return;
+    }
+
+    const data = { title, departmentId };
+
     if (editingId) {
-      await axios.put(`http://localhost:5000/api/courses/${editingId}`, { title });
+      await axios.put(`http://localhost:5000/api/courses/${editingId}`, data);
       setEditingId(null);
     } else {
-      await axios.post('http://localhost:5000/api/courses', { title });
+      await axios.post('http://localhost:5000/api/courses', data);
     }
+
     setTitle('');
+    setDepartmentId('');
     fetchCourses();
   };
 
   const handleEdit = (course) => {
     setEditingId(course.id);
     setTitle(course.title);
+    setDepartmentId(course.departmentId || '');
   };
 
   const handleDelete = async (id) => {
@@ -50,7 +69,10 @@ function App() {
         <h1 className="title">Course Management System</h1>
 
         <nav>
-          <Link to="/">Courses</Link> | <Link to="/users">Users</Link> | <Link to="/departments">Departments</Link>
+          <Link to="/">Courses</Link> |{' '}
+          <Link to="/users">Users</Link> |{' '}
+          <Link to="/departments">Departments</Link> |{' '}
+          <Link to="/lectures">Lectures</Link> {/* ✅ Link i ri */}
         </nav>
 
         <Routes>
@@ -67,6 +89,21 @@ function App() {
                     required
                     className="input"
                   />
+
+                  <select
+                    value={departmentId}
+                    onChange={(e) => setDepartmentId(e.target.value)}
+                    required
+                    className="input"
+                  >
+                    <option value="">-- Select Department --</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.id}>
+                        {dept.name}
+                      </option>
+                    ))}
+                  </select>
+
                   <button type="submit" className="button submit-button">
                     {editingId ? 'Update Course' : 'Add Course'}
                   </button>
@@ -78,6 +115,7 @@ function App() {
                     <li key={course.id} className="course-item">
                       <div className="course-content">
                         <h3 className="course-title">{course.title}</h3>
+                        <p>Department ID: {course.departmentId || 'N/A'}</p>
                       </div>
                       <div className="course-actions">
                         <button onClick={() => handleEdit(course)} className="button edit-button">Edit</button>
@@ -90,7 +128,8 @@ function App() {
             }
           />
           <Route path="/users" element={<Users />} />
-          <Route path="/departments" element={<Departments />} /> {/* ✅ Rruga e re për departments */}
+          <Route path="/departments" element={<Departments />} />
+          <Route path="/lectures" element={<Lectures />} /> {/* ✅ Route i ri */}
         </Routes>
       </div>
     </Router>

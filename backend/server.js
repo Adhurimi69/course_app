@@ -4,6 +4,8 @@ const { sequelize } = require('./config/db');
 const courseRoutes = require('./routes/courseRoutes');
 const userRoutes = require('./routes/userRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
+const lectureRoutes = require('./routes/lectureRoutes');
+
 // const categoryRoutes = require('./routes/categoryRoutes');
 // const enrollmentRoutes = require('./routes/enrollmentRoutes');
 // const assignmentRoutes = require('./routes/assignmentRoutes');
@@ -16,6 +18,7 @@ app.use(express.json());
 app.use('/api/courses', courseRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/departments', departmentRoutes);
+app.use('/api/lectures', lectureRoutes);
 // app.use('/api/categories', categoryRoutes);
 // app.use('/api/enrollments', enrollmentRoutes);
 // app.use('/api/assignments', assignmentRoutes);
@@ -23,6 +26,7 @@ app.use('/api/departments', departmentRoutes);
 // 🟢 Importo të gjitha modelet para se të bëhet sync
 require('./models/Department');
 require('./models/Course');
+require('./models/Lecture');
 
 
 

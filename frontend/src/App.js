@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'; // Update import
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 import './App.css';
-import Users from './Views/Users'; // Ensure you're importing Users component properly
+import Users from './Views/Users';
+import Departments from './Views/Departments'; // ✅ Import i komponentit të ri
 
 function App() {
   const [courses, setCourses] = useState([]);
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -23,20 +23,18 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (editingId) {
-      await axios.put(`http://localhost:5000/api/courses/${editingId}`, { title, description });
+      await axios.put(`http://localhost:5000/api/courses/${editingId}`, { title });
       setEditingId(null);
     } else {
-      await axios.post('http://localhost:5000/api/courses', { title, description });
+      await axios.post('http://localhost:5000/api/courses', { title });
     }
     setTitle('');
-    setDescription('');
     fetchCourses();
   };
 
   const handleEdit = (course) => {
     setEditingId(course.id);
     setTitle(course.title);
-    setDescription(course.description);
   };
 
   const handleDelete = async (id) => {
@@ -52,46 +50,47 @@ function App() {
         <h1 className="title">Course Management System</h1>
 
         <nav>
-          <Link to="/">Courses</Link> | <Link to="/users">Users</Link>
+          <Link to="/">Courses</Link> | <Link to="/users">Users</Link> | <Link to="/departments">Departments</Link>
         </nav>
 
         <Routes>
-          <Route path="/" element={
-            <>
-              <form className="form" onSubmit={handleSubmit}>
-                <input
-                  type="text"
-                  placeholder="Course Title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  className="input"
-                />
-                <textarea
-                  placeholder="Course Description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="textarea"
-                ></textarea>
-                <button type="submit" className="button">
-                  {editingId ? 'Update Course' : 'Add Course'}
-                </button>
-              </form>
+          <Route
+            path="/"
+            element={
+              <>
+                <form className="form" onSubmit={handleSubmit}>
+                  <input
+                    type="text"
+                    placeholder="Course Title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    className="input"
+                  />
+                  <button type="submit" className="button submit-button">
+                    {editingId ? 'Update Course' : 'Add Course'}
+                  </button>
+                </form>
 
-              <h2 className="courses-title">Courses List</h2>
-              <ul className="courses-list">
-                {courses.map((course) => (
-                  <li key={course.id} className="course-item">
-                    <h3 className="course-title">{course.title}</h3>
-                    <p className="course-description">{course.description}</p>
-                    <button onClick={() => handleEdit(course)} className="button edit-button">Edit</button>
-                    <button onClick={() => handleDelete(course.id)} className="button delete-button">Delete</button>
-                  </li>
-                ))}
-              </ul>
-            </>
-          } />
+                <h2 className="courses-title">Courses List</h2>
+                <ul className="courses-list">
+                  {courses.map((course) => (
+                    <li key={course.id} className="course-item">
+                      <div className="course-content">
+                        <h3 className="course-title">{course.title}</h3>
+                      </div>
+                      <div className="course-actions">
+                        <button onClick={() => handleEdit(course)} className="button edit-button">Edit</button>
+                        <button onClick={() => handleDelete(course.id)} className="button delete-button">Delete</button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            }
+          />
           <Route path="/users" element={<Users />} />
+          <Route path="/departments" element={<Departments />} /> {/* ✅ Rruga e re për departments */}
         </Routes>
       </div>
     </Router>

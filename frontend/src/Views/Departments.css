@@ -1,0 +1,59 @@
+.departments-container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+  }
+  
+  .form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+  }
+  
+  .button {
+    padding: 10px 15px;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .submit-button {
+    background-color: #2196F3;
+  }
+  
+  .edit-button {
+    background-color: #FFA726;
+    margin-right: 5px;
+  }
+  
+  .delete-button {
+    background-color: #E53935;
+  }
+  
+  .departments-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .department-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #eee;
+    margin: 5px 0;
+    border-radius: 5px;
+  }
+  
+  .actions button {
+    margin-left: 5px;
+  }
+  

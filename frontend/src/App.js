@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-import './App.css';
 import Users from './Views/Users';
 import Departments from './Views/Departments';
-import Lectures from './Views/Lectures'; // ✅ Shtimi i komponentit të Lectures
+import Lectures from './Views/Lectures';
+import Home from './Views/Home';
+import './App.css';
 
 function App() {
   const [courses, setCourses] = useState([]);
@@ -64,76 +64,69 @@ function App() {
   };
 
   return (
-    <Router>
-      <div className="App">
-        <h1 className="title">Course Management System</h1>
+    <div className="App">
+      <h1 className="title">Course Management System</h1>
 
-        <nav>
-          <Link to="/">Courses</Link> |{' '}
-          <Link to="/users">Users</Link> |{' '}
-          <Link to="/departments">Departments</Link> |{' '}
-          <Link to="/lectures">Lectures</Link> {/* ✅ Link i ri */}
-        </nav>
+      <nav className="nav-bar">
+        <Link to="/app">Courses</Link>
+        <Link to="/app/users">Users</Link>
+        <Link to="/app/departments">Departments</Link>
+        <Link to="/app/lectures">Lectures</Link>
+      </nav>
 
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <form className="form" onSubmit={handleSubmit}>
-                  <input
-                    type="text"
-                    placeholder="Course Title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    className="input"
-                  />
-
-                  <select
-                    value={departmentId}
-                    onChange={(e) => setDepartmentId(e.target.value)}
-                    required
-                    className="input"
-                  >
-                    <option value="">-- Select Department --</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>
-                        {dept.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <button type="submit" className="button submit-button">
-                    {editingId ? 'Update Course' : 'Add Course'}
-                  </button>
-                </form>
-
-                <h2 className="courses-title">Courses List</h2>
-                <ul className="courses-list">
-                  {courses.map((course) => (
-                    <li key={course.id} className="course-item">
-                      <div className="course-content">
-                        <h3 className="course-title">{course.title}</h3>
-                        <p>Department ID: {course.departmentId || 'N/A'}</p>
-                      </div>
-                      <div className="course-actions">
-                        <button onClick={() => handleEdit(course)} className="button edit-button">Edit</button>
-                        <button onClick={() => handleDelete(course.id)} className="button delete-button">Delete</button>
-                      </div>
-                    </li>
+      <Routes>
+        <Route
+          path="/app"
+          element={
+            <div className="course-page container">
+              <form onSubmit={handleSubmit} className="course-form">
+                <input
+                  type="text"
+                  placeholder="Course Title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+                <select
+                  value={departmentId}
+                  onChange={(e) => setDepartmentId(e.target.value)}
+                  required
+                >
+                  <option value="">-- Select Department --</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
                   ))}
-                </ul>
-              </>
-            }
-          />
-          <Route path="/users" element={<Users />} />
-          <Route path="/departments" element={<Departments />} />
-          <Route path="/lectures" element={<Lectures />} /> {/* ✅ Route i ri */}
-        </Routes>
-      </div>
-    </Router>
+                </select>
+                <button type="submit">{editingId ? 'Update' : 'Add'} Course</button>
+              </form>
+
+              <ul className="course-list">
+                {courses.map((course) => (
+                  <li key={course.id}>
+                    {course.title} - Dept ID: {course.departmentId || 'N/A'}
+                    <button onClick={() => handleEdit(course)}>Edit</button>
+                    <button onClick={() => handleDelete(course.id)}>Delete</button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          }
+        />
+        <Route path="/app/users" element={<Users />} />
+        <Route path="/app/departments" element={<Departments />} />
+        <Route path="/app/lectures" element={<Lectures />} />
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </div>
   );
 }
 
-export default App;
+export default function WrappedApp() {
+  return (
+    <Router>
+      <App />
+    </Router>
+  );
+}

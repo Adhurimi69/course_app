@@ -6,6 +6,9 @@ const userRoutes = require("./routes/userRoutes");
 const departmentRoutes = require("./routes/departmentRoutes");
 const lectureRoutes = require("./routes/lectureRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
+const examRoutes = require('./routes/examRoutes');
+
+
 
 // const categoryRoutes = require('./routes/categoryRoutes');
 // const enrollmentRoutes = require('./routes/enrollmentRoutes');
@@ -20,10 +23,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/departments", departmentRoutes);
 app.use("/api/lectures", lectureRoutes);
 app.use("/api/assignments", assignmentRoutes);
+app.use('/api/exams', examRoutes);
 
-require("./models/Department");
-require("./models/Course");
-require("./models/Lecture");
+//require("./models/Department");
+//require("./models/Course");
+//require("./models/Lecture");
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {

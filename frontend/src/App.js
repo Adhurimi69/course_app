@@ -7,6 +7,7 @@ import Lectures from "./Views/Lectures";
 import Courses from "./Views/Courses";
 import Assignment from "./Views/Assignment";
 import Home from "./Views/Home";
+import Exams from "./Views/Exams";
 import "./App.css";
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Link to="/app/departments">Departments</Link>
         <Link to="/app/lectures">Lectures</Link>
         <Link to="/app/assignments">Assignments</Link>
+        <Link to="/app/exams">Exams</Link>
       </nav>
 
       <Routes>
@@ -28,6 +30,7 @@ function App() {
         <Route path="/app/departments" element={<Departments />} />
         <Route path="/app/lectures" element={<Lectures />} />
         <Route path="/app/assignments" element={<Assignment />} />
+        <Route path="/app/exams" element={<Exams />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </div>

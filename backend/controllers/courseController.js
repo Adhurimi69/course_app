@@ -17,12 +17,34 @@ exports.getCourses = async (req, res) => {
   }
 };
 
+// Get a single course by ID
+exports.getCourseById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const course = await Course.findByPk(id, {
+      include: {
+        model: Department,
+        attributes: ['id', 'name'],
+      },
+    });
+
+    if (!course) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    res.json(course);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch course' });
+  }
+};
+
 // Create a new course
 exports.createCourse = async (req, res) => {
   try {
     const { title, departmentId } = req.body;
 
-    // Kontrollo nëse ekziston departamenti
     const department = await Department.findByPk(departmentId);
     if (!department) {
       return res.status(400).json({ error: 'Invalid departmentId' });
@@ -47,7 +69,6 @@ exports.updateCourse = async (req, res) => {
       return res.status(404).json({ error: 'Course not found' });
     }
 
-    // Opsionale: kontrollo nëse po ndryshohet departmentId dhe ai ekziston
     if (departmentId) {
       const department = await Department.findByPk(departmentId);
       if (!department) {

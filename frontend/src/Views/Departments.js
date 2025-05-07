@@ -1,11 +1,11 @@
 // src/Views/Departments.js
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import './Departments.css';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "./Departments.css";
 
 function Departments() {
   const [departments, setDepartments] = useState([]);
-  const [name, setName] = useState('');
+  const [name, setName] = useState("");
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -13,7 +13,9 @@ function Departments() {
   }, []);
 
   const fetchDepartments = async () => {
-    const res = await axios.get('http://localhost:5000/api/departments');
+    const res = await axios.get(
+      "http://localhost:5000/api/queries/departments"
+    );
     setDepartments(res.data);
   };
 
@@ -21,15 +23,22 @@ function Departments() {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/departments/${editingId}`, { name });
+        await axios.put(
+          `http://localhost:5000/api/commands/departments/${editingId}`,
+          {
+            name,
+          }
+        );
         setEditingId(null);
       } else {
-        await axios.post('http://localhost:5000/api/departments', { name });
+        await axios.post("http://localhost:5000/api/commands/departments", {
+          name,
+        });
       }
-      setName('');
+      setName("");
       fetchDepartments();
     } catch (error) {
-      alert(error.response?.data?.error || 'Error occurred');
+      alert(error.response?.data?.error || "Error occurred");
     }
   };
 
@@ -39,8 +48,10 @@ function Departments() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this department?')) {
-      await axios.delete(`http://localhost:5000/api/departments/${id}`);
+    if (window.confirm("Are you sure you want to delete this department?")) {
+      await axios.delete(
+        `http://localhost:5000/api/commands/departments/${id}`
+      );
       fetchDepartments();
     }
   };
@@ -58,7 +69,7 @@ function Departments() {
           className="input"
         />
         <button type="submit" className="button submit-button">
-          {editingId ? 'Update' : 'Add'}
+          {editingId ? "Update" : "Add"}
         </button>
       </form>
 
@@ -67,8 +78,18 @@ function Departments() {
           <li key={dept.id} className="department-item">
             <span>{dept.name}</span>
             <div className="actions">
-              <button className="button edit-button" onClick={() => handleEdit(dept)}>Edit</button>
-              <button className="button delete-button" onClick={() => handleDelete(dept.id)}>Delete</button>
+              <button
+                className="button edit-button"
+                onClick={() => handleEdit(dept)}
+              >
+                Edit
+              </button>
+              <button
+                className="button delete-button"
+                onClick={() => handleDelete(dept.id)}
+              >
+                Delete
+              </button>
             </div>
           </li>
         ))}

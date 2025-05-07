@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import './Departments.css'; // Përdor të njëjtin stil për thjeshtësi
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "./Departments.css"; // Përdor të njëjtin stil për thjeshtësi
 
 function Lectures() {
   const [lectures, setLectures] = useState([]);
-  const [title, setTitle] = useState('');
-  const [courseId, setCourseId] = useState('');
+  const [title, setTitle] = useState("");
+  const [courseId, setCourseId] = useState("");
   const [courses, setCourses] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
@@ -15,12 +15,12 @@ function Lectures() {
   }, []);
 
   const fetchLectures = async () => {
-    const res = await axios.get('http://localhost:5000/api/lectures');
+    const res = await axios.get("http://localhost:5000/api/queries/lectures");
     setLectures(res.data);
   };
 
   const fetchCourses = async () => {
-    const res = await axios.get('http://localhost:5000/api/courses');
+    const res = await axios.get("http://localhost:5000/api/queries/courses");
     setCourses(res.data);
   };
 
@@ -29,16 +29,19 @@ function Lectures() {
     try {
       const data = { title, courseId };
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/lectures/${editingId}`, data);
+        await axios.put(
+          `http://localhost:5000/api/commands/lectures/${editingId}`,
+          data
+        );
         setEditingId(null);
       } else {
-        await axios.post('http://localhost:5000/api/lectures', data);
+        await axios.post("http://localhost:5000/api/commands/lectures", data);
       }
-      setTitle('');
-      setCourseId('');
+      setTitle("");
+      setCourseId("");
       fetchLectures();
     } catch (error) {
-      alert(error.response?.data?.error || 'Error occurred');
+      alert(error.response?.data?.error || "Error occurred");
     }
   };
 
@@ -49,8 +52,8 @@ function Lectures() {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this lecture?')) {
-      await axios.delete(`http://localhost:5000/api/lectures/${id}`);
+    if (window.confirm("Are you sure you want to delete this lecture?")) {
+      await axios.delete(`http://localhost:5000/api/commands/lectures/${id}`);
       fetchLectures();
     }
   };
@@ -75,21 +78,35 @@ function Lectures() {
         >
           <option value="">Select Course</option>
           {courses.map((course) => (
-            <option key={course.id} value={course.id}>{course.title}</option>
+            <option key={course.courseId} value={course.courseId}>
+              {course.title}
+            </option>
           ))}
         </select>
         <button type="submit" className="button submit-button">
-          {editingId ? 'Update' : 'Add'}
+          {editingId ? "Update" : "Add"}
         </button>
       </form>
 
       <ul className="departments-list">
         {lectures.map((lecture) => (
           <li key={lecture.id} className="department-item">
-            <span>{lecture.title} — <em>{lecture.Course?.title || 'No Course'}</em></span>
+            <span>
+              {lecture.title} — <em>{lecture.Course?.title || "No Course"}</em>
+            </span>
             <div className="actions">
-              <button className="button edit-button" onClick={() => handleEdit(lecture)}>Edit</button>
-              <button className="button delete-button" onClick={() => handleDelete(lecture.id)}>Delete</button>
+              <button
+                className="button edit-button"
+                onClick={() => handleEdit(lecture)}
+              >
+                Edit
+              </button>
+              <button
+                className="button delete-button"
+                onClick={() => handleDelete(lecture.id)}
+              >
+                Delete
+              </button>
             </div>
           </li>
         ))}

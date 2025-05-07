@@ -16,7 +16,9 @@ export default function Assignments() {
 
   const fetchAssignments = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/assignments");
+      const res = await axios.get(
+        "http://localhost:5000/api/queries/assignments"
+      );
       setAssignments(res.data);
     } catch (err) {
       console.error("Error fetching assignments:", err);
@@ -25,7 +27,7 @@ export default function Assignments() {
 
   const fetchLectures = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/lectures");
+      const res = await axios.get("http://localhost:5000/api/queries/lectures");
       setLectures(res.data);
     } catch (err) {
       console.error("Error fetching lectures:", err);
@@ -44,12 +46,15 @@ export default function Assignments() {
     try {
       if (editingId) {
         await axios.put(
-          `http://localhost:5000/api/assignments/${editingId}`,
+          `http://localhost:5000/api/commands/assignments/${editingId}`,
           data
         );
         setEditingId(null);
       } else {
-        await axios.post("http://localhost:5000/api/assignments", data);
+        await axios.post(
+          "http://localhost:5000/api/commands/assignments",
+          data
+        );
       }
 
       setTitle("");
@@ -71,7 +76,9 @@ export default function Assignments() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this assignment?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/assignments/${id}`);
+        await axios.delete(
+          `http://localhost:5000/api/commands/assignments/${id}`
+        );
         fetchAssignments();
       } catch (err) {
         console.error("Error deleting assignment:", err);
@@ -101,7 +108,7 @@ export default function Assignments() {
         >
           <option value="">-- Select Lecture --</option>
           {lectures.map((lecture) => (
-            <option key={lecture.id} value={lecture.id}>
+            <option key={lecture.lectureId} value={lecture.lectureId}>
               {lecture.title}
             </option>
           ))}

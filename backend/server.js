@@ -1,33 +1,46 @@
 const express = require("express");
 const cors = require("cors");
+const connectMongo = require("./config/mongo");
 const { sequelize } = require("./config/db");
-const courseRoutes = require("./routes/courseRoutes");
-const userRoutes = require("./routes/userRoutes");
-const departmentRoutes = require("./routes/departmentRoutes");
-const lectureRoutes = require("./routes/lectureRoutes");
-const assignmentRoutes = require("./routes/assignmentRoutes");
-const examRoutes = require('./routes/examRoutes');
 
+// ----- Command Routes -----
+const courseCommandRoutes = require("./routes/commands/courseCommandRoutes");
+const userCommandRoutes = require("./routes/commands/userCommandRoutes");
+const departmentCommandRoutes = require("./routes/commands/departmentCommandRoutes");
+const lectureCommandRoutes = require("./routes/commands/lectureCommandRoutes");
+const assignmentCommandRoutes = require("./routes/commands/assignmentCommandRoutes");
 
-
-// const categoryRoutes = require('./routes/categoryRoutes');
-// const enrollmentRoutes = require('./routes/enrollmentRoutes');
+// ----- Query Routes -----
+const courseQueryRoutes = require("./routes/queries/courseQueryRoutes");
+const userQueryRoutes = require("./routes/queries/userQueryRoutes");
+const departmentQueryRoutes = require("./routes/queries/departmentQueryRoutes");
+const lectureQueryRoutes = require("./routes/queries/lectureQueryRoutes");
+const assignmentQueryRoutes = require("./routes/queries/assignmentQueryRoutes");
 
 const app = express();
+connectMongo();
 
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/courses", courseRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/departments", departmentRoutes);
-app.use("/api/lectures", lectureRoutes);
-app.use("/api/assignments", assignmentRoutes);
-app.use('/api/exams', examRoutes);
+// ----- Command APIs (writes to SQL + syncs Mongo) -----
+app.use("/api/commands/courses", courseCommandRoutes);
+app.use("/api/commands/users", userCommandRoutes);
+app.use("/api/commands/departments", departmentCommandRoutes);
+app.use("/api/commands/lectures", lectureCommandRoutes);
+app.use("/api/commands/assignments", assignmentCommandRoutes);
 
-//require("./models/Department");
-//require("./models/Course");
-//require("./models/Lecture");
+// ----- Query APIs (reads from Mongo) -----
+app.use("/api/queries/courses", courseQueryRoutes);
+app.use("/api/queries/users", userQueryRoutes);
+app.use("/api/queries/departments", departmentQueryRoutes);
+app.use("/api/queries/lectures", lectureQueryRoutes);
+app.use("/api/queries/assignments", assignmentQueryRoutes);
+
+// ----- Sequelize models (SQL relations setup) -----
+require("./models/sql/department");
+require("./models/sql/course");
+require("./models/sql/lecture");
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
@@ -35,10 +48,10 @@ app.listen(PORT, async () => {
 
   try {
     await sequelize.authenticate();
-    console.log("Database connected successfully!");
-    await sequelize.sync(); // ose sync({ force: true }) për test
-    console.log("Database tables created or synced!");
+    console.log("✅ SQL Database connected successfully!");
+    await sequelize.sync();
+    console.log("✅ SQL Database tables created or synced!");
   } catch (error) {
-    console.error("Unable to connect to the database:", error);
+    console.error("❌ Unable to connect to SQL database:", error);
   }
 });

@@ -1,19 +1,26 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Home.css';
+import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Home.css";
+import studentsGroup from "../images/students-group.png";
 
 function Home() {
   const navigate = useNavigate();
+  const categoriesRef = useRef(null); // 👈 reference for categories section
 
   const handleCreateAccount = () => {
-    navigate('/app');
+    navigate("/app");
+  };
+
+  const scrollToCategories = () => {
+    categoriesRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <div className="home-wrapper">
       <header className="top-bar">
         <div className="contact-info">
-          📞 (001) 875-734-5261 | 📧 peaceprince01@gmail.com | 📍 225, Atirumadb, Mexico - USA
+          📞 (001) 875-734-5261 | 📧 peaceprince01@gmail.com | 📍 225,
+          Atirumadb, Mexico - USA
         </div>
         <div className="social-icons">🔵 🟡</div>
       </header>
@@ -37,25 +44,30 @@ function Home() {
         <div className="hero-text">
           <h4>WELCOME EDUNITY ONLINE COURSES</h4>
           <h1>Achieving Your Dreams Through Education</h1>
-          <p>We are specialized in educational platforms and skilled strategies for the success of online learners.</p>
-          <button className="find-course">Find Courses</button>
+          <p>
+            We are specialized in educational platforms and skilled strategies
+            for the success of online learners.
+          </p>
+          <button className="find-course" onClick={scrollToCategories}>
+            Find Courses
+          </button>
         </div>
-        <img src="https://via.placeholder.com/400x300" alt="Students Group" />
+        <img src={studentsGroup} alt="Students Group" />
       </section>
 
-      <section className="categories">
+      <section className="categories" ref={categoriesRef}>
         <h2>Browse By Categories</h2>
         <div className="category-grid">
           {[
-            'Business Management',
-            'Arts & Design',
-            'Personal Development',
-            'UI/UX Design',
-            'Graphic Design',
-            'Digital Marketing',
-            'Exclusive man',
-            'Product Design',
-            'Video & Photography',
+            "Business Management",
+            "Arts & Design",
+            "Personal Development",
+            "UI/UX Design",
+            "Graphic Design",
+            "Digital Marketing",
+            "Exclusive man",
+            "Product Design",
+            "Video & Photography",
           ].map((cat, i) => (
             <div className="category-card" key={i}>
               {cat}

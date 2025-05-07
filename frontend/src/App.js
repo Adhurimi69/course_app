@@ -1,12 +1,13 @@
 // App.js
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Users from './Views/Users';
-import Departments from './Views/Departments';
-import Lectures from './Views/Lectures';
-import Courses from './Views/Courses';
-import Home from './Views/Home';
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Users from "./Views/Users";
+import Departments from "./Views/Departments";
+import Lectures from "./Views/Lectures";
+import Courses from "./Views/Courses";
+import Assignment from "./Views/Assignment";
+import Home from "./Views/Home";
+import "./App.css";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Link to="/app/users">Users</Link>
         <Link to="/app/departments">Departments</Link>
         <Link to="/app/lectures">Lectures</Link>
+        <Link to="/app/assignments">Assignments</Link>
       </nav>
 
       <Routes>
@@ -25,6 +27,7 @@ function App() {
         <Route path="/app/users" element={<Users />} />
         <Route path="/app/departments" element={<Departments />} />
         <Route path="/app/lectures" element={<Lectures />} />
+        <Route path="/app/assignments" element={<Assignment />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </div>

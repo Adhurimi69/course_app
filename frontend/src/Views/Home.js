@@ -2,10 +2,11 @@ import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 import studentsGroup from "../images/students-group.png";
+import img1 from "../images/students.jpg"; // Only keeping this image in the About Us section
 
 function Home() {
   const navigate = useNavigate();
-  const categoriesRef = useRef(null); // 👈 reference for categories section
+  const categoriesRef = useRef(null);
 
   const handleCreateAccount = () => {
     navigate("/app");
@@ -55,6 +56,7 @@ function Home() {
         <img src={studentsGroup} alt="Students Group" />
       </section>
 
+      {/* Categories Section */}
       <section className="categories" ref={categoriesRef}>
         <h2>Browse By Categories</h2>
         <div className="category-grid">
@@ -73,6 +75,35 @@ function Home() {
               {cat}
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="about-section">
+        <div className="about-images">
+          <img src={img1} alt="Teacher" className="about-img" />
+          {/* Only keeping one image here */}
+          <div className="experience-circle">8+<br />Years Of<br />Experiences</div>
+        </div>
+        <div className="about-text">
+          <span className="about-label">OUR ABOUT US</span>
+          <h2>
+            Learn & Grow Your <span className="circle-highlight">Skills</span> From Anywhere
+          </h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+          <div className="about-features">
+            <div>
+              <h4>FLEXIBLE CLASSNAMEES</h4>
+              <p>Ultrice gravida dictum fusce placerat ultrices integer quis auctor elit.</p>
+            </div>
+            <div>
+              <h4>FLEXIBLE CLASSNAMEES</h4>
+              <p>Ultrice gravida dictum fusce placerat ultrices integer quis auctor elit.</p>
+            </div>
+          </div>
+          <button className="load-more">Load More →</button>
         </div>
       </section>
     </div>

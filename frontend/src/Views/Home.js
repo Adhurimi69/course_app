@@ -36,10 +36,10 @@ function Home() {
         <div className="logo">🧠 edunity</div>
         <ul className="nav-links">
           <li>Home</li>
-          <li>About Us</li>
           <li>Courses</li>
-          <li>Pages</li>
+          <li><Link to="/prices">Prices</Link></li>
           <li><Link to="/blog">Blog</Link></li>
+          <li>About Us</li>
           <li>Contact</li>
         </ul>
         <button className="create-account" onClick={handleCreateAccount}>

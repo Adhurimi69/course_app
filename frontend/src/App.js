@@ -16,10 +16,11 @@ import Exams from "./Views/Exams";
 import "./App.css";
 import LoginPage from "./Views/LoginPage";
 import Blog from "./Views/Blog";
+import Prices from "./Views/Prices";
 
 function App() {
   const location = useLocation();
-  const isSimplePage = ["/", "/blog", "/login"].includes(location.pathname);
+  const isSimplePage = ["/", "/blog", "/login", "/prices"].includes(location.pathname);
 
   return (
     <div className="App">
@@ -46,6 +47,7 @@ function App() {
         <Route path="/app/exams" element={<Exams />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/prices" element={<Prices />} />
       </Routes>
     </div>
   );

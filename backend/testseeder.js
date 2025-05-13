@@ -5,7 +5,7 @@ const { sequelize } = require("./config/db");
 const { createAdmin } = require("./controllers/commands/adminCommandController");
 const { createStudent } = require("./controllers/commands/studentCommandController");
 const { createTeacher } = require("./controllers/commands/teacherCommandController");
-
+//test comment
 // Mocked request/response for testing
 const mockReqRes = (body) => {
   const req = { body };

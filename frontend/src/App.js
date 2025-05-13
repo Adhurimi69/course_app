@@ -1,5 +1,11 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useLocation,
+} from "react-router-dom";
 import Users from "./Views/Users";
 import Departments from "./Views/Departments";
 import Lectures from "./Views/Lectures";
@@ -8,6 +14,7 @@ import Assignment from "./Views/Assignment";
 import Home from "./Views/Home";
 import Exams from "./Views/Exams";
 import "./App.css";
+import LoginPage from "./Views/LoginPage";
 
 function App() {
   const location = useLocation();
@@ -36,6 +43,8 @@ function App() {
         <Route path="/app/lectures" element={<Lectures />} />
         <Route path="/app/assignments" element={<Assignment />} />
         <Route path="/app/exams" element={<Exams />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginPage />} />
       </Routes>
     </div>
   );

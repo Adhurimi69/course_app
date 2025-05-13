@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../../config/db");
+const bcrypt = require("bcryptjs");
 
 const User = sequelize.define(
   "User",
@@ -21,10 +22,21 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    refreshToken: {
+      type: DataTypes.TEXT,
+    },
   },
-  {
-    timestamps: false,
-  }
+  { timestamps: false }
 );
+
+User.beforeCreate(async (user) => {
+  user.password = await bcrypt.hash(user.password, 10);
+});
+
+User.beforeUpdate(async (user) => {
+  if (user.changed("password")) {
+    user.password = await bcrypt.hash(user.password, 10);
+  }
+});
 
 module.exports = User;

@@ -3,12 +3,28 @@ const cors = require("cors");
 const connectMongo = require("./config/mongo");
 const { sequelize } = require("./config/db");
 
+const app = express();
+connectMongo();
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
+
+app.use(express.json());
+
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+
 // ----- Command Routes -----
 const courseCommandRoutes = require("./routes/commands/courseCommandRoutes");
 const userCommandRoutes = require("./routes/commands/userCommandRoutes");
 const departmentCommandRoutes = require("./routes/commands/departmentCommandRoutes");
 const lectureCommandRoutes = require("./routes/commands/lectureCommandRoutes");
 const assignmentCommandRoutes = require("./routes/commands/assignmentCommandRoutes");
+const authRoutes = require("./routes/commands/authRoutes");
 
 // ----- Query Routes -----
 const courseQueryRoutes = require("./routes/queries/courseQueryRoutes");
@@ -17,18 +33,13 @@ const departmentQueryRoutes = require("./routes/queries/departmentQueryRoutes");
 const lectureQueryRoutes = require("./routes/queries/lectureQueryRoutes");
 const assignmentQueryRoutes = require("./routes/queries/assignmentQueryRoutes");
 
-const app = express();
-connectMongo();
-
-app.use(cors());
-app.use(express.json());
-
 // ----- Command APIs (writes to SQL + syncs Mongo) -----
 app.use("/api/commands/courses", courseCommandRoutes);
 app.use("/api/commands/users", userCommandRoutes);
 app.use("/api/commands/departments", departmentCommandRoutes);
 app.use("/api/commands/lectures", lectureCommandRoutes);
 app.use("/api/commands/assignments", assignmentCommandRoutes);
+app.use("/api/auth", authRoutes);
 
 // ----- Query APIs (reads from Mongo) -----
 app.use("/api/queries/courses", courseQueryRoutes);

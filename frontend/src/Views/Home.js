@@ -8,8 +8,8 @@ function Home() {
   const navigate = useNavigate();
   const categoriesRef = useRef(null);
 
-  const handleCreateAccount = () => {
-    navigate("/app");
+  const handleLoginUser = () => {
+    navigate("/login");
   };
 
   const scrollToCategories = () => {
@@ -36,8 +36,8 @@ function Home() {
           <li>Blog</li>
           <li>Contact</li>
         </ul>
-        <button className="create-account" onClick={handleCreateAccount}>
-          Create Account
+        <button className="create-account" onClick={handleLoginUser}>
+          Login
         </button>
       </nav>
 

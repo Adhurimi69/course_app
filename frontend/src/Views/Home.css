@@ -231,18 +231,19 @@ body {
 
 .category-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 40px;
   justify-items: center;
 }
 
+
 .category-card {
   background: white;
-  padding: 30px;
+  padding: 40px;
   border-radius: 12px;
   width: 300px;
   text-align: center;
-  font-size: 20px;
+  font-size: 18px;
   color: black;
   transition: all 0.3s ease;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);

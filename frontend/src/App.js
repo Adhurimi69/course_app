@@ -1,27 +1,20 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-  useLocation,
-  Outlet,
-  Link,
-} from "react-router-dom";
+import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import LoginPage from "./Views/LoginPage";
+import RoleSelectPage from "./Views/RoleSelectPage";
+import Home from "./Views/Home";
+import Courses from "./Views/Courses";
 import Users from "./Views/Users";
 import Departments from "./Views/Departments";
 import Lectures from "./Views/Lectures";
-import Courses from "./Views/Courses";
 import Assignment from "./Views/Assignment";
-import Home from "./Views/Home";
 import Exams from "./Views/Exams";
-import LoginPage from "./Views/LoginPage";
-import RoleSelectPage from "./Views/RoleSelectPage";
-import "./App.css";
-import ProtectedRoute from "./components/ProtectedRoute"; // ⬅ import this
-import LogoutButton from "./components/LogoutButton"; // adjust path as needed
+import Blog from "./Views/Blog";
+import Prices from "./Views/Prices";
+import { Link } from "react-router-dom";
+import LogoutButton from "./components/LogoutButton";
 
-// 🧱 Layout with navigation bar for roles
 const RoleLayout = ({ role }) => {
   return (
     <div className="App">
@@ -33,65 +26,49 @@ const RoleLayout = ({ role }) => {
         <Link to={`/${role}/lectures`}>Lectures</Link>
         <Link to={`/${role}/assignments`}>Assignments</Link>
         <Link to={`/${role}/exams`}>Exams</Link>
-       <LogoutButton/>
       </nav>
       <Outlet />
     </div>
   );
 };
-
-function AppRoutes() {
+function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<RoleSelectPage />} />
       <Route path="/login/:type" element={<LoginPage />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/prices" element={<Prices />} />
 
-      {/* Admin Routes */}
-
-
-
-      <Route path="/admins" element={
-        <RoleLayout role="admins" />}>
-        <Route path="courses" element={<ProtectedRoute allowedRoles={["admin"]}> <Courses /></ProtectedRoute>} />
-        <Route path="users" element={<ProtectedRoute allowedRoles={["admin"]}> <Users /></ProtectedRoute>} /> 
-        <Route path="departments" element={<ProtectedRoute allowedRoles={["admin"]}> <Departments /></ProtectedRoute>} />
-        <Route path="lectures" element={ <ProtectedRoute allowedRoles={["admin"]}> <Lectures /></ProtectedRoute>} />
-        <Route path="assignments" element={<ProtectedRoute allowedRoles={["admin"]}> <Assignment /></ProtectedRoute>} />
-        <Route path="exams" element={<ProtectedRoute allowedRoles={["admin"]}> <Exams /></ProtectedRoute> } />
+      <Route path="/admins" element={<RoleLayout role="admins" />}>
+        <Route index element={<Navigate to="courses" replace />} />
+        <Route path="courses" element={<ProtectedRoute allowedRoles={["admin"]}><Courses /></ProtectedRoute>} />
+        <Route path="users" element={<ProtectedRoute allowedRoles={["admin"]}><Users /></ProtectedRoute>} />
+        <Route path="departments" element={<ProtectedRoute allowedRoles={["admin"]}><Departments /></ProtectedRoute>} />
+        <Route path="lectures" element={<ProtectedRoute allowedRoles={["admin"]}><Lectures /></ProtectedRoute>} />
+        <Route path="assignments" element={<ProtectedRoute allowedRoles={["admin"]}><Assignment /></ProtectedRoute>} />
+        <Route path="exams" element={<ProtectedRoute allowedRoles={["admin"]}><Exams /></ProtectedRoute>} />
       </Route>
 
-      {/* Teacher Routes */}
       <Route path="/teachers" element={<RoleLayout role="teachers" />}>
+        <Route index element={<Navigate to="courses" replace />} />
         <Route path="courses" element={<ProtectedRoute allowedRoles={["teacher"]}><Courses /></ProtectedRoute>} />
         <Route path="lectures" element={<ProtectedRoute allowedRoles={["teacher"]}><Lectures /></ProtectedRoute>} />
-        <Route path="assignments" element={<ProtectedRoute allowedRoles={["teacher"]}> <Assignment /></ProtectedRoute>} />
+        <Route path="assignments" element={<ProtectedRoute allowedRoles={["teacher"]}><Assignment /></ProtectedRoute>} />
         <Route path="exams" element={<ProtectedRoute allowedRoles={["teacher"]}><Exams /></ProtectedRoute>} />
       </Route>
 
-      {/* Student Routes */}
       <Route path="/students" element={<RoleLayout role="students" />}>
-        <Route path="courses" element={   <ProtectedRoute allowedRoles={["student"]}>
-        <Courses />
-      </ProtectedRoute>} />
-        <Route path="assignments" element={   <ProtectedRoute allowedRoles={["student"]}>
-        <Assignment />
-      </ProtectedRoute>} />
-        <Route path="exams" element={   <ProtectedRoute allowedRoles={["student"]}>
-        <Courses />
-      </ProtectedRoute>} />
+        <Route index element={<Navigate to="courses" replace />} />
+        <Route path="courses" element={<ProtectedRoute allowedRoles={["student"]}><Courses /></ProtectedRoute>} />
+        <Route path="assignments" element={<ProtectedRoute allowedRoles={["student"]}><Assignment /></ProtectedRoute>} />
+        <Route path="exams" element={<ProtectedRoute allowedRoles={["student"]}><Exams /></ProtectedRoute>} />
       </Route>
 
-      {/* Redirect old path /app to admin's view by default */}
       <Route path="/app/*" element={<Navigate to="/admins/courses" replace />} />
+      <Route path="*" element={<div>404 - Page Not Found</div>} />
     </Routes>
   );
 }
 
-export default function WrappedApp() {
-  return (
-    <Router>
-      <AppRoutes />
-    </Router>
-  );
-}
+export default App;

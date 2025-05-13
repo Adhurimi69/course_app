@@ -19,8 +19,10 @@ function Home() {
   };
 
   const scrollToCategories = () => {
-    categoriesRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+    if (categoriesRef.current) {
+      categoriesRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+      };
 
   return (
     <div className="home-wrapper">

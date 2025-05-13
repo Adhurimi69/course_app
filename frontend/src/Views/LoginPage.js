@@ -1,6 +1,13 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import Button from "../components/Button";
+
+const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 const LoginPage = () => {
+  const { type } = useParams(); // "admin", "teacher", or "student"
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -10,7 +17,7 @@ const LoginPage = () => {
     setError("");
 
     try {
-      const response = await fetch("http://localhost:5000/api/auth/login", {
+      const response = await fetch(`http://localhost:5000/api/auth/${type}s/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -21,7 +28,7 @@ const LoginPage = () => {
 
       if (!response.ok) {
         let message = "Login failed";
-        if (contentType && contentType.includes("application/json")) {
+        if (contentType?.includes("application/json")) {
           const data = await response.json();
           message = data.message || message;
         }
@@ -31,7 +38,15 @@ const LoginPage = () => {
 
       const { accessToken } = await response.json();
       localStorage.setItem("accessToken", accessToken);
-      window.location.href = "/app"; // or any protected route
+
+      const decoded = jwtDecode(accessToken);
+      const role = decoded?.role;
+
+      if (["admin", "teacher", "student"].includes(role)) {
+        navigate(`/${role}s/courses`);
+      } else {
+        navigate("/");
+      }
     } catch (err) {
       console.error("Login error:", err);
       setError("Server error during login.");
@@ -39,50 +54,86 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Login
-        </h2>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              className="mt-1 block w-full px-4 py-2 border rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          {error && <p className="text-red-500 text-center text-sm">{error}</p>}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded-lg shadow-lg hover:bg-blue-700 transition duration-300 relative overflow-hidden group"
-          >
-            <span className="absolute inset-0 bg-gradient-to-r from-blue-500 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-            <span className="relative z-10">Login</span>
-          </button>
-        </form>
-      </div>
+    <div style={styles.container}>
+      <form onSubmit={handleSubmit} style={styles.form}>
+        <h2 style={styles.title}>Sign in as {capitalize(type)}</h2>
+
+        <label htmlFor="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          placeholder="Email *"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          style={styles.input}
+        />
+
+        <label htmlFor="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Password *"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          style={{ ...styles.input, ...styles.passwordHidden }}
+        />
+
+        {error && <p style={styles.error}>{error}</p>}
+
+        <Button>Sign In</Button>
+      </form>
     </div>
   );
+};
+
+const styles = {
+  container: {
+    fontFamily: `'Segoe UI', Tahoma, Geneva, Verdana, sans-serif`,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "100vh",
+    padding: "1rem",
+  },
+  form: {
+    backgroundColor: "#fff",
+    padding: 40,
+    borderRadius: 12,
+    boxShadow: "0 8px 32px rgba(31, 38, 135, 0.1)",
+    maxWidth: 400,
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    gap: 16,
+    border: "1px solid rgba(255, 255, 255, 0.2)",
+  },
+  title: {
+    fontSize: "24px",
+    fontWeight: "bold",
+    marginBottom: "12px",
+    textAlign: "center",
+  },
+  input: {
+    width: "100%",
+    padding: "12px 16px",
+    border: "1px solid #e2e8f0",
+    borderRadius: 8,
+    fontSize: 14,
+    color: "#2d3748",
+    backgroundColor: "#f8fafc",
+  },
+  passwordHidden: {
+    WebkitTextSecurity: "disc",
+    textSecurity: "disc",
+  },
+  error: {
+    color: "red",
+    fontSize: "14px",
+    textAlign: "center",
+    marginTop: -10,
+  },
 };
 
 export default LoginPage;

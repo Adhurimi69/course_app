@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 import studentsGroup from "../images/students-group.png";
-import img1 from "../images/students.jpg"; // Only keeping this image in the About Us section
+import img1 from "../images/students.jpg";
 
 function Home() {
   const navigate = useNavigate();
@@ -82,8 +82,9 @@ function Home() {
       <section className="about-section">
         <div className="about-images">
           <img src={img1} alt="Teacher" className="about-img" />
-          {/* Only keeping one image here */}
-          <div className="experience-circle">8+<br />Years Of<br />Experiences</div>
+          <div className="experience-circle">
+            8+<br />Years Of<br />Experiences
+          </div>
         </div>
         <div className="about-text">
           <span className="about-label">OUR ABOUT US</span>
@@ -106,6 +107,54 @@ function Home() {
           <button className="load-more">Load More →</button>
         </div>
       </section>
+
+      {/* Footer Section */}
+      <footer className="footer">
+        <div className="footer-container">
+          <div className="footer-column">
+            <h3>About Us</h3>
+            <p>
+              We are a leading educational platform providing resources for
+              students to succeed. Our mission is to make learning accessible to
+              everyone.
+            </p>
+          </div>
+
+          <div className="footer-column">
+            <h3>Quick Links</h3>
+            <ul>
+              <li><a href="#">Home</a></li>
+              <li><a href="#">Courses</a></li>
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Contact</a></li>
+            </ul>
+          </div>
+
+          <div className="footer-column">
+            <h3>Contact</h3>
+            <ul>
+              <li>Email: info@eduplatform.com</li>
+              <li>Phone: +1 234 567 890</li>
+              <li>Address: 123 Education St, City, Country</li>
+            </ul>
+          </div>
+
+          <div className="footer-column">
+            <h3>Follow Us</h3>
+            <ul>
+              <li><a href="#">Facebook</a></li>
+              <li><a href="#">Twitter</a></li>
+              <li><a href="#">LinkedIn</a></li>
+              <li><a href="#">Instagram</a></li>
+            </ul>
+          </div>
+        </div>
+      </footer>
+
+      {/* Footer Bottom Section */}
+      <div className="footer-bottom">
+        <p>&copy; 2025 Edunity. All rights reserved.</p>
+      </div>
     </div>
   );
 }

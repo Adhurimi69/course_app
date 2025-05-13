@@ -16,7 +16,7 @@ body {
 
 /* Top Bar */
 .top-bar {
-  background-color: #1d2a64;
+  background-color: #5348b3; /* updated to match purple theme */
   color: white;
   padding: 12px 24px;
   display: flex;
@@ -25,7 +25,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  border-bottom: 2px solid #5348b3;
+  border-bottom: 2px solid #3e3694;
   font-family: 'Segoe UI', sans-serif;
 }
 
@@ -48,8 +48,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 20px 60px;
-  background: white;
-  border-bottom: 1px solid #ddd;
+  background: #ffffff;
+  border-bottom: 2px solid #ece9ff;
   position: sticky;
   top: 0;
   z-index: 999;
@@ -209,10 +209,10 @@ body {
 .about-img {
   width: 100%;
   max-width: 1200px;
-  height: 420px; /* Smaller height */
+  height: 420px;
   object-fit: cover;
   margin-bottom: 20px;
-  border-radius: 12px; /* Rounded corners */
+  border-radius: 12px;
 }
 
 .experience-circle {
@@ -335,5 +335,82 @@ body {
 
   .category-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Footer */
+.footer {
+  background-color: #5348b3;
+  color: white;
+  padding: 30px 30px; /* Reduced top padding and equal padding for top and bottom */
+  margin-top: 60px;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between; /* spreads columns across the row */
+  align-items: flex-start;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 40px;
+  gap: 40px; /* Added gap between columns */
+}
+
+.footer-column {
+  flex: 0 0 250px; /* fixed column width */
+  text-align: left;
+}
+
+.footer-column h3,
+.footer-column h4 {
+  margin-bottom: 12px;
+  color: #fff; /* White title color */
+  font-size: 18px;
+}
+
+.footer-column p,
+.footer-column li {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #e0e0e0; /* Almost white color for descriptions */
+  list-style: none;
+}
+
+.footer-column ul {
+  padding: 0;
+}
+
+/* Links */
+.footer-column a {
+  color: #e0e0e0; /* Matches the description color */
+  text-decoration: none;
+}
+
+.footer-column a:hover {
+  color: #fff; /* Full white on hover */
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  background-color: #3e3694; /* Same purple color as header */
+  color: white; /* White text */
+  text-align: center;
+  margin-top: 0; /* No space between footer and footer bottom */
+  padding: 10px 0;
+  font-size: 14px;
+  border-top: 2px solid #3e3694; /* Subtle border to divide from footer */
+}
+
+/* Responsive Footer */
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .footer-column {
+    width: 100%;
   }
 }

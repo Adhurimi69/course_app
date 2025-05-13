@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const {
-  loginUser,
+  loginAdmin,
   handleRefreshToken,
   handleLogout,
-} = require("../../controllers/commands/authController");
+} = require("../../controllers/commands/adminAuthController");
 
-router.post("/login", loginUser);
+router.post("/login", loginAdmin);
 router.get("/refresh", handleRefreshToken);
 router.post("/logout", handleLogout);
 

@@ -2,8 +2,8 @@ const { DataTypes } = require("sequelize");
 const { sequelize } = require("../../config/db");
 const bcrypt = require("bcryptjs");
 
-const User = sequelize.define(
-  "User",
+const Teacher = sequelize.define(
+  "Teacher",
   {
     name: {
       type: DataTypes.STRING,
@@ -29,14 +29,14 @@ const User = sequelize.define(
   { timestamps: false }
 );
 
-User.beforeCreate(async (user) => {
-  user.password = await bcrypt.hash(user.password, 10);
+Teacher.beforeCreate(async (teacher) => {
+  teacher.password = await bcrypt.hash(teacher.password, 10);
 });
 
-User.beforeUpdate(async (user) => {
-  if (user.changed("password")) {
-    user.password = await bcrypt.hash(user.password, 10);
+Teacher.beforeUpdate(async (teacher) => {
+  if (teacher.changed("password")) {
+    teacher.password = await bcrypt.hash(teacher.password, 10);
   }
 });
 
-module.exports = User;
+module.exports = Teacher;

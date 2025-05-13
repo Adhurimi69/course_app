@@ -1,9 +1,9 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const User = require("../../models/sql/user");
+const Admin = require("../../models/sql/admin");
 
 // LOGIN
-const loginUser = async (req, res) => {
+const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
     return res
@@ -11,27 +11,27 @@ const loginUser = async (req, res) => {
       .json({ message: "Email and password are required." });
 
   try {
-    const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    const admin = await Admin.findOne({ where: { email } });
+    if (!admin) return res.status(401).json({ message: "Invalid credentials" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch)
       return res.status(401).json({ message: "Invalid credentials" });
 
     const accessToken = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: admin.id, email: admin.email, role: admin.role },
       process.env.JWT_SECRET || "accesssecret",
       { expiresIn: "15m" }
     );
 
     const refreshToken = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: admin.id, email: admin.email, role: admin.role },
       process.env.JWT_REFRESH_SECRET || "refreshsecret",
       { expiresIn: "7d" }
     );
 
-    user.refreshToken = refreshToken;
-    await user.save();
+    admin.refreshToken = refreshToken;
+    await admin.save();
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
@@ -54,17 +54,17 @@ const handleRefreshToken = async (req, res) => {
   const refreshToken = cookies.jwt;
 
   try {
-    const user = await User.findOne({ where: { refreshToken } });
-    if (!user) return res.sendStatus(403); // Forbidden
+    const admin = await Admin.findOne({ where: { refreshToken } });
+    if (!admin) return res.sendStatus(403); // Forbidden
 
     jwt.verify(
       refreshToken,
       process.env.JWT_REFRESH_SECRET || "refreshsecret",
       (err, decoded) => {
-        if (err || user.email !== decoded.email) return res.sendStatus(403);
+        if (err || admin.email !== decoded.email) return res.sendStatus(403);
 
         const accessToken = jwt.sign(
-          { id: user.id, email: user.email, role: user.role },
+          { id: admin.id, email: admin.email, role: admin.role },
           process.env.JWT_SECRET || "accesssecret",
           { expiresIn: "15m" }
         );
@@ -85,10 +85,10 @@ const handleLogout = async (req, res) => {
   const refreshToken = cookies.jwt;
 
   try {
-    const user = await User.findOne({ where: { refreshToken } });
-    if (user) {
-      user.refreshToken = null;
-      await user.save();
+    const admin = await Admin.findOne({ where: { refreshToken } });
+    if (admin) {
+      admin.refreshToken = null;
+      await admin.save();
     }
 
     res.clearCookie("jwt", {
@@ -104,7 +104,7 @@ const handleLogout = async (req, res) => {
 };
 
 module.exports = {
-  loginUser,
+  loginAdmin,
   handleRefreshToken,
   handleLogout,
 };

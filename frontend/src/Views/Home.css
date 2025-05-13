@@ -16,7 +16,7 @@ body {
 
 /* Top Bar */
 .top-bar {
-  background-color: #5348b3; /* updated to match purple theme */
+  background-color: #1d2a64;
   color: white;
   padding: 12px 24px;
   display: flex;
@@ -25,7 +25,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
-  border-bottom: 2px solid #3e3694;
+  border-bottom: 2px solid #5348b3;
   font-family: 'Segoe UI', sans-serif;
 }
 
@@ -42,14 +42,73 @@ body {
   gap: 10px;
 }
 
+/* Header CTA style */
+.top-bar {
+  background: (#5348b3);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 30px;
+  font-size: 15px;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.announcement {
+  font-weight: 500;
+}
+
+.cta-button {
+  background: white;
+  color: #6c63ff;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* Dismissible alert styles */
+.cta-alert {
+  background: linear-gradient(#5348b3);
+  color: white;
+  text-align: center;
+  padding: 12px 60px;
+  position: relative;
+  font-size: 15px;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.close-alert {
+  background: transparent;
+  color: white;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 /* Navbar */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 60px;
-  background: #ffffff;
-  border-bottom: 2px solid #ece9ff;
+  background: white;
+  border-bottom: 1px solid #ddd;
   position: sticky;
   top: 0;
   z-index: 999;
@@ -210,9 +269,11 @@ body {
   width: 100%;
   max-width: 1200px;
   height: 420px;
+  /* Smaller height */
   object-fit: cover;
   margin-bottom: 20px;
   border-radius: 12px;
+  /* Rounded corners */
 }
 
 .experience-circle {
@@ -279,13 +340,16 @@ body {
   .category-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
   .hero {
     padding: 60px 30px;
   }
+
   .about-section {
     flex-direction: column;
     align-items: center;
   }
+
   .about-images,
   .about-text {
     width: 100%;
@@ -338,79 +402,136 @@ body {
   }
 }
 
-/* Footer */
-.footer {
-  background-color: #5348b3;
-  color: white;
-  padding: 30px 30px; /* Reduced top padding and equal padding for top and bottom */
-  margin-top: 60px;
+.site-footer {
+  position: relative;
+  width: 100%;
+  font-family: 'Sora', sans-serif;
+  color: #fff;
 }
 
-.footer-container {
+.site-footer .footer-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 504.19px;
+  background-size: cover;
+  background-position: center;
+  background-color: #1d2a64;
+}
+
+.site-footer .footer-content {
+  position: relative;
+  padding: 120px 100px 0;
+}
+
+.site-footer .logo-link img {
+  width: 237px;
+  height: 54px;
+  object-fit: contain;
+}
+
+.site-footer .intro {
+  margin-top: 24px;
+  max-width: 384px;
+  font-size: 17px;
+  line-height: 32px;
+}
+
+.site-footer .social {
   display: flex;
-  justify-content: space-between; /* spreads columns across the row */
-  align-items: flex-start;
-  flex-wrap: wrap;
-  max-width: 1200px;
-  margin: auto;
-  padding: 0 40px;
-  gap: 40px; /* Added gap between columns */
+  gap: 10px;
+  margin-top: 32px;
 }
 
-.footer-column {
-  flex: 0 0 250px; /* fixed column width */
-  text-align: left;
+.site-footer .social .icon {
+  width: 45px;
+  height: 45px;
+  background: #E9E2FF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.footer-column h3,
-.footer-column h4 {
-  margin-bottom: 12px;
-  color: #fff; /* White title color */
-  font-size: 18px;
+.site-footer .social .icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
-.footer-column p,
-.footer-column li {
-  font-size: 15px;
-  line-height: 1.6;
-  color: #e0e0e0; /* Almost white color for descriptions */
+.site-footer .footer-column {
+  position: absolute;
+  top: 130px;
+  font-family: 'Epilogue', sans-serif;
+}
+
+.site-footer .services {
+  left: 774.5px;
+}
+
+.site-footer .quick-links {
+  left: 1060.5px;
+}
+
+.site-footer .footer-column h4 {
+  font-weight: 700;
+  font-size: 22px;
+  margin-bottom: 16px;
+  text-transform: capitalize;
+}
+
+.site-footer .footer-column ul {
   list-style: none;
-}
-
-.footer-column ul {
   padding: 0;
 }
 
-/* Links */
-.footer-column a {
-  color: #e0e0e0; /* Matches the description color */
-  text-decoration: none;
+.site-footer .footer-column li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 17px;
+  line-height: 32px;
 }
 
-.footer-column a:hover {
-  color: #fff; /* Full white on hover */
+.site-footer .footer-column li::before {
+  content: '›';
+  margin-right: 8px;
 }
 
-/* Footer Bottom */
-.footer-bottom {
-  background-color: #3e3694; /* Same purple color as header */
-  color: white; /* White text */
-  text-align: center;
-  margin-top: 0; /* No space between footer and footer bottom */
-  padding: 10px 0;
-  font-size: 14px;
-  border-top: 2px solid #3e3694; /* Subtle border to divide from footer */
+.site-footer .gallery {
+  position: absolute;
+  left: 1334.5px;
+  top: 130px;
+  display: grid;
+  grid-template-columns: repeat(3, 85.66px);
+  grid-gap: 10px;
 }
 
-/* Responsive Footer */
-@media (max-width: 768px) {
-  .footer-container {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
+.site-footer .gallery .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
 
-  .footer-column {
-    width: 100%;
-  }
+.site-footer .bottom-bar {
+  position: absolute;
+  top: 504.19px;
+  left: 0;
+  width: 100%;
+  height: 70.3px;
+  background: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 17px;
+}
+
+.site-footer .bottom-bar .brand {
+  font-weight: 700;
+  color: #FFD25D;
 }

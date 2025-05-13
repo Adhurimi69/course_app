@@ -1,15 +1,21 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Home.css";
 import studentsGroup from "../images/students-group.png";
 import img1 from "../images/students.jpg";
+import socialTwitter from "../images/twitter.png";
+import socialFacebook from "../images/facebook.png";
+import socialInstagram from "../images/instagram.png";
+import socialLinkedIn from "../images/linkedin.png";
+import { Link } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
   const categoriesRef = useRef(null);
+  const [showAlert, setShowAlert] = useState(true);
 
-  const handleLoginUser = () => {
-    navigate("/login");
+  const handleCreateAccount = () => {
+    navigate("/app");
   };
 
   const scrollToCategories = () => {
@@ -18,13 +24,13 @@ function Home() {
 
   return (
     <div className="home-wrapper">
-      <header className="top-bar">
-        <div className="contact-info">
-          📞 (001) 875-734-5261 | 📧 peaceprince01@gmail.com | 📍 225,
-          Atirumadb, Mexico - USA
+      {/* ✅ Dismissible Alert */}
+      {showAlert && (
+        <div className="cta-alert">
+          <span>🎉 Sign up now and get 25% off your first course!</span>
+          <button className="close-alert" onClick={() => setShowAlert(false)}>✖</button>
         </div>
-        <div className="social-icons">🔵 🟡</div>
-      </header>
+      )}
 
       <nav className="navbar">
         <div className="logo">🧠 edunity</div>
@@ -33,11 +39,11 @@ function Home() {
           <li>About Us</li>
           <li>Courses</li>
           <li>Pages</li>
-          <li>Blog</li>
+          <li><Link to="/blog">Blog</Link></li>
           <li>Contact</li>
         </ul>
-        <button className="create-account" onClick={handleLoginUser}>
-          Login
+        <button className="create-account" onClick={handleCreateAccount}>
+          Create Account
         </button>
       </nav>
 
@@ -56,7 +62,6 @@ function Home() {
         <img src={studentsGroup} alt="Students Group" />
       </section>
 
-      {/* Categories Section */}
       <section className="categories" ref={categoriesRef}>
         <h2>Browse By Categories</h2>
         <div className="category-grid">
@@ -78,13 +83,10 @@ function Home() {
         </div>
       </section>
 
-      {/* About Section */}
       <section className="about-section">
         <div className="about-images">
           <img src={img1} alt="Teacher" className="about-img" />
-          <div className="experience-circle">
-            8+<br />Years Of<br />Experiences
-          </div>
+          <div className="experience-circle">8+<br />Years Of<br />Experiences</div>
         </div>
         <div className="about-text">
           <span className="about-label">OUR ABOUT US</span>
@@ -108,53 +110,59 @@ function Home() {
         </div>
       </section>
 
-      {/* Footer Section */}
-      <footer className="footer">
-        <div className="footer-container">
-          <div className="footer-column">
-            <h3>About Us</h3>
-            <p>
-              We are a leading educational platform providing resources for
-              students to succeed. Our mission is to make learning accessible to
-              everyone.
-            </p>
+      <footer className="site-footer">
+        <div className="footer-bg" />
+        <div className="footer-content">
+          <a href="/" className="logo-link">{/* Optional logo */}</a>
+          <p className="intro">
+            We are a leading educational platform providing resources for students to succeed. Our mission is to make learning accessible to everyone.
+          </p>
+          <div className="social">
+            <a href="#" className="icon">
+              <img src={socialFacebook} alt="Facebook" />
+            </a>
+            <a href="#" className="icon">
+              <img src={socialTwitter} alt="Twitter" />
+            </a>
+            <a href="#" className="icon">
+              <img src={socialInstagram} alt="Instagram" />
+            </a>
+            <a href="#" className="icon">
+              <img src={socialLinkedIn} alt="LinkedIn" />
+            </a>
           </div>
 
-          <div className="footer-column">
-            <h3>Quick Links</h3>
+          <div className="footer-column services">
+            <h4>Our Services</h4>
             <ul>
-              <li><a href="#">Home</a></li>
-              <li><a href="#">Courses</a></li>
-              <li><a href="#">About Us</a></li>
-              <li><a href="#">Contact</a></li>
+              <li>Web Development</li>
+              <li>UI/UX Design</li>
+              <li>Management</li>
+              <li>Digital Marketing</li>
+              <li>Blog News</li>
             </ul>
           </div>
 
-          <div className="footer-column">
-            <h3>Contact</h3>
+          <div className="footer-column quick-links">
+            <h4>Contact Us</h4>
             <ul>
-              <li>Email: info@eduplatform.com</li>
-              <li>Phone: +1 234 567 890</li>
-              <li>Address: 123 Education St, City, Country</li>
+              <li>📍 225, Atirumadb, Mexico - USA</li>
+              <li>📞 (001) 875-734-5261</li>
+              <li>📧 peaceprince01@gmail.com</li>
+              <li><a href="/privacy-policy">Privacy Policy</a></li>
             </ul>
           </div>
 
-          <div className="footer-column">
-            <h3>Follow Us</h3>
-            <ul>
-              <li><a href="#">Facebook</a></li>
-              <li><a href="#">Twitter</a></li>
-              <li><a href="#">LinkedIn</a></li>
-              <li><a href="#">Instagram</a></li>
-            </ul>
+          <div className="gallery">
+            {/* Optional gallery thumbnails */}
           </div>
         </div>
+        <div className="bottom-bar">
+          <span>© 2025</span>
+          <span className="brand">edunity</span>
+          <span>All Rights Reserved</span>
+        </div>
       </footer>
-
-      {/* Footer Bottom Section */}
-      <div className="footer-bottom">
-        <p>&copy; 2025 Edunity. All rights reserved.</p>
-      </div>
     </div>
   );
 }

@@ -15,16 +15,17 @@ import Home from "./Views/Home";
 import Exams from "./Views/Exams";
 import "./App.css";
 import LoginPage from "./Views/LoginPage";
+import Blog from "./Views/Blog";
 
 function App() {
   const location = useLocation();
-  const isHome = location.pathname === "/";
+  const isSimplePage = ["/", "/blog", "/login"].includes(location.pathname);
 
   return (
     <div className="App">
-      {!isHome && <h1 className="title">Course Management System</h1>}
+      {!isSimplePage && <h1 className="title">Course Management System</h1>}
 
-      {!isHome && (
+      {!isSimplePage && (
         <nav className="nav-bar">
           <Link to="/app">Courses</Link>
           <Link to="/app/users">Users</Link>
@@ -43,12 +44,13 @@ function App() {
         <Route path="/app/lectures" element={<Lectures />} />
         <Route path="/app/assignments" element={<Assignment />} />
         <Route path="/app/exams" element={<Exams />} />
-        <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/blog" element={<Blog />} />
       </Routes>
     </div>
   );
 }
+
 
 export default function WrappedApp() {
   return (

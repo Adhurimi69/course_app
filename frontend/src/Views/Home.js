@@ -7,6 +7,7 @@ import socialTwitter from "../images/twitter.png";
 import socialFacebook from "../images/facebook.png";
 import socialInstagram from "../images/instagram.png";
 import socialLinkedIn from "../images/linkedin.png";
+import { Link } from "react-router-dom";
 
 function Home() {
   const navigate = useNavigate();
@@ -38,7 +39,7 @@ function Home() {
           <li>About Us</li>
           <li>Courses</li>
           <li>Pages</li>
-          <li>Blog</li>
+          <li><Link to="/blog">Blog</Link></li>
           <li>Contact</li>
         </ul>
         <button className="create-account" onClick={handleCreateAccount}>
@@ -157,7 +158,7 @@ function Home() {
           </div>
         </div>
         <div className="bottom-bar">
-          <span>© 2024</span>
+          <span>© 2025</span>
           <span className="brand">edunity</span>
           <span>All Rights Reserved</span>
         </div>

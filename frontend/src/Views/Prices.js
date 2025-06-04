@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "./Home.css";
+import Navbar from "../components/Navbar";
 
 function Prices() {
-    const [showAlert, setShowAlert] = useState(true);
 
     const plans = [
         {
@@ -54,13 +54,8 @@ function Prices() {
 
     return (
         <div className="home-wrapper">
-            {/* 🎉 Discount Alert */}
-            {showAlert && (
-                <div className="cta-alert">
-                    <span>🎉 Sign up now and get 25% off your first course!</span>
-                    <button className="close-alert" onClick={() => setShowAlert(false)}>✖</button>
-                </div>
-            )}
+            {/* ✅ Navbar includes alert and wrapper */}
+            <Navbar />
 
             {/* 💰 Pricing Plans */}
             <section className="categories">

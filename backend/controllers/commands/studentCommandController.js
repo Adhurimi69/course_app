@@ -1,13 +1,15 @@
 const Student = require("../../models/sql/student");
 const { StudentReadModel } = require("../../models/nosql/studentReadModel");
 
+const bcrypt = require("bcryptjs");
+
 const createStudent = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password) {
       return res.status(400).json({
-        message: "All fields (name, email, password, role) are required",
+        message: "All fields (name, email, password) are required",
       });
     }
 
@@ -18,7 +20,15 @@ const createStudent = async (req, res) => {
         .json({ message: "Student already exists with this email" });
     }
 
-    const newStudent = await Student.create({ name, email, password, role });
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newStudent = await Student.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "student", // assign role internally
+    });
 
     // Sync to MongoDB (NEVER include password!)
     await StudentReadModel.create({
@@ -33,6 +43,7 @@ const createStudent = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const updateStudent = async (req, res) => {
   try {
@@ -49,14 +60,15 @@ const updateStudent = async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10); // 🔐 Fix
+
     student.name = name;
     student.email = email;
-    student.password = password;
+    student.password = hashedPassword;
     student.role = role;
 
     await student.save();
 
-    // Update MongoDB (still never store password)
     await StudentReadModel.findOneAndUpdate(
       { studentId: student.id },
       {
@@ -71,6 +83,7 @@ const updateStudent = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const deleteStudent = async (req, res) => {
   try {

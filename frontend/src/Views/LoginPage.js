@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 import Button from "../components/Button";
 
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -13,45 +14,54 @@ const LoginPage = () => {
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    try {
-      const response = await fetch(`http://localhost:5000/api/auth/${type}s/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
+  console.log("Submitting login with:", { email, password, userType: type });
 
-      const contentType = response.headers.get("content-type");
+  try {
+    const response = await axios.post(
+      `http://localhost:5000/api/auth/${type}s/login`,
+      { email, password },
+      { withCredentials: true, headers: { "Content-Type": "application/json" } }
+    );
 
-      if (!response.ok) {
-        let message = "Login failed";
-        if (contentType?.includes("application/json")) {
-          const data = await response.json();
-          message = data.message || message;
-        }
-        setError(message);
-        return;
-      }
+    console.log("Login response:", response);
 
-      const { accessToken } = await response.json();
-      localStorage.setItem("accessToken", accessToken);
+    const { accessToken } = response.data;
 
-      const decoded = jwtDecode(accessToken);
-      const role = decoded?.role;
-
-      if (["admin", "teacher", "student"].includes(role)) {
-        navigate(`/${role}s/courses`);
-      } else {
-        navigate("/");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("Server error during login.");
+    if (!accessToken) {
+      setError("Login failed: no access token received");
+      console.warn("No access token received in response");
+      return;
     }
-  };
+
+    localStorage.setItem("accessToken", accessToken);
+    console.log("Access token saved to localStorage");
+
+    const decoded = jwtDecode(accessToken);
+    console.log("Decoded JWT token:", decoded);
+
+    const role = decoded?.role;
+
+    if (["admin", "teacher", "student"].includes(role)) {
+      console.log(`Navigating to /${role}s/courses`);
+      navigate(`/${role}s/courses`);
+    } else {
+      console.warn("Role from token is unexpected, navigating to home");
+      navigate("/");
+    }
+  } catch (error) {
+    if (error.response?.data?.message) {
+      setError(error.response.data.message);
+      console.error("Backend error message:", error.response.data.message);
+    } else {
+      setError("Server error during login.");
+      console.error("Unexpected login error:", error);
+    }
+  }
+};
+
 
   return (
     <div style={styles.container}>

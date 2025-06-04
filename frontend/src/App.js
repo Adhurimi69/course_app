@@ -12,6 +12,7 @@ import Assignment from "./Views/Assignment";
 import Exams from "./Views/Exams";
 import Blog from "./Views/Blog";
 import Prices from "./Views/Prices";
+import Signup from "./Views/SignUp";
 import { Link } from "react-router-dom";
 import LogoutButton from "./components/LogoutButton";
 
@@ -39,6 +40,8 @@ function App() {
       <Route path="/login/:type" element={<LoginPage />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/prices" element={<Prices />} />
+      <Route path="/signup" element={<Signup />} />
+      
 
       <Route path="/admins" element={<RoleLayout role="admins" />}>
         <Route index element={<Navigate to="courses" replace />} />

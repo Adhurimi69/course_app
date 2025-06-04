@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Home.css";
+import Navbar from "../components/Navbar";
 import blogImg0 from "../images/blog0.jpeg";
 import blogImg1 from "../images/blog1.jpeg";
 import blogImg2 from "../images/blog2.png";
@@ -58,13 +59,8 @@ function Blog() {
 
     return (
         <div className="home-wrapper">
-            {/* 🎉 Discount alert like on Home */}
-            {showAlert && (
-                <div className="cta-alert">
-                    <span>🎉 Sign up now and get 25% off your first course!</span>
-                    <button className="close-alert" onClick={() => setShowAlert(false)}>✖</button>
-                </div>
-            )}
+            {/* ✅ Navbar includes alert and wrapper */}
+            <Navbar />
 
             {/* 🔠 Enlarged blog header */}
             <div className="hero">

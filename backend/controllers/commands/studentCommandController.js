@@ -20,13 +20,10 @@ const createStudent = async (req, res) => {
         .json({ message: "Student already exists with this email" });
     }
 
-    // Hash password before saving
-    const hashedPassword = await bcrypt.hash(password, 10);
-
     const newStudent = await Student.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       role: "student", // assign role internally
     });
 
@@ -60,11 +57,10 @@ const updateStudent = async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10); // 🔐 Fix
 
     student.name = name;
     student.email = email;
-    student.password = hashedPassword;
+    student.password = password;
     student.role = role;
 
     await student.save();

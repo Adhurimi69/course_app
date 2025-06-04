@@ -1,0 +1,143 @@
+/* Layout Container */
+.admin-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f3f4f6; /* gray-100 */
+  font-family: sans-serif;
+}
+
+/* Sidebar */
+.admin-sidebar {
+  width: 16rem; /* 64 * 0.25rem */
+  background-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar Header */
+.admin-sidebar-header {
+  padding: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+}
+
+/* Navigation */
+.admin-nav {
+  padding: 1rem;
+}
+
+.admin-nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Top-level nav link */
+.admin-link {
+  display: block;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  color: #111827; /* gray-900 */
+  transition: background-color 0.2s ease;
+}
+
+.admin-link:hover {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+/* Collapsible Button */
+.admin-collapsible-button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #111827;
+  transition: background-color 0.2s ease;
+}
+
+.admin-collapsible-button:hover {
+  background-color: #e5e7eb;
+}
+
+/* Nested Subitems */
+.admin-subitem {
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  color: #111827;
+  transition: background-color 0.2s ease;
+  margin-left: 1rem;
+  font-size: 0.875rem; /* text-sm */
+}
+
+.admin-subitem:hover {
+  background-color: #f3f4f6;
+}
+
+/* Main Area */
+.admin-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+/* Top Navbar */
+.admin-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Home link (top left) */
+.admin-home-link {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151; /* gray-700 */
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.admin-home-link:hover {
+  color: #2563eb; /* blue-600 */
+}
+
+/* Main content outlet */
+.admin-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.admin-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  background-color: #fafafa;
+  position: relative;
+}
+
+.logout-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 0.5rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  z-index: 50;
+}
+

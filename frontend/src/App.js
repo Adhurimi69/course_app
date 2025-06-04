@@ -14,6 +14,7 @@ import Blog from "./Views/Blog";
 import Prices from "./Views/Prices";
 import Signup from "./Views/SignUp";
 import { Link } from "react-router-dom";
+import AdminDashboard from "./Views/AdminDashboard";
 import LogoutButton from "./components/LogoutButton";
 
 const RoleLayout = ({ role }) => {
@@ -43,15 +44,26 @@ function App() {
       <Route path="/signup" element={<Signup />} />
       
 
-      <Route path="/admins" element={<RoleLayout role="admins" />}>
-        <Route index element={<Navigate to="courses" replace />} />
-        <Route path="courses" element={<ProtectedRoute allowedRoles={["admin"]}><Courses /></ProtectedRoute>} />
-        <Route path="users" element={<ProtectedRoute allowedRoles={["admin"]}><Users /></ProtectedRoute>} />
-        <Route path="departments" element={<ProtectedRoute allowedRoles={["admin"]}><Departments /></ProtectedRoute>} />
-        <Route path="lectures" element={<ProtectedRoute allowedRoles={["admin"]}><Lectures /></ProtectedRoute>} />
-        <Route path="assignments" element={<ProtectedRoute allowedRoles={["admin"]}><Assignment /></ProtectedRoute>} />
-        <Route path="exams" element={<ProtectedRoute allowedRoles={["admin"]}><Exams /></ProtectedRoute>} />
+      <Route
+        path="/admins"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      >
+        {/* ✅ Add a default welcome route */}
+        <Route index element={<div style={{ padding: "1rem" }}>Welcome to the Admin Dashboard</div>} />
+
+        <Route path="courses" element={<Courses />} />
+        <Route path="users" element={<Users />} />
+        <Route path="departments" element={<Departments />} />
+        <Route path="lectures" element={<Lectures />} />
+        <Route path="assignments" element={<Assignment />} />
+        <Route path="exams" element={<Exams />} />
       </Route>
+
+
 
       <Route path="/teachers" element={<RoleLayout role="teachers" />}>
         <Route index element={<Navigate to="courses" replace />} />

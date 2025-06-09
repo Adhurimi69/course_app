@@ -26,6 +26,7 @@ const studentCommandRoutes = require("./routes/commands/studentCommandRoutes");
 const departmentCommandRoutes = require("./routes/commands/departmentCommandRoutes");
 const lectureCommandRoutes = require("./routes/commands/lectureCommandRoutes");
 const assignmentCommandRoutes = require("./routes/commands/assignmentCommandRoutes");
+const examCommandRoutes = require("./routes/commands/examCommandRoutes");
 const adminAuthRoutes = require("./routes/commands/adminAuthRoutes");
 const teacherAuthRoutes = require("./routes/commands/teacherAuthRoutes");
 const studentAuthRoutes = require("./routes/commands/studentAuthRoutes");
@@ -38,6 +39,7 @@ const studentQueryRoutes = require("./routes/queries/studentQueryRoutes");
 const departmentQueryRoutes = require("./routes/queries/departmentQueryRoutes");
 const lectureQueryRoutes = require("./routes/queries/lectureQueryRoutes");
 const assignmentQueryRoutes = require("./routes/queries/assignmentQueryRoutes");
+const examQueryRoutes = require("./routes/queries/examQueryRoutes");
 
 // ----- Command APIs (writes to SQL + syncs Mongo) -----
 app.use("/api/commands/courses", courseCommandRoutes);
@@ -47,6 +49,7 @@ app.use("/api/commands/students", studentCommandRoutes);
 app.use("/api/commands/departments", departmentCommandRoutes);
 app.use("/api/commands/lectures", lectureCommandRoutes);
 app.use("/api/commands/assignments", assignmentCommandRoutes);
+app.use("/api/commands/exams", examCommandRoutes);
 app.use("/api/auth/admins", adminAuthRoutes);
 app.use("/api/auth/teachers", teacherAuthRoutes);
 app.use("/api/auth/students", studentAuthRoutes);
@@ -59,11 +62,13 @@ app.use("/api/queries/students", studentQueryRoutes);
 app.use("/api/queries/departments", departmentQueryRoutes);
 app.use("/api/queries/lectures", lectureQueryRoutes);
 app.use("/api/queries/assignments", assignmentQueryRoutes);
+app.use("/api/queries/exams", examQueryRoutes);
 
 // ----- Sequelize models (SQL relations setup) -----
 require("./models/sql/department");
 require("./models/sql/course");
 require("./models/sql/lecture");
+require("./models/sql/exam");
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {

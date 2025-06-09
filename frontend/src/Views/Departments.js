@@ -13,10 +13,12 @@ function Departments() {
   }, []);
 
   const fetchDepartments = async () => {
-    const res = await axios.get(
-      "http://localhost:5000/api/queries/departments"
-    );
-    setDepartments(res.data);
+    try {
+      const res = await axios.get("http://localhost:5000/api/queries/departments");
+      setDepartments(res.data);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -25,15 +27,11 @@ function Departments() {
       if (editingId) {
         await axios.put(
           `http://localhost:5000/api/commands/departments/${editingId}`,
-          {
-            name,
-          }
+          { name }
         );
         setEditingId(null);
       } else {
-        await axios.post("http://localhost:5000/api/commands/departments", {
-          name,
-        });
+        await axios.post("http://localhost:5000/api/commands/departments", { name });
       }
       setName("");
       fetchDepartments();
@@ -43,16 +41,18 @@ function Departments() {
   };
 
   const handleEdit = (department) => {
-    setEditingId(department.id);
+    setEditingId(department.departmentId);
     setName(department.name);
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this department?")) {
-      await axios.delete(
-        `http://localhost:5000/api/commands/departments/${id}`
-      );
-      fetchDepartments();
+      try {
+        await axios.delete(`http://localhost:5000/api/commands/departments/${id}`);
+        fetchDepartments();
+      } catch (error) {
+        console.error("Error deleting department:", error);
+      }
     }
   };
 
@@ -75,7 +75,7 @@ function Departments() {
 
       <ul className="departments-list">
         {departments.map((dept) => (
-          <li key={dept.id} className="department-item">
+          <li key={dept.departmentId} className="department-item">
             <span>{dept.name}</span>
             <div className="actions">
               <button
@@ -86,7 +86,7 @@ function Departments() {
               </button>
               <button
                 className="button delete-button"
-                onClick={() => handleDelete(dept.id)}
+                onClick={() => handleDelete(dept.departmentId)}
               >
                 Delete
               </button>

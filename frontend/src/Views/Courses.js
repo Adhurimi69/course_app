@@ -15,15 +15,23 @@ export default function Courses() {
   }, []);
 
   const fetchCourses = async () => {
-    const res = await axios.get("http://localhost:5000/api/queries/courses");
-    setCourses(res.data);
+    try {
+      const res = await axios.get("http://localhost:5000/api/queries/courses");
+      setCourses(res.data);
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+    }
   };
 
   const fetchDepartments = async () => {
-    const res = await axios.get(
-      "http://localhost:5000/api/queries/departments"
-    );
-    setDepartments(res.data);
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/queries/departments"
+      );
+      setDepartments(res.data);
+    } catch (err) {
+      console.error("Error fetching departments:", err);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -54,15 +62,24 @@ export default function Courses() {
   };
 
   const handleEdit = (course) => {
-    setEditingId(course.id);
+    setEditingId(course.courseId); // ndryshova nga id në courseId
     setTitle(course.title);
     setDepartmentId(course.departmentId || "");
   };
 
   const handleDelete = async (id) => {
+    if (!id) {
+      alert("Invalid course id");
+      return;
+    }
     if (window.confirm("Are you sure you want to delete this course?")) {
-      await axios.delete(`http://localhost:5000/api/commands/courses/${id}`);
-      fetchCourses();
+      try {
+        await axios.delete(`http://localhost:5000/api/commands/courses/${id}`);
+        fetchCourses();
+      } catch (err) {
+        console.error("Delete failed:", err);
+        alert("Delete failed. Please try again.");
+      }
     }
   };
 
@@ -93,10 +110,10 @@ export default function Courses() {
 
       <ul className="course-list">
         {courses.map((course) => (
-          <li key={course.id}>
+          <li key={course.courseId}>
             {course.title} - Dept ID: {course.departmentId || "N/A"}
             <button onClick={() => handleEdit(course)}>Edit</button>
-            <button onClick={() => handleDelete(course.id)}>Delete</button>
+            <button onClick={() => handleDelete(course.courseId)}>Delete</button>
           </li>
         ))}
       </ul>

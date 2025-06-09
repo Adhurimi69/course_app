@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function Exams() {
   const [exams, setExams] = useState([]);
   const [courses, setCourses] = useState([]);
-  const [title, setTitle] = useState('');
-  const [courseId, setCourseId] = useState('');
-  const [date, setDate] = useState('');
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+  const [courseId, setCourseId] = useState("");
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -15,19 +15,27 @@ export default function Exams() {
   }, []);
 
   const fetchExams = async () => {
-    const res = await axios.get('http://localhost:5000/api/exams');
-    setExams(res.data);
+    try {
+      const res = await axios.get("http://localhost:5000/api/queries/exams");
+      setExams(res.data);
+    } catch (err) {
+      console.error("Error fetching exams:", err);
+    }
   };
 
   const fetchCourses = async () => {
-    const res = await axios.get('http://localhost:5000/api/courses');
-    setCourses(res.data);
+    try {
+      const res = await axios.get("http://localhost:5000/api/queries/courses");
+      setCourses(res.data);
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!courseId || !date) {
-      alert('Please select a course and date.');
+      alert("Please select a course and date.");
       return;
     }
 
@@ -35,41 +43,46 @@ export default function Exams() {
 
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/exams/${editingId}`, data);
+        await axios.put(
+          `http://localhost:5000/api/commands/exams/${editingId}`,
+          data
+        );
         setEditingId(null);
       } else {
-        await axios.post('http://localhost:5000/api/exams', data);
+        await axios.post("http://localhost:5000/api/commands/exams", data);
       }
-
-      setTitle('');
-      setCourseId('');
-      setDate('');
+      setTitle("");
+      setDate("");
+      setCourseId("");
       fetchExams();
     } catch (err) {
-      console.error("Error submitting exam:", err.response?.data || err.message);
+      console.error("Error submitting exam:", err);
     }
   };
 
   const handleEdit = (exam) => {
-    setEditingId(exam.id);
+    setEditingId(exam.examId); // use examId as key
     setTitle(exam.title);
-    setCourseId(exam.courseId || '');
-    setDate(exam.date?.split('T')[0] || '');
+    setDate(exam.date ? exam.date.slice(0, 10) : "");
+    setCourseId(exam.courseId || "");
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this exam?')) {
-      await axios.delete(`http://localhost:5000/api/exams/${id}`);
-      fetchExams();
+    if (window.confirm("Are you sure you want to delete this exam?")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/commands/exams/${id}`);
+        fetchExams();
+      } catch (err) {
+        console.error("Error deleting exam:", err);
+      }
     }
   };
 
   return (
-    <div className="departments-container">
-      <form onSubmit={handleSubmit} className="form">
+    <div className="exam-page container">
+      <form onSubmit={handleSubmit} className="exam-form">
         <input
           type="text"
-          className="input"
           placeholder="Exam Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -77,39 +90,35 @@ export default function Exams() {
         />
         <input
           type="date"
-          className="input"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
         />
         <select
-          className="input"
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
           required
         >
           <option value="">-- Select Course --</option>
           {courses.map((course) => (
-            <option key={course.id} value={course.id}>
-              {course.title}
+            <option
+              key={course.courseId || course.id}
+              value={course.courseId || course.id}
+            >
+              {course.title || course.name}
             </option>
           ))}
         </select>
-        <button type="submit" className="button submit-button">
-          {editingId ? 'Update' : 'Add'} Exam
-        </button>
+        <button type="submit">{editingId ? "Update" : "Add"} Exam</button>
       </form>
 
-      <ul className="departments-list">
+      <ul className="exam-list">
         {exams.map((exam) => (
-          <li key={exam.id} className="department-item">
-            <span>
-              <strong>{exam.title}</strong> - {exam.date?.split('T')[0]} - Course ID: {exam.courseId}
-            </span>
-            <div className="actions">
-              <button className="button edit-button" onClick={() => handleEdit(exam)}>Edit</button>
-              <button className="button delete-button" onClick={() => handleDelete(exam.id)}>Delete</button>
-            </div>
+          <li key={exam.examId}>
+            {exam.title} - Course ID: {exam.courseId || "N/A"} - Date:{" "}
+            {exam.date ? exam.date.slice(0, 10) : "No date"}
+            <button onClick={() => handleEdit(exam)}>Edit</button>
+            <button onClick={() => handleDelete(exam.examId)}>Delete</button>
           </li>
         ))}
       </ul>

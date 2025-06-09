@@ -15,7 +15,17 @@ const Course = sequelize.define(
   }
 );
 
-Department.hasMany(Course, { foreignKey: "departmentId", onDelete: "CASCADE" });
-Course.belongsTo(Department, { foreignKey: "departmentId" });
+// Lidhjet me onDelete/onUpdate të plotë
+Department.hasMany(Course, {
+  foreignKey: "departmentId",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Course.belongsTo(Department, {
+  foreignKey: "departmentId",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
 
 module.exports = Course;

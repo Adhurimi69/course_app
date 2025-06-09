@@ -22,9 +22,21 @@ function Users() {
         axios.get("http://localhost:5000/api/queries/students"),
       ]);
 
-      const admins = adminsRes.data.map((u) => ({ ...u, role: "admin" }));
-      const teachers = teachersRes.data.map((u) => ({ ...u, role: "teacher" }));
-      const students = studentsRes.data.map((u) => ({ ...u, role: "student" }));
+      const admins = adminsRes.data.map((u) => ({
+        ...u,
+        role: "admin",
+        id: u.adminId,
+      }));
+      const teachers = teachersRes.data.map((u) => ({
+        ...u,
+        role: "teacher",
+        id: u.teacherId,
+      }));
+      const students = studentsRes.data.map((u) => ({
+        ...u,
+        role: "student",
+        id: u.studentId,
+      }));
 
       setUsers([...admins, ...teachers, ...students]);
     } catch (error) {
@@ -54,6 +66,7 @@ function Users() {
         await axios.post(`http://localhost:5000/api/commands/${role}s`, userData);
       }
 
+      // Reset form
       setEditingId(null);
       setEditingRole(null);
       setName("");
@@ -67,8 +80,7 @@ function Users() {
   };
 
   const handleEdit = (user) => {
-    const id = user.studentId || user.teacherId || user.adminId;
-    setEditingId(id);
+    setEditingId(user.id);
     setEditingRole(user.role);
     setName(user.name);
     setEmail(user.email);
@@ -116,14 +128,17 @@ function Users() {
           required={!editingId}
           className="input"
         />
-        <input
-          type="text"
-          placeholder="Role (admin/teacher/student)"
+        <select
           value={role}
-          onChange={(e) => setRole(e.target.value.toLowerCase())}
+          onChange={(e) => setRole(e.target.value)}
           required
           className="input"
-        />
+        >
+          <option value="">Select Role</option>
+          <option value="admin">Admin</option>
+          <option value="teacher">Teacher</option>
+          <option value="student">Student</option>
+        </select>
         <button type="submit" className="button">
           {editingId ? "Update User" : "Add User"}
         </button>
@@ -141,33 +156,33 @@ function Users() {
           </tr>
         </thead>
         <tbody>
-          {users.map((user, index) => {
-            const id = user.studentId || user.teacherId || user.adminId;
-            return (
-              <tr key={`${user.role}-${id}`} style={index % 2 === 0 ? rowStyleEven : rowStyleOdd}>
-                <td style={tdStyle}>{index + 1}</td>
-                <td style={tdStyle}>{user.name}</td>
-                <td style={tdStyle}>{user.email}</td>
-                <td style={tdStyle}>{user.role}</td>
-                <td style={tdStyle}>
-                  <button
-                    onClick={() => handleEdit(user)}
-                    className="button edit-button"
-                    style={editBtn}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(id, user.role)}
-                    className="button delete-button"
-                    style={deleteBtn}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            );
-          })}
+          {users.map((user, index) => (
+            <tr
+              key={`${user.role}-${user.id}`}
+              style={index % 2 === 0 ? rowStyleEven : rowStyleOdd}
+            >
+              <td style={tdStyle}>{index + 1}</td>
+              <td style={tdStyle}>{user.name}</td>
+              <td style={tdStyle}>{user.email}</td>
+              <td style={tdStyle}>{user.role}</td>
+              <td style={tdStyle}>
+                <button
+                  onClick={() => handleEdit(user)}
+                  className="button edit-button"
+                  style={editBtn}
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(user.id, user.role)}
+                  className="button delete-button"
+                  style={deleteBtn}
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

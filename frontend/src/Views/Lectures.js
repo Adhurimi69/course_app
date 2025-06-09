@@ -1,12 +1,12 @@
+// ./Views/Lectures.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import "./Departments.css"; // Përdor të njëjtin stil për thjeshtësi
 
-function Lectures() {
+export default function Lectures() {
   const [lectures, setLectures] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [title, setTitle] = useState("");
   const [courseId, setCourseId] = useState("");
-  const [courses, setCourses] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -15,19 +15,33 @@ function Lectures() {
   }, []);
 
   const fetchLectures = async () => {
-    const res = await axios.get("http://localhost:5000/api/queries/lectures");
-    setLectures(res.data);
+    try {
+      const res = await axios.get("http://localhost:5000/api/queries/lectures");
+      setLectures(res.data);
+    } catch (err) {
+      console.error("Error fetching lectures:", err);
+    }
   };
 
   const fetchCourses = async () => {
-    const res = await axios.get("http://localhost:5000/api/queries/courses");
-    setCourses(res.data);
+    try {
+      const res = await axios.get("http://localhost:5000/api/queries/courses");
+      setCourses(res.data);
+    } catch (err) {
+      console.error("Error fetching courses:", err);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!courseId) {
+      alert("Please select a course.");
+      return;
+    }
+
+    const data = { title, courseId };
+
     try {
-      const data = { title, courseId };
       if (editingId) {
         await axios.put(
           `http://localhost:5000/api/commands/lectures/${editingId}`,
@@ -40,79 +54,67 @@ function Lectures() {
       setTitle("");
       setCourseId("");
       fetchLectures();
-    } catch (error) {
-      alert(error.response?.data?.error || "Error occurred");
+    } catch (err) {
+      console.error("Error submitting lecture:", err);
     }
   };
 
   const handleEdit = (lecture) => {
-    setEditingId(lecture.id);
+    setEditingId(lecture.lectureId); // përdor lectureId
     setTitle(lecture.title);
-    setCourseId(lecture.courseId);
+    setCourseId(lecture.courseId || "");
   };
 
   const handleDelete = async (id) => {
+    if (!id) {
+      alert("Invalid lecture id");
+      return;
+    }
     if (window.confirm("Are you sure you want to delete this lecture?")) {
-      await axios.delete(`http://localhost:5000/api/commands/lectures/${id}`);
-      fetchLectures();
+      try {
+        await axios.delete(`http://localhost:5000/api/commands/lectures/${id}`);
+        fetchLectures();
+      } catch (err) {
+        console.error("Delete failed:", err);
+        alert("Delete failed. Please try again.");
+      }
     }
   };
 
   return (
-    <div className="departments-container">
-      <h2>Lecture Management</h2>
-      <form onSubmit={handleSubmit} className="form">
+    <div className="lecture-page container">
+      <form onSubmit={handleSubmit} className="lecture-form">
         <input
           type="text"
           placeholder="Lecture Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="input"
         />
         <select
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
           required
-          className="input"
         >
-          <option value="">Select Course</option>
+          <option value="">-- Select Course --</option>
           {courses.map((course) => (
             <option key={course.courseId} value={course.courseId}>
               {course.title}
             </option>
           ))}
         </select>
-        <button type="submit" className="button submit-button">
-          {editingId ? "Update" : "Add"}
-        </button>
+        <button type="submit">{editingId ? "Update" : "Add"} Lecture</button>
       </form>
 
-      <ul className="departments-list">
+      <ul className="lecture-list">
         {lectures.map((lecture) => (
-          <li key={lecture.id} className="department-item">
-            <span>
-              {lecture.title} — <em>{lecture.Course?.title || "No Course"}</em>
-            </span>
-            <div className="actions">
-              <button
-                className="button edit-button"
-                onClick={() => handleEdit(lecture)}
-              >
-                Edit
-              </button>
-              <button
-                className="button delete-button"
-                onClick={() => handleDelete(lecture.id)}
-              >
-                Delete
-              </button>
-            </div>
+          <li key={lecture.lectureId}>
+            {lecture.title} - Course ID: {lecture.courseId || "N/A"}
+            <button onClick={() => handleEdit(lecture)}>Edit</button>
+            <button onClick={() => handleDelete(lecture.lectureId)}>Delete</button>
           </li>
         ))}
       </ul>
     </div>
   );
 }
-
-export default Lectures;

@@ -19,7 +19,16 @@ const Assignment = sequelize.define(
   }
 );
 
-Lecture.hasMany(Assignment, { foreignKey: "lectureId", onDelete: "CASCADE" });
-Assignment.belongsTo(Lecture, { foreignKey: "lectureId" });
+Lecture.hasMany(Assignment, {
+  foreignKey: "lectureId",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Assignment.belongsTo(Lecture, {
+  foreignKey: "lectureId",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
 
 module.exports = Assignment;

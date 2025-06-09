@@ -16,9 +16,7 @@ export default function Assignments() {
 
   const fetchAssignments = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/queries/assignments"
-      );
+      const res = await axios.get("http://localhost:5000/api/queries/assignments");
       setAssignments(res.data);
     } catch (err) {
       console.error("Error fetching assignments:", err);
@@ -51,10 +49,7 @@ export default function Assignments() {
         );
         setEditingId(null);
       } else {
-        await axios.post(
-          "http://localhost:5000/api/commands/assignments",
-          data
-        );
+        await axios.post("http://localhost:5000/api/commands/assignments", data);
       }
 
       setTitle("");
@@ -67,7 +62,7 @@ export default function Assignments() {
   };
 
   const handleEdit = (assignment) => {
-    setEditingId(assignment.id);
+    setEditingId(assignment.assignmentId); // përdor assignmentId
     setTitle(assignment.title);
     setDueDate(assignment.dueDate ? assignment.dueDate.slice(0, 10) : "");
     setLectureId(assignment.lectureId || "");
@@ -76,9 +71,7 @@ export default function Assignments() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this assignment?")) {
       try {
-        await axios.delete(
-          `http://localhost:5000/api/commands/assignments/${id}`
-        );
+        await axios.delete(`http://localhost:5000/api/commands/assignments/${id}`);
         fetchAssignments();
       } catch (err) {
         console.error("Error deleting assignment:", err);
@@ -87,8 +80,8 @@ export default function Assignments() {
   };
 
   return (
-    <div className="course-page container">
-      <form onSubmit={handleSubmit} className="course-form">
+    <div className="assignment-page container">
+      <form onSubmit={handleSubmit} className="assignment-form">
         <input
           type="text"
           placeholder="Assignment Title"
@@ -116,16 +109,13 @@ export default function Assignments() {
         <button type="submit">{editingId ? "Update" : "Add"} Assignment</button>
       </form>
 
-      <ul className="course-list">
+      <ul className="assignment-list">
         {assignments.map((assignment) => (
-          <li key={assignment.id}>
-            {assignment.title} - Lecture ID: {assignment.lectureId || "N/A"} -
-            Due:{" "}
-            {assignment.dueDate
-              ? assignment.dueDate.slice(0, 10)
-              : "No due date"}
+          <li key={assignment.assignmentId}>
+            {assignment.title} - Lecture ID: {assignment.lectureId || "N/A"} - Due:{" "}
+            {assignment.dueDate ? assignment.dueDate.slice(0, 10) : "No due date"}
             <button onClick={() => handleEdit(assignment)}>Edit</button>
-            <button onClick={() => handleDelete(assignment.id)}>Delete</button>
+            <button onClick={() => handleDelete(assignment.assignmentId)}>Delete</button>
           </li>
         ))}
       </ul>

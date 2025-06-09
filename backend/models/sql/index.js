@@ -2,6 +2,7 @@ const Department = require("./department");
 const Course = require("./course");
 const Lecture = require("./lecture");
 const Assignment = require("./assignment");
+const Exam = require("./exam");
 const { sequelize } = require("../../config/db");
 
 // As associations are already defined in the individual models,
@@ -20,4 +21,5 @@ module.exports = {
   Course,
   Lecture,
   Assignment,
+  Exam,
 };

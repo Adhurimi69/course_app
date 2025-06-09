@@ -31,6 +31,7 @@ const adminAuthRoutes = require("./routes/commands/adminAuthRoutes");
 const teacherAuthRoutes = require("./routes/commands/teacherAuthRoutes");
 const studentAuthRoutes = require("./routes/commands/studentAuthRoutes");
 
+
 // ----- Query Routes -----
 const courseQueryRoutes = require("./routes/queries/courseQueryRoutes");
 const adminQueryRoutes = require("./routes/queries/adminQueryRoutes");
@@ -40,6 +41,41 @@ const departmentQueryRoutes = require("./routes/queries/departmentQueryRoutes");
 const lectureQueryRoutes = require("./routes/queries/lectureQueryRoutes");
 const assignmentQueryRoutes = require("./routes/queries/assignmentQueryRoutes");
 const examQueryRoutes = require("./routes/queries/examQueryRoutes");
+// ----- Command Routes -----
+const uploadCommandRoute = require("./routes/commands/uploadRoutes");
+const gradeCommandRoute = require("./routes/commands/gradeRoutes");
+const reviewCommandRoute = require("./routes/commands/reviewRoutes");
+const attendanceCommandRoute = require("./routes/commands/attendanceRoutes");
+const assignmentGradeCommandRoute = require("./routes/commands/assignmentGradeRoutes");
+const studentCourseCommandRoute = require("./routes/commands/studentCourseRoutes");
+const studentExamCommandRoute = require("./routes/commands/studentExamRoutes");
+
+// ----- Query Routes -----
+const uploadQueryRoute = require("./routes/queries/uploadQueryRoutes");
+const gradeQueryRoute = require("./routes/queries/gradeQueryRoutes");
+const reviewQueryRoute = require("./routes/queries/reviewQueryRoutes");
+const attendanceQueryRoute = require("./routes/queries/attendanceQueryRoutes");
+const assignmentGradeQueryRoute = require("./routes/queries/assignmentGradeQueryRoutes");
+const studentCourseQueryRoute = require("./routes/queries/studentCourseQueryRoutes");
+const studentExamQueryRoute = require("./routes/queries/studentExamQueryRoutes");
+
+// ----- Command APIs -----
+app.use("/api/commands/upload", uploadCommandRoute);
+app.use("/api/commands/grade", gradeCommandRoute);
+app.use("/api/commands/review", reviewCommandRoute);
+app.use("/api/commands/attendance", attendanceCommandRoute);
+app.use("/api/commands/assignment-grade", assignmentGradeCommandRoute);
+app.use("/api/commands/student-course", studentCourseCommandRoute);
+app.use("/api/commands/student-exam", studentExamCommandRoute);
+
+// ----- Query APIs -----
+app.use("/api/queries/upload", uploadQueryRoute);
+app.use("/api/queries/grade", gradeQueryRoute);
+app.use("/api/queries/review", reviewQueryRoute);
+app.use("/api/queries/attendance", attendanceQueryRoute);
+app.use("/api/queries/assignment-grade", assignmentGradeQueryRoute);
+app.use("/api/queries/student-course", studentCourseQueryRoute);
+app.use("/api/queries/student-exam", studentExamQueryRoute);
 
 // ----- Command APIs (writes to SQL + syncs Mongo) -----
 app.use("/api/commands/courses", courseCommandRoutes);
@@ -54,6 +90,7 @@ app.use("/api/auth/admins", adminAuthRoutes);
 app.use("/api/auth/teachers", teacherAuthRoutes);
 app.use("/api/auth/students", studentAuthRoutes);
 
+
 // ----- Query APIs (reads from Mongo) -----
 app.use("/api/queries/courses", courseQueryRoutes);
 app.use("/api/queries/admins", adminQueryRoutes);
@@ -63,6 +100,7 @@ app.use("/api/queries/departments", departmentQueryRoutes);
 app.use("/api/queries/lectures", lectureQueryRoutes);
 app.use("/api/queries/assignments", assignmentQueryRoutes);
 app.use("/api/queries/exams", examQueryRoutes);
+
 
 // ----- Sequelize models (SQL relations setup) -----
 require("./models/sql/department");

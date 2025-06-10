@@ -25,7 +25,18 @@ const getLectureById = async (req, res) => {
   }
 };
 
+const getLectureByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const lectures = await LectureReadModel.find({ courseId });
+    res.json(lectures);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAllLectures,
   getLectureById,
+  getLectureByCourse,
 };

@@ -38,9 +38,9 @@ const updateAdmin = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !role) {
       return res.status(400).json({
-        message: "All fields (name, email, password, role) are required",
+        message: "Fields (name, email, role) are required",
       });
     }
 
@@ -51,12 +51,14 @@ const updateAdmin = async (req, res) => {
 
     admin.name = name;
     admin.email = email;
-    admin.password = password;
+    if (password) {
+      admin.password = password; // only update if provided
+    }
     admin.role = role;
 
     await admin.save();
 
-    // Update MongoDB (still never store password)
+    // Update MongoDB (never store password)
     await AdminReadModel.findOneAndUpdate(
       { adminId: admin.id },
       {
@@ -71,6 +73,7 @@ const updateAdmin = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const deleteAdmin = async (req, res) => {
   try {

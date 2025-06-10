@@ -46,7 +46,7 @@ const updateStudent = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !role) {
       return res.status(400).json({
         message: "All fields (name, email, password, role) are required",
       });
@@ -60,8 +60,11 @@ const updateStudent = async (req, res) => {
 
     student.name = name;
     student.email = email;
-    student.password = password;
     student.role = role;
+
+    if (password) {
+      student.password = password;
+    }
 
     await student.save();
 

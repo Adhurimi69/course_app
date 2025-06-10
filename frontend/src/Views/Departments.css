@@ -56,4 +56,10 @@
   .actions button {
     margin-left: 5px;
   }
+
+  .department-item.highlight {
+  background-color: #db1212;
+  transition: background-color 0.3s ease;
+}
+
   

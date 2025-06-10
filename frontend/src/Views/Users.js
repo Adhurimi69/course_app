@@ -35,22 +35,30 @@ function Users() {
       const students = studentsRes.data.map((u) => ({
         ...u,
         role: "student",
-        id: u.studentId,
+        id: u.studentId || u.id || u._id,
       }));
 
       setUsers([...admins, ...teachers, ...students]);
     } catch (error) {
       console.error("Error fetching users:", error);
+      alert("Failed to fetch users.");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    let userData = { name, email };
-    if (!editingId || password) {
-      userData.password = password;
+    if (!name || !email || (!editingId && !password) || !role) {
+      alert("Please fill in all required fields.");
+      return;
     }
+
+    const userData = {
+      name,
+      email,
+      role,
+      ...(password && { password }),
+    };
 
     try {
       if (editingId) {
@@ -58,12 +66,18 @@ function Users() {
           `http://localhost:5000/api/commands/${editingRole}s/${editingId}`,
           userData
         );
+        alert("User updated successfully.");
       } else {
         if (!["admin", "teacher", "student"].includes(role)) {
-          alert("Role must be 'admin', 'teacher', or 'student'");
+          alert("Role must be 'admin', 'teacher', or 'student'.");
           return;
         }
-        await axios.post(`http://localhost:5000/api/commands/${role}s`, userData);
+
+        await axios.post(
+          `http://localhost:5000/api/commands/${role}s`,
+          userData
+        );
+        alert("User created successfully.");
       }
 
       // Reset form
@@ -71,30 +85,35 @@ function Users() {
       setEditingRole(null);
       setName("");
       setEmail("");
-      setRole("");
       setPassword("");
+      setRole("");
       fetchAllUsers();
     } catch (error) {
-      console.error("Error submitting user:", error);
+      console.error("Error submitting user:", error.response ? error.response.data : error.message);
+      alert("Error: " + (error.response ? JSON.stringify(error.response.data) : error.message));
     }
   };
 
   const handleEdit = (user) => {
-    setEditingId(user.id);
-    setEditingRole(user.role);
-    setName(user.name);
-    setEmail(user.email);
-    setRole(user.role);
-    setPassword("");
-  };
+  console.log("Editing user:", user);
+  setEditingId(user.id);
+  setEditingRole(user.role);
+  setName(user.name);
+  setEmail(user.email);
+  setRole(user.role);
+  setPassword(""); // Do not preload passwords
+};
+
 
   const handleDelete = async (id, role) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await axios.delete(`http://localhost:5000/api/commands/${role}s/${id}`);
+        alert("User deleted successfully.");
         fetchAllUsers();
       } catch (error) {
         console.error("Error deleting user:", error.response?.data || error.message);
+        alert("Failed to delete user.");
       }
     }
   };
@@ -122,11 +141,11 @@ function Users() {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder={editingId ? "Leave blank to keep current password" : "Password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required={!editingId}
           className="input"
+          required={!editingId}
         />
         <select
           value={role}
@@ -189,7 +208,7 @@ function Users() {
   );
 }
 
-// Inline styles
+// Styles
 const thStyle = {
   padding: "10px",
   backgroundColor: "#f4f4f4",

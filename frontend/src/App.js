@@ -42,6 +42,7 @@ function App() {
       <Route path="/blog" element={<Blog />} />
       <Route path="/prices" element={<Prices />} />
       <Route path="/signup" element={<Signup />} />
+
       
 
       <Route
@@ -56,12 +57,24 @@ function App() {
         <Route index element={<div style={{ padding: "1rem" }}>Welcome to the Admin Dashboard</div>} />
 
         <Route path="courses" element={<Courses />} />
+        <Route path="courses/:id" element={<Courses />} />
+
         <Route path="users" element={<Users />} />
+        <Route path="users/:id" element={<Users />} />
+        
         <Route path="departments" element={<Departments />} />
+        <Route path="departments/:id" element={<Departments />} />
+        
         <Route path="lectures" element={<Lectures />} />
+        <Route path="lectures/:id" element={<Lectures />} />
+
         <Route path="assignments" element={<Assignment />} />
+        <Route path="assignments/:id" element={<Assignment />} />
+
         <Route path="exams" element={<Exams />} />
+        <Route path="exams/:id" element={<Exams />} />
       </Route>
+
 
 
 

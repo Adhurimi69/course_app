@@ -38,9 +38,10 @@ const updateTeacher = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password || !role) {
+    // Validate required fields except password (optional on update)
+    if (!name || !email || !role) {
       return res.status(400).json({
-        message: "All fields (name, email, password, role) are required",
+        message: "Name, email, and role are required",
       });
     }
 
@@ -51,12 +52,16 @@ const updateTeacher = async (req, res) => {
 
     teacher.name = name;
     teacher.email = email;
-    teacher.password = password;
     teacher.role = role;
+
+    // Update password only if provided
+    if (password) {
+      teacher.password = password;
+    }
 
     await teacher.save();
 
-    // Update MongoDB (still never store password)
+    // Update MongoDB read model (don't store password there)
     await TeacherReadModel.findOneAndUpdate(
       { teacherId: teacher.id },
       {
@@ -71,6 +76,7 @@ const updateTeacher = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const deleteTeacher = async (req, res) => {
   try {

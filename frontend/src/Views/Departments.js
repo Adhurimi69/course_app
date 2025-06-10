@@ -1,16 +1,42 @@
 // src/Views/Departments.js
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 import "./Departments.css";
 
 function Departments() {
+  const location = useLocation();
+  const highlightId = location.state?.highlightId;
+
   const [departments, setDepartments] = useState([]);
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState(null);
 
+  // ref për secilin department
+  const departmentRefs = useRef({});
+
   useEffect(() => {
     fetchDepartments();
   }, []);
+
+  // Shtesë për scroll dhe highlight kur ndryshon highlightId
+  useEffect(() => {
+  if (highlightId && departmentRefs.current[highlightId]) {
+    departmentRefs.current[highlightId].scrollIntoView({ behavior: "smooth", block: "center" });
+    departmentRefs.current[highlightId].classList.add("highlight");
+    const timer = setTimeout(() => {
+      departmentRefs.current[highlightId]?.classList.remove("highlight");
+    }, 3000);
+    return () => clearTimeout(timer);
+  }
+}, [highlightId, departments]);
+
+console.log('highlightId:', highlightId, typeof highlightId);
+departments.forEach(dept => {
+  console.log('departmentId:', dept.departmentId, typeof dept.departmentId);
+});
+
+
 
   const fetchDepartments = async () => {
     try {
@@ -75,7 +101,11 @@ function Departments() {
 
       <ul className="departments-list">
         {departments.map((dept) => (
-          <li key={dept.departmentId} className="department-item">
+          <li
+            key={dept.departmentId}
+            className="department-item"
+            ref={(el) => (departmentRefs.current[dept.departmentId] = el)}
+          >
             <span>{dept.name}</span>
             <div className="actions">
               <button

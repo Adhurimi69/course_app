@@ -33,3 +33,46 @@ exports.list = async (req, res) => {
   });
   res.json(entries);
 };
+// Fetch enrolled courses for a student
+// In studentCourseController.js
+
+// const Student = require('../../models/sql/student');
+// const Course = require('../../models/sql/course');
+
+exports.getEnrolledCourses = async (req, res) => {
+  const { studentId } = req.params;
+
+  try {
+    const student = await Student.findByPk(studentId);
+    if (!student) return res.status(404).json({ message: "Student not found" });
+
+    const enrolledCourses = await student.getCourses(); // Sequelize auto-generated method
+    res.json(enrolledCourses);
+  } catch (err) {
+    console.error("Error fetching enrolled courses:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+exports.getAvailableCourses = async (req, res) => {
+  const { studentId } = req.params;
+
+  try {
+    const student = await Student.findByPk(studentId);
+    if (!student) return res.status(404).json({ message: "Student not found" });
+
+    const enrolledCourses = await student.getCourses();
+    const enrolledIds = enrolledCourses.map((c) => c.id);
+
+    const { Op } = require("sequelize");
+    const availableCourses = await Course.findAll({
+      where: {
+        id: { [Op.notIn]: enrolledIds }
+      }
+    });
+
+    res.json(availableCourses);
+  } catch (err) {
+    console.error("Error fetching available courses:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

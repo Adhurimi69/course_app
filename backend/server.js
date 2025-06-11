@@ -30,6 +30,7 @@ const examCommandRoutes = require("./routes/commands/examCommandRoutes");
 const adminAuthRoutes = require("./routes/commands/adminAuthRoutes");
 const teacherAuthRoutes = require("./routes/commands/teacherAuthRoutes");
 const studentAuthRoutes = require("./routes/commands/studentAuthRoutes");
+const studentCourseRoutes = require("./routes/commands/studentCourseRoutes");
 
 
 // ----- Query Routes -----
@@ -67,6 +68,7 @@ app.use("/api/commands/attendance", attendanceCommandRoute);
 app.use("/api/commands/assignment-grade", assignmentGradeCommandRoute);
 app.use("/api/commands/student-course", studentCourseCommandRoute);
 app.use("/api/commands/student-exam", studentExamCommandRoute);
+app.use("/api/commands/student-courses", studentCourseRoutes);
 
 // ----- Query APIs -----
 app.use("/api/queries/upload", uploadQueryRoute);

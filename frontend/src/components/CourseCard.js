@@ -20,9 +20,9 @@ export default function CourseCard({
 
   const handleViewClick = () => {
     if (role === "student") {
-      navigate(`/students/courses/${course.courseId}`);
+      navigate(`/students/courses/${course.id}`);
     } else {
-      navigate(`/teachers/courses/${course.courseId}`);
+      navigate(`/teachers/courses/${course.id}`);
     }
   };
 
@@ -80,7 +80,7 @@ export default function CourseCard({
                   variant="contained"
                   color="error"
                   size="small"
-                  onClick={() => onDelete(course.courseId)}
+                  onClick={() => onDelete(course.id)}
                 >
                   Delete
                 </Button>

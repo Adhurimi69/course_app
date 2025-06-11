@@ -1,6 +1,5 @@
-// src/Views/Courses.js
-
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import {
   Box,
@@ -23,23 +22,29 @@ import CourseCard from "../components/CourseCard";
 import CourseModal from "../components/CourseModal";
 
 export default function Courses({ teacherView = false, studentView = false }) {
-  // State
+  const location = useLocation();
+  const isViewingCourse = /^\/students\/courses\/\d+/.test(location.pathname);
+  const studentId = JSON.parse(localStorage.getItem("user"))?.id;
+
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [availableCourses, setAvailableCourses] = useState([]);
 
-  // Admin/Teacher form & modal state
   const [title, setTitle] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [editingId, setEditingId] = useState(null);
 
-  // Modal open state (teacher only)
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("create"); // "create" or "edit"
 
-  // Fetch data on mount
   useEffect(() => {
-    fetchCourses();
     fetchDepartments();
+    if (studentView) {
+      fetchStudentCourses();
+    } else {
+      fetchCourses();
+    }
   }, []);
 
   const fetchCourses = async () => {
@@ -53,16 +58,40 @@ export default function Courses({ teacherView = false, studentView = false }) {
 
   const fetchDepartments = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/queries/departments"
-      );
+      const res = await axios.get("http://localhost:5000/api/queries/departments");
       setDepartments(res.data);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Admin inline form submit
+  const fetchStudentCourses = async () => {
+    try {
+      const enrolledRes = await axios.get(
+        `http://localhost:5000/api/commands/student-courses/enrolled/${studentId}`
+      );
+      const availableRes = await axios.get(
+        `http://localhost:5000/api/commands/student-courses/available/${studentId}`
+      );
+      setEnrolledCourses(enrolledRes.data);
+      setAvailableCourses(availableRes.data);
+    } catch (err) {
+      console.error("Error fetching student courses:", err);
+    }
+  };
+
+  const enrollCourse = async (courseId) => {
+    try {
+      await axios.post("http://localhost:5000/api/commands/student-courses", {
+        studentId,
+        courseId,
+      });
+      fetchStudentCourses();
+    } catch (err) {
+      console.error("Enrollment failed:", err);
+    }
+  };
+
   const handleSubmitInline = async (e) => {
     e.preventDefault();
     if (!departmentId) return alert("Please select a department.");
@@ -85,18 +114,17 @@ export default function Courses({ teacherView = false, studentView = false }) {
     }
   };
 
-  // Delete handler (admin/teacher)
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this course?")) return;
     try {
       await axios.delete(`http://localhost:5000/api/commands/courses/${id}`);
-      fetchCourses();
+      if (studentView) fetchStudentCourses();
+      else fetchCourses();
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Modal controls (teacher only)
   const openModal = (action, course = null) => {
     setMode(action);
     if (action === "edit" && course) {
@@ -112,7 +140,6 @@ export default function Courses({ teacherView = false, studentView = false }) {
   };
   const closeModal = () => setOpen(false);
 
-  // Modal submit (teacher only)
   const handleSubmitModal = async () => {
     if (!departmentId) return alert("Please select a department.");
     const payload = { title, departmentId };
@@ -138,7 +165,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
         Course Management
       </Typography>
 
-      {/* 1) Admin view: inline form + styled table */}
+      {/* Admin View */}
       {!teacherView && !studentView && (
         <>
           <Box
@@ -196,18 +223,10 @@ export default function Courses({ teacherView = false, studentView = false }) {
             <Table>
               <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
                 <TableRow>
-                  <TableCell>
-                    <strong>ID</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Title</strong>
-                  </TableCell>
-                  <TableCell>
-                    <strong>Department</strong>
-                  </TableCell>
-                  <TableCell align="right">
-                    <strong>Actions</strong>
-                  </TableCell>
+                  <TableCell><strong>ID</strong></TableCell>
+                  <TableCell><strong>Title</strong></TableCell>
+                  <TableCell><strong>Department</strong></TableCell>
+                  <TableCell align="right"><strong>Actions</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -221,18 +240,10 @@ export default function Courses({ teacherView = false, studentView = false }) {
                       )?.name || "N/A"}
                     </TableCell>
                     <TableCell align="right">
-                      <Button
-                        size="small"
-                        onClick={() => openModal("edit", course)}
-                        sx={{ mr: 1 }}
-                      >
+                      <Button size="small" onClick={() => openModal("edit", course)} sx={{ mr: 1 }}>
                         Edit
                       </Button>
-                      <Button
-                        size="small"
-                        color="error"
-                        onClick={() => handleDelete(course.courseId)}
-                      >
+                      <Button size="small" color="error" onClick={() => handleDelete(course.courseId)}>
                         Delete
                       </Button>
                     </TableCell>
@@ -244,24 +255,54 @@ export default function Courses({ teacherView = false, studentView = false }) {
         </>
       )}
 
-      {/* 2) Teacher view: Add Course button */}
+      {/* Teacher Button */}
       {teacherView && !studentView && (
         <Box display="flex" justifyContent="flex-end" mb={2}>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => openModal("create")}
-          >
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => openModal("create")}>
             Add Course
           </Button>
         </Box>
       )}
 
-      {/* 3) Teacher & Student view: grid of cards */}
-      {(teacherView || studentView) && (
+      {/* Student View */}
+      {studentView && !isViewingCourse && (
+        <>
+          <Typography variant="h5" mt={4} gutterBottom>Enrolled Courses</Typography>
+          <Grid container spacing={4}>
+            {enrolledCourses.map((course) => (
+              <Grid item xs={12} sm={6} md={4} key={course.id}>
+                {/* {console.log(course)} */}
+                <CourseCard
+                  course={course}
+                  
+                  departments={departments}
+                  role="student"
+                />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Typography variant="h5" mt={6} gutterBottom>Available Courses</Typography>
+          <Grid container spacing={4}>
+            {availableCourses.map((course) => (
+              <Grid item xs={12} sm={6} md={4} key={course.id}>
+                <CourseCard
+                  course={course}
+                  departments={departments}
+                  role="student"
+                  onEnroll={() => enrollCourse(course.id)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      )}
+
+      {/* Teacher & Student shared card view */}
+      {(teacherView || (studentView && isViewingCourse)) && !(!studentView && !teacherView) && (
         <Grid container spacing={4}>
           {courses.map((course) => (
-            <Grid item xs={12} sm={6} md={4} key={course.courseId}>
+            <Grid item xs={12} sm={6} md={4} key={course.id}>
               <CourseCard
                 course={course}
                 departments={departments}
@@ -274,7 +315,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
         </Grid>
       )}
 
-      {/* 4) CourseModal only for admin/teacher */}
+      {/* Modal for Admin & Teacher */}
       {!studentView && (
         <CourseModal
           open={open}

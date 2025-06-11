@@ -1,5 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 
 export default function Exams() {
   const [exams, setExams] = useState([]);
@@ -34,19 +49,12 @@ export default function Exams() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!courseId || !date) {
-      alert("Please select a course and date.");
-      return;
-    }
+    if (!courseId || !date) return alert("Please select a course and date.");
 
     const data = { title, courseId, date };
-
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/commands/exams/${editingId}`,
-          data
-        );
+        await axios.put(`http://localhost:5000/api/commands/exams/${editingId}`, data);
         setEditingId(null);
       } else {
         await axios.post("http://localhost:5000/api/commands/exams", data);
@@ -61,7 +69,7 @@ export default function Exams() {
   };
 
   const handleEdit = (exam) => {
-    setEditingId(exam.examId); // use examId as key
+    setEditingId(exam.examId);
     setTitle(exam.title);
     setDate(exam.date ? exam.date.slice(0, 10) : "");
     setCourseId(exam.courseId || "");
@@ -79,49 +87,114 @@ export default function Exams() {
   };
 
   return (
-    <div className="exam-page container">
-      <form onSubmit={handleSubmit} className="exam-form">
-        <input
-          type="text"
-          placeholder="Exam Title"
+    <Box p={3}>
+      <Typography variant="h4" gutterBottom>
+        Exam Management
+      </Typography>
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          display: "flex",
+          gap: 2,
+          alignItems: "center",
+          mb: 3,
+          backgroundColor: "#f3e5f5",
+          padding: 2,
+          borderRadius: 2,
+          boxShadow: 1,
+          flexWrap: "wrap"
+        }}
+      >
+        <TextField
+          label="Exam Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
+          size="small"
+          sx={{ minWidth: 200, backgroundColor: "#fff" }}
         />
-        <input
+        <TextField
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
           required
+          size="small"
+          sx={{ minWidth: 160, backgroundColor: "#fff" }}
         />
-        <select
+        <Select
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
+          displayEmpty
           required
+          size="small"
+          sx={{ minWidth: 220, backgroundColor: "#fff" }}
         >
-          <option value="">-- Select Course --</option>
+          <MenuItem value="">
+            <em>-- Select Course --</em>
+          </MenuItem>
           {courses.map((course) => (
-            <option
-              key={course.courseId || course.id}
-              value={course.courseId || course.id}
-            >
-              {course.title || course.name}
-            </option>
+            <MenuItem key={course.courseId} value={course.courseId}>
+              {course.title}
+            </MenuItem>
           ))}
-        </select>
-        <button type="submit">{editingId ? "Update" : "Add"} Exam</button>
-      </form>
+        </Select>
+        <Button
+          variant="contained"
+          color="secondary"
+          type="submit"
+          size="medium"
+          sx={{ height: "40px", minWidth: "120px" }}
+        >
+          {editingId ? "Update" : "Add"}
+        </Button>
+      </Box>
 
-      <ul className="exam-list">
-        {exams.map((exam) => (
-          <li key={exam.examId}>
-            {exam.title} - Course ID: {exam.courseId || "N/A"} - Date:{" "}
-            {exam.date ? exam.date.slice(0, 10) : "No date"}
-            <button onClick={() => handleEdit(exam)}>Edit</button>
-            <button onClick={() => handleDelete(exam.examId)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <Paper elevation={3}>
+        <Table>
+          <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
+            <TableRow>
+              <TableCell><strong>ID</strong></TableCell>
+              <TableCell><strong>Title</strong></TableCell>
+              <TableCell><strong>Date</strong></TableCell>
+              <TableCell><strong>Course</strong></TableCell>
+              <TableCell align="right"><strong>Actions</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {exams.map((exam) => (
+              <TableRow key={exam.examId}>
+                <TableCell>{exam.examId}</TableCell>
+                <TableCell>{exam.title}</TableCell>
+                <TableCell>{exam.date ? exam.date.slice(0, 10) : "-"}</TableCell>
+                <TableCell>
+                  {courses.find((c) => c.courseId === exam.courseId)?.title || "N/A"}
+                </TableCell>
+                <TableCell align="right">
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    sx={{ mr: 1 }}
+                    onClick={() => handleEdit(exam)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => handleDelete(exam.examId)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    </Box>
   );
 }

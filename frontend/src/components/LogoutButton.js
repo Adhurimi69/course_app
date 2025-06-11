@@ -10,9 +10,10 @@ const LogoutButton = () => {
   };
 
   return (
-    <Button width="100px"
+    <Button
+      width="100%"
       onClick={handleLogout}
-      className="ml-4 px-4 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+      className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-all"
     >
       Logout
     </Button>

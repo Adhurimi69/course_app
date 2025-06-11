@@ -1,25 +1,35 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
-import { Box, Button, Grid } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 
 import CourseCard from "../components/CourseCard";
 import CourseModal from "../components/CourseModal";
+import AddIcon from "@mui/icons-material/Add";
 
 export default function Courses({ teacherView = false }) {
-  // data
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
 
-  // inline form state (for admin)
   const [title, setTitle] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [editingId, setEditingId] = useState(null);
 
-  // modal state (for teacher)
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState("create"); // "create" or "edit"
+  const [mode, setMode] = useState("create");
 
   useEffect(() => {
     fetchCourses();
@@ -37,27 +47,20 @@ export default function Courses({ teacherView = false }) {
 
   const fetchDepartments = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/queries/departments"
-      );
+      const res = await axios.get("http://localhost:5000/api/queries/departments");
       setDepartments(res.data);
     } catch (err) {
       console.error("Error fetching departments:", err);
     }
   };
 
-  // Admin inline form submit
   const handleSubmitInline = async (e) => {
     e.preventDefault();
     if (!departmentId) return alert("Please select a department.");
-
     const data = { title, departmentId };
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/commands/courses/${editingId}`,
-          data
-        );
+        await axios.put(`http://localhost:5000/api/commands/courses/${editingId}`, data);
         setEditingId(null);
       } else {
         await axios.post("http://localhost:5000/api/commands/courses", data);
@@ -80,7 +83,6 @@ export default function Courses({ teacherView = false }) {
     }
   };
 
-  // Modal open/close
   const openModal = (action, course = null) => {
     setMode(action);
     if (action === "edit" && course) {
@@ -94,18 +96,15 @@ export default function Courses({ teacherView = false }) {
     }
     setOpen(true);
   };
+
   const closeModal = () => setOpen(false);
 
-  // Modal submit (create or update)
   const handleSubmitModal = async () => {
     if (!departmentId) return alert("Please select a department.");
     const data = { title, departmentId };
     try {
       if (mode === "edit") {
-        await axios.put(
-          `http://localhost:5000/api/commands/courses/${editingId}`,
-          data
-        );
+        await axios.put(`http://localhost:5000/api/commands/courses/${editingId}`, data);
       } else {
         await axios.post("http://localhost:5000/api/commands/courses", data);
       }
@@ -117,101 +116,136 @@ export default function Courses({ teacherView = false }) {
   };
 
   return (
-    <div className="course-page container mx-auto p-4">
-      {/* Admin inline form */}
+    <Box p={3}>
+      <Typography variant="h4" gutterBottom>
+        Course Management
+      </Typography>
+
       {!teacherView && (
-        <form
-          onSubmit={handleSubmitInline}
-          className="course-form flex space-x-2 mb-6"
-        >
-          <input
-            className="border rounded px-2 py-1 flex-1"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Course Title"
-            required
-          />
-          <select
-            className="border rounded px-2 py-1"
-            value={departmentId}
-            onChange={(e) => setDepartmentId(e.target.value)}
-            required
+        <>
+          <Box
+            component="form"
+            onSubmit={handleSubmitInline}
+            sx={{
+              display: "flex",
+              gap: 2,
+              alignItems: "center",
+              mb: 3,
+              backgroundColor: "#f3e5f5",
+              padding: 2,
+              borderRadius: 2,
+              boxShadow: 1,
+              flexWrap: "wrap"
+            }}
           >
-            <option value="">-- Select Department --</option>
-            {departments.map((d) => (
-              <option key={d.departmentId} value={d.departmentId}>
-                {d.name}
-              </option>
-            ))}
-          </select>
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded px-4"
-          >
-            {editingId ? "Update" : "Add"}
-          </button>
-        </form>
+            <TextField
+              label="Course Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              size="small"
+              sx={{ minWidth: 200, backgroundColor: "#fff" }}
+            />
+            <Select
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
+              displayEmpty
+              required
+              size="small"
+              sx={{ minWidth: 220, backgroundColor: "#fff" }}
+            >
+              <MenuItem value="">
+                <em>-- Select Department --</em>
+              </MenuItem>
+              {departments.map((d) => (
+                <MenuItem key={d.departmentId} value={d.departmentId}>
+                  {d.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Button
+              variant="contained"
+              color="secondary"
+              type="submit"
+              size="medium"
+              sx={{ height: "40px", minWidth: "120px" }}
+            >
+              {editingId ? "Update" : "Add"}
+            </Button>
+          </Box>
+
+          <Paper elevation={3}>
+            <Table>
+              <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
+                <TableRow>
+                  <TableCell><strong>ID</strong></TableCell>
+                  <TableCell><strong>Title</strong></TableCell>
+                  <TableCell><strong>Department</strong></TableCell>
+                  <TableCell align="right"><strong>Actions</strong></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {courses.map((course) => (
+                  <TableRow key={course.courseId}>
+                    <TableCell>{course.courseId}</TableCell>
+                    <TableCell>{course.title}</TableCell>
+                    <TableCell>
+                      {departments.find((d) => d.departmentId === course.departmentId)?.name || "N/A"}
+                    </TableCell>
+                    <TableCell align="right">
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        sx={{ mr: 1 }}
+                        onClick={() => openModal("edit", course)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        onClick={() => handleDelete(course.courseId)}
+                      >
+                        Delete
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Paper>
+        </>
       )}
 
-      {/* Teacher: Add Course Button */}
+      {/* Teacher View – unchanged */}
       {teacherView && (
-        <Box className="flex justify-end mb-4">
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => openModal("create")}
-          >
-            Add Course
-          </Button>
-        </Box>
-      )}
+        <>
+          <Box className="flex justify-end mb-4">
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => openModal("create")}
+            >
+              Add Course
+            </Button>
+          </Box>
 
-      {/* Courses Display */}
-      {teacherView ? (
-        <Grid container spacing={4}>
-          {courses.map((course) => (
-            <Grid item xs={12} sm={6} lg={4} key={course.courseId}>
+          <Box display="flex" flexWrap="wrap" gap={2}>
+            {courses.map((course) => (
               <CourseCard
+                key={course.courseId}
                 course={course}
                 departments={departments}
                 openModal={openModal}
                 onDelete={handleDelete}
               />
-            </Grid>
-          ))}
-        </Grid>
-      ) : (
-        <ul className="space-y-2">
-          {courses.map((course) => (
-            <li
-              key={course.courseId}
-              className="flex justify-between items-center border-b pb-2"
-            >
-              <span>
-                {course.title} — Dept:{" "}
-                {departments.find((d) => d.departmentId === course.departmentId)
-                  ?.name || "N/A"}
-              </span>
-              <div className="space-x-2">
-                <button
-                  onClick={() => openModal("edit", course)}
-                  className="text-yellow-500"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(course.courseId)}
-                  className="text-red-500"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+            ))}
+          </Box>
+        </>
       )}
 
-      {/* Course Modal */}
       <CourseModal
         open={open}
         mode={mode}
@@ -223,6 +257,6 @@ export default function Courses({ teacherView = false }) {
         onChangeDept={setDepartmentId}
         onSubmit={handleSubmitModal}
       />
-    </div>
+    </Box>
   );
 }

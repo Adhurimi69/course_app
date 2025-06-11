@@ -2,7 +2,18 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
-import "./Departments.css";
+import {
+  Box,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  Paper,
+} from "@mui/material";
 
 function Departments() {
   const location = useLocation();
@@ -11,32 +22,27 @@ function Departments() {
   const [departments, setDepartments] = useState([]);
   const [name, setName] = useState("");
   const [editingId, setEditingId] = useState(null);
-
-  // ref për secilin department
   const departmentRefs = useRef({});
 
   useEffect(() => {
     fetchDepartments();
   }, []);
 
-  // Shtesë për scroll dhe highlight kur ndryshon highlightId
   useEffect(() => {
-  if (highlightId && departmentRefs.current[highlightId]) {
-    departmentRefs.current[highlightId].scrollIntoView({ behavior: "smooth", block: "center" });
-    departmentRefs.current[highlightId].classList.add("highlight");
-    const timer = setTimeout(() => {
-      departmentRefs.current[highlightId]?.classList.remove("highlight");
-    }, 3000);
-    return () => clearTimeout(timer);
-  }
-}, [highlightId, departments]);
-
-console.log('highlightId:', highlightId, typeof highlightId);
-departments.forEach(dept => {
-  console.log('departmentId:', dept.departmentId, typeof dept.departmentId);
-});
-
-
+    if (highlightId && departmentRefs.current[highlightId]) {
+      departmentRefs.current[highlightId].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      departmentRefs.current[highlightId].style.backgroundColor = "#fff3cd"; // soft highlight
+      const timer = setTimeout(() => {
+        if (departmentRefs.current[highlightId]) {
+          departmentRefs.current[highlightId].style.backgroundColor = "inherit";
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightId, departments]);
 
   const fetchDepartments = async () => {
     try {
@@ -51,10 +57,7 @@ departments.forEach(dept => {
     e.preventDefault();
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/commands/departments/${editingId}`,
-          { name }
-        );
+        await axios.put(`http://localhost:5000/api/commands/departments/${editingId}`, { name });
         setEditingId(null);
       } else {
         await axios.post("http://localhost:5000/api/commands/departments", { name });
@@ -83,48 +86,70 @@ departments.forEach(dept => {
   };
 
   return (
-    <div className="departments-container">
-      <h2>Department Management</h2>
-      <form onSubmit={handleSubmit} className="form">
-        <input
-          type="text"
-          placeholder="Department Name"
+    <Box p={3}>
+      <Typography variant="h4" gutterBottom>
+        Department Management
+      </Typography>
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{ display: "flex", gap: 2, mb: 3 }}
+      >
+        <TextField
+          label="Department Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="input"
+          fullWidth
         />
-        <button type="submit" className="button submit-button">
+        <Button variant="contained" color="secondary" type="submit">
           {editingId ? "Update" : "Add"}
-        </button>
-      </form>
+        </Button>
+      </Box>
 
-      <ul className="departments-list">
-        {departments.map((dept) => (
-          <li
-            key={dept.departmentId}
-            className="department-item"
-            ref={(el) => (departmentRefs.current[dept.departmentId] = el)}
-          >
-            <span>{dept.name}</span>
-            <div className="actions">
-              <button
-                className="button edit-button"
-                onClick={() => handleEdit(dept)}
+      <Paper elevation={3}>
+        <Table>
+          <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
+            <TableRow>
+              <TableCell><strong>ID</strong></TableCell>
+              <TableCell><strong>Name</strong></TableCell>
+              <TableCell align="right"><strong>Actions</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {departments.map((dept) => (
+              <TableRow
+                key={dept.departmentId}
+                ref={(el) => (departmentRefs.current[dept.departmentId] = el)}
               >
-                Edit
-              </button>
-              <button
-                className="button delete-button"
-                onClick={() => handleDelete(dept.departmentId)}
-              >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+                <TableCell>{dept.departmentId}</TableCell>
+                <TableCell>{dept.name}</TableCell>
+                <TableCell align="right">
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    onClick={() => handleEdit(dept)}
+                    sx={{ mr: 1 }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => handleDelete(dept.departmentId)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    </Box>
   );
 }
 

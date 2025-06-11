@@ -1,5 +1,20 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 
 export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
@@ -34,24 +49,17 @@ export default function Assignments() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!lectureId) {
-      alert("Please select a lecture.");
-      return;
-    }
+    if (!lectureId) return alert("Please select a lecture.");
 
     const data = { title, dueDate, lectureId };
 
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/commands/assignments/${editingId}`,
-          data
-        );
+        await axios.put(`http://localhost:5000/api/commands/assignments/${editingId}`, data);
         setEditingId(null);
       } else {
         await axios.post("http://localhost:5000/api/commands/assignments", data);
       }
-
       setTitle("");
       setDueDate("");
       setLectureId("");
@@ -62,7 +70,7 @@ export default function Assignments() {
   };
 
   const handleEdit = (assignment) => {
-    setEditingId(assignment.assignmentId); // përdor assignmentId
+    setEditingId(assignment.assignmentId);
     setTitle(assignment.title);
     setDueDate(assignment.dueDate ? assignment.dueDate.slice(0, 10) : "");
     setLectureId(assignment.lectureId || "");
@@ -80,45 +88,113 @@ export default function Assignments() {
   };
 
   return (
-    <div className="assignment-page container">
-      <form onSubmit={handleSubmit} className="assignment-form">
-        <input
-          type="text"
-          placeholder="Assignment Title"
+    <Box p={3}>
+      <Typography variant="h4" gutterBottom>
+        Assignment Management
+      </Typography>
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          display: "flex",
+          gap: 2,
+          alignItems: "center",
+          mb: 3,
+          backgroundColor: "#f3e5f5",
+          padding: 2,
+          borderRadius: 2,
+          boxShadow: 1,
+          flexWrap: "wrap",
+        }}
+      >
+        <TextField
+          label="Assignment Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
+          size="small"
+          sx={{ minWidth: 180, backgroundColor: "#fff" }}
         />
-        <input
+        <TextField
           type="date"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
+          label="Due Date"
+          InputLabelProps={{ shrink: true }}
+          size="small"
+          sx={{ minWidth: 160, backgroundColor: "#fff" }}
         />
-        <select
+        <Select
           value={lectureId}
           onChange={(e) => setLectureId(e.target.value)}
+          displayEmpty
           required
+          size="small"
+          sx={{ minWidth: 220, backgroundColor: "#fff" }}
         >
-          <option value="">-- Select Lecture --</option>
+          <MenuItem value="">
+            <em>-- Select Lecture --</em>
+          </MenuItem>
           {lectures.map((lecture) => (
-            <option key={lecture.lectureId} value={lecture.lectureId}>
+            <MenuItem key={lecture.lectureId} value={lecture.lectureId}>
               {lecture.title}
-            </option>
+            </MenuItem>
           ))}
-        </select>
-        <button type="submit">{editingId ? "Update" : "Add"} Assignment</button>
-      </form>
+        </Select>
+        <Button
+          variant="contained"
+          color="secondary"
+          type="submit"
+          size="medium"
+          sx={{ height: "40px", minWidth: "120px" }}
+        >
+          {editingId ? "Update" : "Add"}
+        </Button>
+      </Box>
 
-      <ul className="assignment-list">
-        {assignments.map((assignment) => (
-          <li key={assignment.assignmentId}>
-            {assignment.title} - Lecture ID: {assignment.lectureId || "N/A"} - Due:{" "}
-            {assignment.dueDate ? assignment.dueDate.slice(0, 10) : "No due date"}
-            <button onClick={() => handleEdit(assignment)}>Edit</button>
-            <button onClick={() => handleDelete(assignment.assignmentId)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <Paper elevation={3}>
+        <Table>
+          <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
+            <TableRow>
+              <TableCell><strong>ID</strong></TableCell>
+              <TableCell><strong>Title</strong></TableCell>
+              <TableCell><strong>Lecture</strong></TableCell>
+              <TableCell><strong>Due Date</strong></TableCell>
+              <TableCell align="right"><strong>Actions</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {assignments.map((a) => (
+              <TableRow key={a.assignmentId}>
+                <TableCell>{a.assignmentId}</TableCell>
+                <TableCell>{a.title}</TableCell>
+                <TableCell>{lectures.find((l) => l.lectureId === a.lectureId)?.title || "N/A"}</TableCell>
+                <TableCell>{a.dueDate ? a.dueDate.slice(0, 10) : "No due date"}</TableCell>
+                <TableCell align="right">
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    sx={{ mr: 1 }}
+                    onClick={() => handleEdit(a)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => handleDelete(a.assignmentId)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    </Box>
   );
 }

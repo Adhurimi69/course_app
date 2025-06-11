@@ -372,7 +372,7 @@ export default function AdminDashboard() {
                   </ul>
                 </div>
               )}
-              
+
 
               {/* Unified Users search results */}
               {filteredUsers.length > 0 && (
@@ -409,19 +409,18 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          <div className="relative">
+          <div className="relative user-avatar">
             <UserCircle
               size={32}
               className="text-gray-500 cursor-pointer hover:text-gray-700 transition"
               onClick={() => setShowLogout((prev) => !prev)}
             />
             {showLogout && (
-              <div className="absolute right-0 mt-2 w-44 bg-white border rounded-lg shadow-lg z-20 py-1">
+              <div className="logout-dropdown">
                 <LogoutButton />
               </div>
             )}
           </div>
-
         </header>
 
         <main className="admin-content">

@@ -1,6 +1,20 @@
-// ./Views/Lectures.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Box,
+  Button,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 
 export default function Lectures() {
   const [lectures, setLectures] = useState([]);
@@ -34,19 +48,11 @@ export default function Lectures() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!courseId) {
-      alert("Please select a course.");
-      return;
-    }
-
+    if (!courseId) return alert("Please select a course.");
     const data = { title, courseId };
-
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/commands/lectures/${editingId}`,
-          data
-        );
+        await axios.put(`http://localhost:5000/api/commands/lectures/${editingId}`, data);
         setEditingId(null);
       } else {
         await axios.post("http://localhost:5000/api/commands/lectures", data);
@@ -60,61 +66,120 @@ export default function Lectures() {
   };
 
   const handleEdit = (lecture) => {
-    setEditingId(lecture.lectureId); // përdor lectureId
+    setEditingId(lecture.lectureId);
     setTitle(lecture.title);
     setCourseId(lecture.courseId || "");
   };
 
   const handleDelete = async (id) => {
-    if (!id) {
-      alert("Invalid lecture id");
-      return;
-    }
-    if (window.confirm("Are you sure you want to delete this lecture?")) {
-      try {
-        await axios.delete(`http://localhost:5000/api/commands/lectures/${id}`);
-        fetchLectures();
-      } catch (err) {
-        console.error("Delete failed:", err);
-        alert("Delete failed. Please try again.");
-      }
+    if (!window.confirm("Delete this lecture?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/commands/lectures/${id}`);
+      fetchLectures();
+    } catch (err) {
+      console.error("Delete failed:", err);
     }
   };
 
   return (
-    <div className="lecture-page container">
-      <form onSubmit={handleSubmit} className="lecture-form">
-        <input
-          type="text"
-          placeholder="Lecture Title"
+    <Box p={3}>
+      <Typography variant="h4" gutterBottom>
+        Lecture Management
+      </Typography>
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          display: "flex",
+          gap: 2,
+          alignItems: "center",
+          mb: 3,
+          backgroundColor: "#f3e5f5",
+          padding: 2,
+          borderRadius: 2,
+          boxShadow: 1,
+          flexWrap: "wrap",
+        }}
+      >
+        <TextField
+          label="Lecture Title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
+          size="small"
+          sx={{ minWidth: 200, backgroundColor: "#fff" }}
         />
-        <select
+        <Select
           value={courseId}
           onChange={(e) => setCourseId(e.target.value)}
+          displayEmpty
           required
+          size="small"
+          sx={{ minWidth: 220, backgroundColor: "#fff" }}
         >
-          <option value="">-- Select Course --</option>
-          {courses.map((course) => (
-            <option key={course.courseId} value={course.courseId}>
-              {course.title}
-            </option>
+          <MenuItem value="">
+            <em>-- Select Course --</em>
+          </MenuItem>
+          {courses.map((c) => (
+            <MenuItem key={c.courseId} value={c.courseId}>
+              {c.title}
+            </MenuItem>
           ))}
-        </select>
-        <button type="submit">{editingId ? "Update" : "Add"} Lecture</button>
-      </form>
+        </Select>
+        <Button
+          variant="contained"
+          color="secondary"
+          type="submit"
+          size="medium"
+          sx={{ height: "40px", minWidth: "120px" }}
+        >
+          {editingId ? "Update" : "Add"}
+        </Button>
+      </Box>
 
-      <ul className="lecture-list">
-        {lectures.map((lecture) => (
-          <li key={lecture.lectureId}>
-            {lecture.title} - Course ID: {lecture.courseId || "N/A"}
-            <button onClick={() => handleEdit(lecture)}>Edit</button>
-            <button onClick={() => handleDelete(lecture.lectureId)}>Delete</button>
-          </li>
-        ))}
-      </ul>
-    </div>
+      <Paper elevation={3}>
+        <Table>
+          <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
+            <TableRow>
+              <TableCell><strong>ID</strong></TableCell>
+              <TableCell><strong>Title</strong></TableCell>
+              <TableCell><strong>Course</strong></TableCell>
+              <TableCell align="right"><strong>Actions</strong></TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {lectures.map((lecture) => (
+              <TableRow key={lecture.lectureId}>
+                <TableCell>{lecture.lectureId}</TableCell>
+                <TableCell>{lecture.title}</TableCell>
+                <TableCell>
+                  {courses.find((c) => c.courseId === lecture.courseId)?.title || "N/A"}
+                </TableCell>
+                <TableCell align="right">
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    sx={{ mr: 1 }}
+                    onClick={() => handleEdit(lecture)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => handleDelete(lecture.lectureId)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </Paper>
+    </Box>
   );
 }

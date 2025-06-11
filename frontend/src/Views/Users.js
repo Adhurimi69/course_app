@@ -1,5 +1,21 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import {
+  Box,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+} from "@mui/material";
 
 function Users() {
   const [users, setUsers] = useState([]);
@@ -68,11 +84,6 @@ function Users() {
         );
         alert("User updated successfully.");
       } else {
-        if (!["admin", "teacher", "student"].includes(role)) {
-          alert("Role must be 'admin', 'teacher', or 'student'.");
-          return;
-        }
-
         await axios.post(
           `http://localhost:5000/api/commands/${role}s`,
           userData
@@ -80,7 +91,6 @@ function Users() {
         alert("User created successfully.");
       }
 
-      // Reset form
       setEditingId(null);
       setEditingRole(null);
       setName("");
@@ -89,21 +99,19 @@ function Users() {
       setRole("");
       fetchAllUsers();
     } catch (error) {
-      console.error("Error submitting user:", error.response ? error.response.data : error.message);
+      console.error("Error submitting user:", error);
       alert("Error: " + (error.response ? JSON.stringify(error.response.data) : error.message));
     }
   };
 
   const handleEdit = (user) => {
-  console.log("Editing user:", user);
-  setEditingId(user.id);
-  setEditingRole(user.role);
-  setName(user.name);
-  setEmail(user.email);
-  setRole(user.role);
-  setPassword(""); // Do not preload passwords
-};
-
+    setEditingId(user.id);
+    setEditingRole(user.role);
+    setName(user.name);
+    setEmail(user.email);
+    setRole(user.role);
+    setPassword("");
+  };
 
   const handleDelete = async (id, role) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
@@ -112,129 +120,172 @@ function Users() {
         alert("User deleted successfully.");
         fetchAllUsers();
       } catch (error) {
-        console.error("Error deleting user:", error.response?.data || error.message);
+        console.error("Error deleting user:", error);
         alert("Failed to delete user.");
       }
     }
   };
 
-  return (
-    <div className="Users">
-      <h1 className="title">User Management</h1>
+  const getRoleColor = (role) => {
+    switch (role) {
+      case "admin":
+        return "secondary";
+      case "teacher":
+        return "info";
+      case "student":
+        return "success";
+      default:
+        return "default";
+    }
+  };
 
-      <form className="form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="User Name"
+  return (
+    <Box p={4}>
+      <Typography variant="h4" gutterBottom>
+        User Management
+      </Typography>
+
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          display: "flex",
+          gap: 2,
+          alignItems: "center",
+          flexWrap: "wrap",
+          mb: 4,
+          backgroundColor: "#f9ecf9", // matches the table header
+          p: 3,
+          borderRadius: 2,
+          boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
+        }}
+      >
+        <TextField
+          label="User Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
-          className="input"
+          size="small"
+          sx={{
+            minWidth: 160,
+            backgroundColor: "#fff",
+            borderRadius: 1,
+          }}
         />
-        <input
+        <TextField
+          label="Email"
           type="email"
-          placeholder="User Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="input"
+          size="small"
+          sx={{
+            minWidth: 180,
+            backgroundColor: "#fff",
+            borderRadius: 1,
+          }}
         />
-        <input
+        <TextField
+          label={editingId ? "New Password" : "Password"}
           type="password"
-          placeholder={editingId ? "Leave blank to keep current password" : "Password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="input"
           required={!editingId}
+          size="small"
+          sx={{
+            minWidth: 160,
+            backgroundColor: "#fff",
+            borderRadius: 1,
+          }}
         />
-        <select
+        <Select
           value={role}
           onChange={(e) => setRole(e.target.value)}
+          displayEmpty
+          size="small"
           required
-          className="input"
+          sx={{
+            minWidth: 140,
+            backgroundColor: "#fff",
+            borderRadius: 1,
+          }}
         >
-          <option value="">Select Role</option>
-          <option value="admin">Admin</option>
-          <option value="teacher">Teacher</option>
-          <option value="student">Student</option>
-        </select>
-        <button type="submit" className="button">
+          <MenuItem value="">
+            <em>Select Role</em>
+          </MenuItem>
+          <MenuItem value="admin">Admin</MenuItem>
+          <MenuItem value="teacher">Teacher</MenuItem>
+          <MenuItem value="student">Student</MenuItem>
+        </Select>
+        <Button
+          variant="contained"
+          color="secondary"
+          type="submit"
+          size="small"
+          sx={{ whiteSpace: "nowrap" }}
+        >
           {editingId ? "Update User" : "Add User"}
-        </button>
-      </form>
+        </Button>
+      </Box>
 
-      <h2 className="users-title">Users List</h2>
-      <table className="user-table" style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            <th style={thStyle}>#</th>
-            <th style={thStyle}>Name</th>
-            <th style={thStyle}>Email</th>
-            <th style={thStyle}>Role</th>
-            <th style={thStyle}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user, index) => (
-            <tr
-              key={`${user.role}-${user.id}`}
-              style={index % 2 === 0 ? rowStyleEven : rowStyleOdd}
-            >
-              <td style={tdStyle}>{index + 1}</td>
-              <td style={tdStyle}>{user.name}</td>
-              <td style={tdStyle}>{user.email}</td>
-              <td style={tdStyle}>{user.role}</td>
-              <td style={tdStyle}>
-                <button
-                  onClick={() => handleEdit(user)}
-                  className="button edit-button"
-                  style={editBtn}
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(user.id, user.role)}
-                  className="button delete-button"
-                  style={deleteBtn}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+
+
+      <Typography variant="h5" gutterBottom>
+        Users List
+      </Typography>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
+            <TableRow>
+              <TableCell><strong>#</strong></TableCell>
+              <TableCell><strong>Name</strong></TableCell>
+              <TableCell><strong>Email</strong></TableCell>
+              <TableCell><strong>Role</strong></TableCell>
+              <TableCell align="right"><strong>Actions</strong></TableCell>
+            </TableRow>
+          </TableHead>
+
+          <TableBody>
+            {users.map((user, index) => (
+              <TableRow key={`${user.role}-${user.id}`}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{user.name}</TableCell>
+                <TableCell>{user.email}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={user.role}
+                    color={getRoleColor(user.role)}
+                    variant="outlined"
+                    size="small"
+                  />
+                </TableCell>
+                <TableCell align="right">
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    sx={{ mr: 1 }}
+                    onClick={() => handleEdit(user)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => handleDelete(user.id, user.role)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }
-
-// Styles
-const thStyle = {
-  padding: "10px",
-  backgroundColor: "#f4f4f4",
-  borderBottom: "2px solid #ccc",
-};
-const tdStyle = {
-  padding: "10px",
-  borderBottom: "1px solid #eee",
-  textAlign: "left",
-};
-const rowStyleEven = { backgroundColor: "#fff" };
-const rowStyleOdd = { backgroundColor: "#f9f9f9" };
-const editBtn = {
-  marginRight: "8px",
-  padding: "5px 10px",
-  backgroundColor: "#4CAF50",
-  color: "white",
-  border: "none",
-  borderRadius: "4px",
-};
-const deleteBtn = {
-  padding: "5px 10px",
-  backgroundColor: "#f44336",
-  color: "white",
-  border: "none",
-  borderRadius: "4px",
-};
 
 export default Users;

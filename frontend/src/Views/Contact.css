@@ -1,0 +1,346 @@
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1e2a3b;
+    background: #f7f7f7;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Container */
+.container {
+    width: 1200px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* HERO */
+.contact-hero {
+    position: relative;
+    background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+    text-align: center;
+    padding: 100px 0 120px;
+    overflow: hidden;
+}
+
+.contact-hero h1 {
+    font-size: 36px;
+    letter-spacing: 1px;
+}
+
+.breadcrumb {
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.breadcrumb a {
+    color: #1e2a3b;
+}
+
+.breadcrumb span {
+    margin: 0 5px;
+}
+
+/* Decorative shapes */
+.shape {
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.shape-dots {
+    top: 30px;
+    left: 40px;
+    width: 40px;
+    height: 40px;
+    background-image: url('../images/shape.svg');
+}
+
+.shape-wave {
+    top: 120px;
+    right: 80px;
+    width: 80px;
+    height: 20px;
+    background-image: url('../images/wave.svg');
+}
+
+.shape-star {
+    bottom: 40px;
+    left: 80px;
+    width: 20px;
+    height: 20px;
+    background-image: url('../images/image.svg');
+}
+
+.shape-arc {
+    bottom: -20px;
+    right: 50px;
+    width: 100px;
+    height: 100px;
+    background-image: url('../images/arc.svg');
+}
+
+/* MAIN CONTENT */
+.contact-content {
+    padding: 80px 0;
+}
+
+.get-in-touch {
+    background: #fff;
+    padding: 40px;
+    border-radius: 6px;
+}
+
+.get-in-touch h2 {
+    font-size: 28px;
+}
+
+.get-in-touch p {
+    margin-top: 8px;
+    color: #555;
+}
+
+.contact-cards {
+    display: flex;
+    gap: 40px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+/* INFO CARD */
+.info-card {
+    flex: 1;
+    min-width: 300px;
+    max-width: 500px;
+}
+
+/* CONTACT FORM */
+.contact-form {
+    flex: 1;
+    min-width: 320px;
+    max-width: 540px;
+    padding: 32px;
+    background: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+}
+
+.contact-form .form-group {
+    margin-bottom: 20px;
+}
+
+.contact-form .form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #fff;
+    transition: border 0.2s;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+    border-color: #7c5dfa;
+    outline: none;
+}
+
+.contact-form textarea {
+    resize: vertical;
+}
+
+.contact-form .submit-btn {
+    background: #7c5dfa;
+    color: #fff;
+    font-size: 14px;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.contact-form .submit-btn:hover {
+    background: #684fd1;
+}
+
+/* FOOTER */
+.footer {
+    background: #0d0d0d;
+    color: #fff;
+    padding-top: 40px;
+}
+
+.footer-top {
+    border-bottom: 1px solid #333;
+    padding-bottom: 24px;
+}
+
+.footer-contact {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.footer-item {
+    display: flex;
+    align-items: center;
+    /* aligns icon + text vertically */
+    gap: 16px;
+    flex: 1 1 30%;
+}
+
+.footer-icon {
+    width: 42px;
+    height: 45px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.footer-item div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.footer-item h4 {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.footer-item p {
+    font-size: 14px;
+    color: #ccc;
+    margin: 2px 0 0 0;
+    line-height: 1.4;
+}
+
+
+
+/* Footer main */
+.footer-main {
+    display: flex;
+    gap: 40px;
+    padding: 40px 0;
+}
+
+.footer-about {
+    flex: 2;
+}
+
+.footer-about h2 {
+    font-size: 24px;
+    margin-bottom: 12px;
+}
+
+.footer-about p {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 16px;
+}
+
+.footer-services,
+.footer-gallery,
+.footer-subscribe {
+    flex: 1;
+}
+
+.footer-services h4,
+.footer-gallery h4,
+.footer-subscribe h4 {
+    font-size: 16px;
+    margin-bottom: 12px;
+}
+
+.footer-services ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-services li {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 14px;
+}
+
+.footer-services li:before {
+    content: '›';
+    position: absolute;
+    left: 0;
+    color: #7c5dfa;
+}
+
+/* Gallery */
+.footer-gallery .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.footer-gallery img {
+    width: 100%;
+    border-radius: 4px;
+}
+
+/* Subscribe */
+.footer-subscribe p {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 12px;
+}
+
+.subscribe-form {
+    display: flex;
+}
+
+.subscribe-form input {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 4px 0 0 4px;
+    font-size: 14px;
+}
+
+.subscribe-form button {
+    background: #ff5c35;
+    color: #fff;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+/* Footer bottom */
+.footer-bottom {
+    text-align: center;
+    padding: 16px 0;
+    font-size: 12px;
+    color: #666;
+}

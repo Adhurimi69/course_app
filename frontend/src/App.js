@@ -11,6 +11,7 @@ import Signup from "./Views/SignUp";
 import Blog from "./Views/Blog";
 import Prices from "./Views/Prices";
 import AboutUs from "./Views/AboutUs";
+import ContactUs from "./Views/ContactUs";
 
 import AdminDashboard from "./Views/AdminDashboard";
 import Users from "./Views/Users";
@@ -51,6 +52,7 @@ export default function App() {
       <Route path="/blog" element={<Blog />} />
       <Route path="/prices" element={<Prices />} />
       <Route path="/about" element={<AboutUs />} />
+      <Route path="/contact" element={<ContactUs />} />
 
       {/* Admin routes */}
       <Route

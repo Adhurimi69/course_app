@@ -11,6 +11,8 @@ export default function CourseCard({
   openModal,
   onDelete,
   role = "admin", // default fallback
+  isEnrolled = false, // 👈 ADD
+  onEnroll,  
 }) {
   const navigate = useNavigate();
 
@@ -18,13 +20,14 @@ export default function CourseCard({
     departments.find((d) => d.departmentId === course.departmentId)?.name ||
     course.departmentId;
 
-  const handleViewClick = () => {
-    if (role === "student") {
-      navigate(`/students/courses/${course.id}`);
-    } else {
-      navigate(`/teachers/courses/${course.id}`);
-    }
-  };
+const handleViewClick = () => {
+  if (role === "student") {
+    navigate(`/students/courses/${course.id}`);
+  } else {
+    navigate(`/teachers/courses/${course.id}`);
+  }
+};
+
 
   return (
     <Box className="relative bg-white rounded-2xl shadow-lg p-4 flex flex-col h-full">
@@ -80,7 +83,7 @@ export default function CourseCard({
                   variant="contained"
                   color="error"
                   size="small"
-                  onClick={() => onDelete(course.id)}
+                  onClick={() => onDelete(course.courseId)}
                 >
                   Delete
                 </Button>
@@ -95,6 +98,22 @@ export default function CourseCard({
             View Course
           </Button>
         )}
+        {
+role === "student" ? (
+  !isEnrolled ? (
+     <Button
+      variant="contained"
+      size="small"
+      onClick={() => onEnroll(course.id)}
+    >
+      Enroll
+    </Button>
+  ) : (
+   <></>
+  )
+) : null
+
+        }
       </Box>
     </Box>
   );

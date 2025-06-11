@@ -231,8 +231,8 @@ export default function Courses({ teacherView = false, studentView = false }) {
               </TableHead>
               <TableBody>
                 {courses.map((course) => (
-                  <TableRow key={course.courseId}>
-                    <TableCell>{course.courseId}</TableCell>
+                  <TableRow key={course.id}>
+                  <TableCell>{course.course.id  }</TableCell>
                     <TableCell>{course.title}</TableCell>
                     <TableCell>
                       {departments.find(
@@ -243,7 +243,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
                       <Button size="small" onClick={() => openModal("edit", course)} sx={{ mr: 1 }}>
                         Edit
                       </Button>
-                      <Button size="small" color="error" onClick={() => handleDelete(course.courseId)}>
+                      <Button size="small" color="error" onClick={() => handleDelete(course.id)}>
                         Delete
                       </Button>
                     </TableCell>
@@ -271,10 +271,12 @@ export default function Courses({ teacherView = false, studentView = false }) {
           <Grid container spacing={4}>
             {enrolledCourses.map((course) => (
               <Grid item xs={12} sm={6} md={4} key={course.id}>
+              {console.log(course)}
+
                 {/* {console.log(course)} */}
                 <CourseCard
                   course={course}
-                  
+                  isEnrolled
                   departments={departments}
                   role="student"
                 />
@@ -286,6 +288,8 @@ export default function Courses({ teacherView = false, studentView = false }) {
           <Grid container spacing={4}>
             {availableCourses.map((course) => (
               <Grid item xs={12} sm={6} md={4} key={course.id}>
+              {console.log(course)}
+
                 <CourseCard
                   course={course}
                   departments={departments}
@@ -303,6 +307,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
         <Grid container spacing={4}>
           {courses.map((course) => (
             <Grid item xs={12} sm={6} md={4} key={course.id}>
+              {console.log(course)}
               <CourseCard
                 course={course}
                 departments={departments}

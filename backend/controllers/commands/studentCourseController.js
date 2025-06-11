@@ -1,14 +1,19 @@
+const { Op } = require("sequelize");
 const StudentCourse = require('../../models/sql/studentCourse');
 const Course = require('../../models/sql/course');
 const Student = require('../../models/sql/student');
 
 exports.fetchCourses = async (req, res) => {
-  const courses = await Course.findAll();
+  const courses = await Course.findAll({
+    attributes: ['id', 'title', 'departmentId']
+  });
   res.json(courses);
 };
 
 exports.fetchStudents = async (req, res) => {
-  const students = await Student.findAll();
+  const students = await Student.findAll({
+    attributes: ['id', 'name', 'email']
+  });
   res.json(students);
 };
 
@@ -27,17 +32,18 @@ exports.delete = async (req, res) => {
 exports.list = async (req, res) => {
   const entries = await StudentCourse.findAll({
     include: [
-      { model: Student, attributes: ['id', 'name', 'email'] },
-      { model: Course, attributes: ['id', 'title'] }
+      {
+        model: Student,
+        attributes: ['id', 'name', 'email']
+      },
+      {
+        model: Course,
+        attributes: ['id', 'title']
+      }
     ]
   });
   res.json(entries);
 };
-// Fetch enrolled courses for a student
-// In studentCourseController.js
-
-// const Student = require('../../models/sql/student');
-// const Course = require('../../models/sql/course');
 
 exports.getEnrolledCourses = async (req, res) => {
   const { studentId } = req.params;
@@ -46,13 +52,16 @@ exports.getEnrolledCourses = async (req, res) => {
     const student = await Student.findByPk(studentId);
     if (!student) return res.status(404).json({ message: "Student not found" });
 
-    const enrolledCourses = await student.getCourses(); // Sequelize auto-generated method
+    const enrolledCourses = await student.getCourses({
+      attributes: ['id', 'title', 'departmentId']
+    });
     res.json(enrolledCourses);
   } catch (err) {
     console.error("Error fetching enrolled courses:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 exports.getAvailableCourses = async (req, res) => {
   const { studentId } = req.params;
 
@@ -60,14 +69,14 @@ exports.getAvailableCourses = async (req, res) => {
     const student = await Student.findByPk(studentId);
     if (!student) return res.status(404).json({ message: "Student not found" });
 
-    const enrolledCourses = await student.getCourses();
+    const enrolledCourses = await student.getCourses({ attributes: ['id'] });
     const enrolledIds = enrolledCourses.map((c) => c.id);
 
-    const { Op } = require("sequelize");
     const availableCourses = await Course.findAll({
       where: {
         id: { [Op.notIn]: enrolledIds }
-      }
+      },
+      attributes: ['id', 'title', 'departmentId']
     });
 
     res.json(availableCourses);

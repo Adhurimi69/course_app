@@ -3,7 +3,7 @@ const { CourseReadModel } = require("../../models/nosql/courseReadModel");
 const getCourses = async (req, res) => {
   try {
     const courses = await CourseReadModel.find();
-    res.json(courses);
+    res.json(courses); // ⬅️ directly return with courseId
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

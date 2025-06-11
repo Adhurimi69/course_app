@@ -135,7 +135,7 @@ export default function Exams() {
             <em>-- Select Course --</em>
           </MenuItem>
           {courses.map((course) => (
-            <MenuItem key={course.courseId} value={course.courseId}>
+            <MenuItem key={course.id} value={course.id}>
               {course.title}
             </MenuItem>
           ))}

@@ -23,7 +23,18 @@ const getExamById = async (req, res) => {
   }
 };
 
+const getExamByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const exams = await ExamReadModel.find({ courseId });
+    res.json(exams);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAllExams,
   getExamById,
+  getExamByCourse,
 };

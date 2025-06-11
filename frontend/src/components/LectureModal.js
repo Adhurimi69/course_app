@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -12,22 +12,33 @@ import {
 } from "@mui/material";
 
 /**
- * AddLectureModal
  * Props:
  * - open: boolean
  * - courseId: string
+ * - lecture: { lectureId, title } | null
  * - onClose: () => void
- * - onLectureAdded: (lecture) => void
+ * - onSave: (lecture) => void
  */
 export default function LectureModal({
   open,
   courseId,
+  lecture,
   onClose,
-  onLectureAdded,
+  onSave,
 }) {
   const [title, setTitle] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // When editing, prefill
+  useEffect(() => {
+    if (lecture) {
+      setTitle(lecture.title);
+    } else {
+      setTitle("");
+    }
+    setError(null);
+  }, [lecture]);
 
   const handleSubmit = async () => {
     if (!title.trim()) {
@@ -35,34 +46,25 @@ export default function LectureModal({
       return;
     }
     setLoading(true);
-    setError(null);
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/commands/lectures",
-        {
-          courseId,
-          title,
-        }
-      );
-      onLectureAdded(res.data);
-      setTitle("");
+      const url = lecture
+        ? `http://localhost:5000/api/commands/lectures/${lecture.lectureId}`
+        : "http://localhost:5000/api/commands/lectures";
+      const method = lecture ? "put" : "post";
+      const payload = lecture ? { title } : { courseId, title };
+      const res = await axios[method](url, payload);
+      onSave(res.data);
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to create lecture");
+      setError(err.response?.data?.error || "Failed to save lecture");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    setError(null);
-    setTitle("");
-    onClose();
-  };
-
   return (
-    <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="sm">
-      <DialogTitle>Add Lecture</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{lecture ? "Edit Lecture" : "Add Lecture"}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
           {error && <Alert severity="error">{error}</Alert>}
@@ -76,11 +78,11 @@ export default function LectureModal({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} disabled={loading}>
+        <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-          {loading ? "Saving..." : "Create"}
+          {loading ? "Saving..." : lecture ? "Save Changes" : "Create"}
         </Button>
       </DialogActions>
     </Dialog>

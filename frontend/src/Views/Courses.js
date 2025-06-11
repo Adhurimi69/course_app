@@ -1,3 +1,5 @@
+// src/Views/Courses.js
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -7,30 +9,34 @@ import {
   TextField,
   Select,
   MenuItem,
+  Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Paper,
+  Grid,
 } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 
 import CourseCard from "../components/CourseCard";
 import CourseModal from "../components/CourseModal";
-import AddIcon from "@mui/icons-material/Add";
 
-export default function Courses({ teacherView = false }) {
+export default function Courses({ teacherView = false, studentView = false }) {
+  // State
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
 
+  // Admin/Teacher form & modal state
   const [title, setTitle] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [editingId, setEditingId] = useState(null);
 
+  // Modal open state (teacher only)
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState("create");
+  const [mode, setMode] = useState("create"); // "create" or "edit"
 
+  // Fetch data on mount
   useEffect(() => {
     fetchCourses();
     fetchDepartments();
@@ -41,54 +47,62 @@ export default function Courses({ teacherView = false }) {
       const res = await axios.get("http://localhost:5000/api/queries/courses");
       setCourses(res.data);
     } catch (err) {
-      console.error("Error fetching courses:", err);
+      console.error(err);
     }
   };
 
   const fetchDepartments = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/queries/departments");
+      const res = await axios.get(
+        "http://localhost:5000/api/queries/departments"
+      );
       setDepartments(res.data);
     } catch (err) {
-      console.error("Error fetching departments:", err);
+      console.error(err);
     }
   };
 
+  // Admin inline form submit
   const handleSubmitInline = async (e) => {
     e.preventDefault();
     if (!departmentId) return alert("Please select a department.");
-    const data = { title, departmentId };
+    const payload = { title, departmentId };
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/commands/courses/${editingId}`, data);
+        await axios.put(
+          `http://localhost:5000/api/commands/courses/${editingId}`,
+          payload
+        );
         setEditingId(null);
       } else {
-        await axios.post("http://localhost:5000/api/commands/courses", data);
+        await axios.post("http://localhost:5000/api/commands/courses", payload);
       }
       setTitle("");
       setDepartmentId("");
       fetchCourses();
     } catch (err) {
-      console.error("Error submitting course:", err);
+      console.error(err);
     }
   };
 
+  // Delete handler (admin/teacher)
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this course?")) return;
     try {
       await axios.delete(`http://localhost:5000/api/commands/courses/${id}`);
       fetchCourses();
     } catch (err) {
-      console.error("Delete failed:", err);
+      console.error(err);
     }
   };
 
+  // Modal controls (teacher only)
   const openModal = (action, course = null) => {
     setMode(action);
     if (action === "edit" && course) {
       setEditingId(course.courseId);
       setTitle(course.title);
-      setDepartmentId(course.departmentId || "");
+      setDepartmentId(course.departmentId);
     } else {
       setEditingId(null);
       setTitle("");
@@ -96,22 +110,25 @@ export default function Courses({ teacherView = false }) {
     }
     setOpen(true);
   };
-
   const closeModal = () => setOpen(false);
 
+  // Modal submit (teacher only)
   const handleSubmitModal = async () => {
     if (!departmentId) return alert("Please select a department.");
-    const data = { title, departmentId };
+    const payload = { title, departmentId };
     try {
       if (mode === "edit") {
-        await axios.put(`http://localhost:5000/api/commands/courses/${editingId}`, data);
+        await axios.put(
+          `http://localhost:5000/api/commands/courses/${editingId}`,
+          payload
+        );
       } else {
-        await axios.post("http://localhost:5000/api/commands/courses", data);
+        await axios.post("http://localhost:5000/api/commands/courses", payload);
       }
       closeModal();
       fetchCourses();
     } catch (err) {
-      console.error("Error submitting course:", err);
+      console.error(err);
     }
   };
 
@@ -121,7 +138,8 @@ export default function Courses({ teacherView = false }) {
         Course Management
       </Typography>
 
-      {!teacherView && (
+      {/* 1) Admin view: inline form + styled table */}
+      {!teacherView && !studentView && (
         <>
           <Box
             component="form"
@@ -132,10 +150,10 @@ export default function Courses({ teacherView = false }) {
               alignItems: "center",
               mb: 3,
               backgroundColor: "#f3e5f5",
-              padding: 2,
+              p: 2,
               borderRadius: 2,
               boxShadow: 1,
-              flexWrap: "wrap"
+              flexWrap: "wrap",
             }}
           >
             <TextField
@@ -168,7 +186,7 @@ export default function Courses({ teacherView = false }) {
               color="secondary"
               type="submit"
               size="medium"
-              sx={{ height: "40px", minWidth: "120px" }}
+              sx={{ height: 40, minWidth: 120 }}
             >
               {editingId ? "Update" : "Add"}
             </Button>
@@ -178,10 +196,18 @@ export default function Courses({ teacherView = false }) {
             <Table>
               <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
                 <TableRow>
-                  <TableCell><strong>ID</strong></TableCell>
-                  <TableCell><strong>Title</strong></TableCell>
-                  <TableCell><strong>Department</strong></TableCell>
-                  <TableCell align="right"><strong>Actions</strong></TableCell>
+                  <TableCell>
+                    <strong>ID</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Title</strong>
+                  </TableCell>
+                  <TableCell>
+                    <strong>Department</strong>
+                  </TableCell>
+                  <TableCell align="right">
+                    <strong>Actions</strong>
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -190,22 +216,21 @@ export default function Courses({ teacherView = false }) {
                     <TableCell>{course.courseId}</TableCell>
                     <TableCell>{course.title}</TableCell>
                     <TableCell>
-                      {departments.find((d) => d.departmentId === course.departmentId)?.name || "N/A"}
+                      {departments.find(
+                        (d) => d.departmentId === course.departmentId
+                      )?.name || "N/A"}
                     </TableCell>
                     <TableCell align="right">
                       <Button
-                        variant="outlined"
-                        color="primary"
                         size="small"
-                        sx={{ mr: 1 }}
                         onClick={() => openModal("edit", course)}
+                        sx={{ mr: 1 }}
                       >
                         Edit
                       </Button>
                       <Button
-                        variant="outlined"
-                        color="error"
                         size="small"
+                        color="error"
                         onClick={() => handleDelete(course.courseId)}
                       >
                         Delete
@@ -219,44 +244,50 @@ export default function Courses({ teacherView = false }) {
         </>
       )}
 
-      {/* Teacher View – unchanged */}
-      {teacherView && (
-        <>
-          <Box className="flex justify-end mb-4">
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => openModal("create")}
-            >
-              Add Course
-            </Button>
-          </Box>
-
-          <Box display="flex" flexWrap="wrap" gap={2}>
-            {courses.map((course) => (
-              <CourseCard
-                key={course.courseId}
-                course={course}
-                departments={departments}
-                openModal={openModal}
-                onDelete={handleDelete}
-              />
-            ))}
-          </Box>
-        </>
+      {/* 2) Teacher view: Add Course button */}
+      {teacherView && !studentView && (
+        <Box display="flex" justifyContent="flex-end" mb={2}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => openModal("create")}
+          >
+            Add Course
+          </Button>
+        </Box>
       )}
 
-      <CourseModal
-        open={open}
-        mode={mode}
-        title={title}
-        departmentId={departmentId}
-        departments={departments}
-        onClose={closeModal}
-        onChangeTitle={setTitle}
-        onChangeDept={setDepartmentId}
-        onSubmit={handleSubmitModal}
-      />
+      {/* 3) Teacher & Student view: grid of cards */}
+      {(teacherView || studentView) && (
+        <Grid container spacing={4}>
+          {courses.map((course) => (
+            <Grid item xs={12} sm={6} md={4} key={course.courseId}>
+              <CourseCard
+                course={course}
+                departments={departments}
+                {...(teacherView
+                  ? { openModal, onDelete: handleDelete, role: "teacher" }
+                  : { role: "student" })}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      {/* 4) CourseModal only for admin/teacher */}
+      {!studentView && (
+        <CourseModal
+          open={open}
+          mode={mode}
+          title={title}
+          departmentId={departmentId}
+          departments={departments}
+          onClose={closeModal}
+          onChangeTitle={setTitle}
+          onChangeDept={setDepartmentId}
+          onSubmit={handleSubmitModal}
+        />
+      )}
     </Box>
   );
 }

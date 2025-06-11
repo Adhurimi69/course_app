@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   Dialog,
@@ -11,11 +11,30 @@ import {
   Alert,
 } from "@mui/material";
 
-export default function ExamModal({ open, courseId, onClose, onExamAdded }) {
+/**
+ * Props:
+ * - open: boolean
+ * - courseId: string
+ * - exam: { examId, title, date } | null
+ * - onClose: () => void
+ * - onSave: (exam) => void
+ */
+export default function ExamModal({ open, courseId, exam, onClose, onSave }) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (exam) {
+      setTitle(exam.title);
+      setDate(exam.date.slice(0, 10));
+    } else {
+      setTitle("");
+      setDate("");
+    }
+    setError(null);
+  }, [exam]);
 
   const handleSubmit = async () => {
     if (!title.trim() || !date) {
@@ -23,34 +42,25 @@ export default function ExamModal({ open, courseId, onClose, onExamAdded }) {
       return;
     }
     setLoading(true);
-    setError(null);
     try {
-      const res = await axios.post("http://localhost:5000/api/commands/exams", {
-        courseId,
-        title,
-        date,
-      });
-      onExamAdded(res.data);
-      setTitle("");
-      setDate("");
+      const url = exam
+        ? `http://localhost:5000/api/commands/exams/${exam.examId}`
+        : "http://localhost:5000/api/commands/exams";
+      const method = exam ? "put" : "post";
+      const payload = exam ? { title, date } : { courseId, title, date };
+      const res = await axios[method](url, payload);
+      onSave(res.data);
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to create exam");
+      setError(err.response?.data?.error || "Failed to save exam");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    setError(null);
-    setTitle("");
-    setDate("");
-    onClose();
-  };
-
   return (
-    <Dialog open={open} onClose={handleCancel} fullWidth maxWidth="sm">
-      <DialogTitle>Add Exam</DialogTitle>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle>{exam ? "Edit Exam" : "Add Exam"}</DialogTitle>
       <DialogContent>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
           {error && <Alert severity="error">{error}</Alert>}
@@ -73,11 +83,11 @@ export default function ExamModal({ open, courseId, onClose, onExamAdded }) {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleCancel} disabled={loading}>
+        <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
         <Button onClick={handleSubmit} variant="contained" disabled={loading}>
-          {loading ? "Saving..." : "Create"}
+          {loading ? "Saving..." : exam ? "Save Changes" : "Create"}
         </Button>
       </DialogActions>
     </Dialog>

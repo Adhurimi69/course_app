@@ -1,14 +1,16 @@
-// src/Views/CourseLayout.jsx
+// src/Views/CourseLayout.js
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { Box, Button, Typography, Divider } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+
 import LectureModal from "../components/LectureModal";
 import AssignmentModal from "../components/AssignmentModal";
 import ExamModal from "../components/ExamModal";
 
-export default function CourseLayout() {
+export default function CourseLayout({ studentView = false }) {
   const { courseId } = useParams();
 
   const [lectures, setLectures] = useState([]);
@@ -16,62 +18,102 @@ export default function CourseLayout() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Modal state
-  const [openAddLecture, setOpenAddLecture] = useState(false);
-  const [openAddAssignment, setOpenAddAssignment] = useState(false);
-  const [openAddExam, setOpenAddExam] = useState(false);
+  // Lecture modal state
+  const [openLectureModal, setOpenLectureModal] = useState(false);
+  const [editingLecture, setEditingLecture] = useState(null);
+
+  // Assignment modal state
+  const [openAssignmentModal, setOpenAssignmentModal] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState(null);
   const [currentLectureId, setCurrentLectureId] = useState(null);
 
-  // Fetch lectures and exams
-  useEffect(() => {
-    async function fetchAll() {
-      setLoading(true);
-      try {
-        const [lecRes, examRes] = await Promise.all([
-          axios.get(
-            `http://localhost:5000/api/queries/lectures/course/${courseId}`
-          ),
-          axios.get(
-            `http://localhost:5000/api/queries/exams?courseId=${courseId}`
-          ),
-        ]);
-        setLectures(lecRes.data);
-        setExams(examRes.data);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load course details.");
-      } finally {
-        setLoading(false);
-      }
+  // Exam modal state
+  const [openExamModal, setOpenExamModal] = useState(false);
+  const [editingExam, setEditingExam] = useState(null);
+
+  // Fetch all data (lectures with assignments, and exams)
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // 1) Fetch lectures
+      const lecRes = await axios.get(
+        `http://localhost:5000/api/queries/lectures/course/${courseId}`
+      );
+      const lecturesData = lecRes.data;
+
+      // 2) Append assignments to each lecture
+      const lecturesWithAssignments = await Promise.all(
+        lecturesData.map(async (lec) => {
+          const asgRes = await axios.get(
+            `http://localhost:5000/api/queries/assignments/lecture/${lec.lectureId}`
+          );
+          return { ...lec, assignments: asgRes.data };
+        })
+      );
+      setLectures(lecturesWithAssignments);
+
+      // 3) Fetch exams
+      const examRes = await axios.get(
+        `http://localhost:5000/api/queries/exams/course/${courseId}`
+      );
+      setExams(examRes.data);
+
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load course details.");
+    } finally {
+      setLoading(false);
     }
-    fetchAll();
+  };
+
+  useEffect(() => {
+    fetchData();
   }, [courseId]);
-
-  const handleLectureAdded = (newLecture) => {
-    setLectures((prev) => [...prev, newLecture]);
-  };
-
-  const handleAssignmentAdded = (newAssignment) => {
-    setLectures((prev) =>
-      prev.map((lec) =>
-        lec.lectureId === newAssignment.lectureId
-          ? { ...lec, assignments: [...(lec.assignments || []), newAssignment] }
-          : lec
-      )
-    );
-  };
-
-  const handleExamAdded = (newExam) => {
-    setExams((prev) => [...prev, newExam]);
-  };
 
   if (loading) return <Typography>Loading...</Typography>;
   if (error) return <Typography color="error">{error}</Typography>;
 
+  // Lecture handlers
+  const handleLectureSave = async () => {
+    setOpenLectureModal(false);
+    setEditingLecture(null);
+    await fetchData();
+  };
+  const handleLectureDelete = async (id) => {
+    if (!window.confirm("Delete this lecture?")) return;
+    await axios.delete(`http://localhost:5000/api/commands/lectures/${id}`);
+    await fetchData();
+  };
+
+  // Assignment handlers
+  const handleAssignmentSave = async () => {
+    setOpenAssignmentModal(false);
+    setEditingAssignment(null);
+    await fetchData();
+  };
+  const handleAssignmentDelete = async (id) => {
+    if (!window.confirm("Delete this assignment?")) return;
+    await axios.delete(`http://localhost:5000/api/commands/assignments/${id}`);
+    await fetchData();
+  };
+
+  // Exam handlers
+  const handleExamSave = async () => {
+    setOpenExamModal(false);
+    setEditingExam(null);
+    await fetchData();
+  };
+  const handleExamDelete = async (id) => {
+    if (!window.confirm("Delete this exam?")) return;
+    await axios.delete(`http://localhost:5000/api/commands/exams/${id}`);
+    await fetchData();
+  };
+
   return (
     <>
       <Box sx={{ display: "flex", height: "100%", gap: 2 }}>
-        {/* Left column: Lectures and Assignments */}
+        {/* Lectures & Assignments */}
         <Box sx={{ flex: 2, p: 3, overflowY: "auto" }}>
           <Typography variant="h5" gutterBottom>
             Lectures & Assignments
@@ -81,104 +123,190 @@ export default function CourseLayout() {
             <Box key={lec.lectureId} sx={{ mb: 4 }}>
               <Box sx={{ border: "1px solid #ddd", borderRadius: 1, p: 2 }}>
                 <Typography variant="h6">{lec.title}</Typography>
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  sx={{ mb: 1 }}
-                >
-                  {lec.description}
-                </Typography>
-                {/* Assignment list under lecture */}
-                {(lec.assignments || []).map((asg) => (
+
+                {/* Edit/Delete Lecture (teachers only) */}
+                {!studentView && (
+                  <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        setEditingLecture(lec);
+                        setOpenLectureModal(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      size="small"
+                      color="error"
+                      onClick={() => handleLectureDelete(lec.lectureId)}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                )}
+
+                {/* Assignments */}
+                {lec.assignments.map((a) => (
                   <Box
-                    key={asg.assignmentId}
+                    key={a.assignmentId}
                     sx={{
                       border: "1px solid #ccc",
                       borderRadius: 1,
                       p: 1,
-                      mb: 1,
+                      mt: 2,
                     }}
                   >
-                    <Typography variant="body1">{asg.title}</Typography>
+                    <Typography>{a.title}</Typography>
                     <Typography variant="caption" color="textSecondary">
-                      Due: {new Date(asg.dueDate).toLocaleDateString()}
+                      Due: {new Date(a.dueDate).toLocaleDateString()}
                     </Typography>
+
+                    {/* Edit/Delete Assignment (teachers only) */}
+                    {!studentView && (
+                      <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setCurrentLectureId(lec.lectureId);
+                            setEditingAssignment(a);
+                            setOpenAssignmentModal(true);
+                          }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          size="small"
+                          color="error"
+                          onClick={() => handleAssignmentDelete(a.assignmentId)}
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    )}
                   </Box>
                 ))}
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<AddIcon />}
-                  onClick={() => {
-                    setCurrentLectureId(lec.lectureId);
-                    setOpenAddAssignment(true);
-                  }}
-                >
-                  Add Assignment
-                </Button>
+
+                {/* Add Assignment (teachers only) */}
+                {!studentView && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<AddIcon />}
+                    sx={{ mt: 2 }}
+                    onClick={() => {
+                      setCurrentLectureId(lec.lectureId);
+                      setEditingAssignment(null);
+                      setOpenAssignmentModal(true);
+                    }}
+                  >
+                    Add Assignment
+                  </Button>
+                )}
               </Box>
             </Box>
           ))}
-          {/* Add Lecture Button */}
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenAddLecture(true)}
-          >
-            Add Lecture
-          </Button>
+
+          {/* Add Lecture (teachers only) */}
+          {!studentView && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setEditingLecture(null);
+                setOpenLectureModal(true);
+              }}
+            >
+              Add Lecture
+            </Button>
+          )}
         </Box>
 
-        {/* Divider */}
         <Divider orientation="vertical" flexItem />
 
-        {/* Right column: Exams */}
+        {/* Exams */}
         <Box sx={{ flex: 1, p: 3, overflowY: "auto" }}>
           <Typography variant="h5" gutterBottom>
             Exams
           </Typography>
-          {exams.map((ex) => (
+
+          {exams.map((e) => (
             <Box
-              key={ex.examId}
+              key={e.examId}
               sx={{ border: "1px solid #ddd", borderRadius: 1, p: 2, mb: 2 }}
             >
-              <Typography variant="body1">{ex.title}</Typography>
+              <Typography>{e.title}</Typography>
               <Typography variant="caption" color="textSecondary">
-                Date: {new Date(ex.date).toLocaleDateString()}
+                Date: {new Date(e.date).toLocaleDateString()}
               </Typography>
+
+              {/* Edit/Delete Exam (teachers only) */}
+              {!studentView && (
+                <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setEditingExam(e);
+                      setOpenExamModal(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="small"
+                    color="error"
+                    onClick={() => handleExamDelete(e.examId)}
+                  >
+                    Delete
+                  </Button>
+                </Box>
+              )}
             </Box>
           ))}
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setOpenAddExam(true)}
-          >
-            Add Exam
-          </Button>
+
+          {/* Add Exam (teachers only) */}
+          {!studentView && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => {
+                setEditingExam(null);
+                setOpenExamModal(true);
+              }}
+            >
+              Add Exam
+            </Button>
+          )}
         </Box>
       </Box>
 
-      {/* Modals */}
-      <LectureModal
-        open={openAddLecture}
-        courseId={courseId}
-        onClose={() => setOpenAddLecture(false)}
-        onLectureAdded={handleLectureAdded}
-      />
+      {/* Modals (teachers only) */}
+      {!studentView && (
+        <>
+          <LectureModal
+            open={openLectureModal}
+            courseId={courseId}
+            lecture={editingLecture}
+            onClose={() => setOpenLectureModal(false)}
+            onSave={handleLectureSave}
+          />
 
-      <AssignmentModal
-        open={openAddAssignment}
-        lectureId={currentLectureId}
-        onClose={() => setOpenAddAssignment(false)}
-        onAssignmentAdded={handleAssignmentAdded}
-      />
+          <AssignmentModal
+            open={openAssignmentModal}
+            lectureId={currentLectureId}
+            assignment={editingAssignment}
+            onClose={() => setOpenAssignmentModal(false)}
+            onSave={handleAssignmentSave}
+          />
 
-      <ExamModal
-        open={openAddExam}
-        courseId={courseId}
-        onClose={() => setOpenAddExam(false)}
-        onExamAdded={handleExamAdded}
-      />
+          <ExamModal
+            open={openExamModal}
+            courseId={courseId}
+            exam={editingExam}
+            onClose={() => setOpenExamModal(false)}
+            onSave={handleExamSave}
+          />
+        </>
+      )}
     </>
   );
 }

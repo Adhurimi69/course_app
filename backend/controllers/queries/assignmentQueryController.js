@@ -27,7 +27,18 @@ const getAssignmentById = async (req, res) => {
   }
 };
 
+const getAssignmentsByLecture = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const assignments = await AssignmentReadModel.find({ lectureId });
+    res.json(assignments);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getAllAssignments,
   getAssignmentById,
+  getAssignmentsByLecture,
 };

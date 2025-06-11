@@ -1,4 +1,5 @@
 // src/App.js
+
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -19,6 +20,7 @@ import Assignment from "./Views/Assignment";
 import Exams from "./Views/Exams";
 import Courses from "./Views/Courses";
 import TeacherDashboard from "./Views/TeacherDashboard";
+import StudentDashboard from "./Views/StudentDashboard";
 import CourseLayout from "./components/CourseLayout";
 
 function RoleLayout({ role }) {
@@ -48,8 +50,6 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/prices" element={<Prices />} />
-      <Route path="/signup" element={<Signup />} />
-
       <Route path="/about" element={<AboutUs />} />
 
       {/* Admin routes */}
@@ -71,19 +71,14 @@ export default function App() {
         />
         <Route path="courses" element={<Courses />} />
         <Route path="courses/:id" element={<Courses />} />
-
         <Route path="users" element={<Users />} />
         <Route path="users/:id" element={<Users />} />
-
         <Route path="departments" element={<Departments />} />
         <Route path="departments/:id" element={<Departments />} />
-
         <Route path="lectures" element={<Lectures />} />
         <Route path="lectures/:id" element={<Lectures />} />
-
         <Route path="assignments" element={<Assignment />} />
         <Route path="assignments/:id" element={<Assignment />} />
-
         <Route path="exams" element={<Exams />} />
         <Route path="exams/:id" element={<Exams />} />
       </Route>
@@ -97,12 +92,8 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        {/* Redirect /teachers to courses list */}
         <Route index element={<Navigate to="courses" replace />} />
-
-        {/* Courses list and nested detail */}
         <Route path="courses">
-          {/* List view as cards */}
           <Route
             index
             element={
@@ -111,8 +102,6 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-
-          {/* Course detail with tabs */}
           <Route
             path=":courseId"
             element={
@@ -130,13 +119,28 @@ export default function App() {
       </Route>
 
       {/* Student routes */}
-      <Route path="/students" element={<RoleLayout role="students" />}>
+      <Route
+        path="/students"
+        element={
+          <ProtectedRoute allowedRoles={["student"]}>
+            <StudentDashboard />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="courses" replace />} />
         <Route
           path="courses"
           element={
             <ProtectedRoute allowedRoles={["student"]}>
-              <Courses />
+              <Courses studentView />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="courses/:courseId"
+          element={
+            <ProtectedRoute allowedRoles={["student"]}>
+              <CourseLayout studentView />
             </ProtectedRoute>
           }
         />

@@ -94,64 +94,79 @@ export default function Assignments() {
       </Typography>
 
       <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          display: "flex",
-          gap: 2,
-          alignItems: "center",
-          mb: 3,
-          backgroundColor: "#f3e5f5",
-          padding: 2,
-          borderRadius: 2,
-          boxShadow: 1,
-          flexWrap: "wrap",
-        }}
-      >
-        <TextField
-          label="Assignment Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-          size="small"
-          sx={{ minWidth: 180, backgroundColor: "#fff" }}
-        />
-        <TextField
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          label="Due Date"
-          InputLabelProps={{ shrink: true }}
-          size="small"
-          sx={{ minWidth: 160, backgroundColor: "#fff" }}
-        />
-        <Select
-          value={lectureId}
-          onChange={(e) => setLectureId(e.target.value)}
-          displayEmpty
-          required
-          size="small"
-          sx={{ minWidth: 220, backgroundColor: "#fff" }}
-        >
-          <MenuItem value="">
-            <em>-- Select Lecture --</em>
-          </MenuItem>
-          {lectures.map((lecture) => (
-            <MenuItem key={lecture.lectureId} value={lecture.lectureId}>
-              {lecture.title}
-            </MenuItem>
-          ))}
-        </Select>
-        <Button
-          variant="contained"
-          color="secondary"
-          type="submit"
-          size="medium"
-          sx={{ height: "40px", minWidth: "120px" }}
-        >
-          {editingId ? "Update" : "Add"}
-        </Button>
-      </Box>
+  component="form"
+  onSubmit={handleSubmit}
+  sx={{
+    display: "flex",
+    gap: 2,
+    alignItems: "center",
+    mb: 3,
+    backgroundColor: "#f3e5f5",
+    padding: 2,
+    borderRadius: 2,
+    boxShadow: 1,
+    flexWrap: "wrap",
+  }}
+>
+  <TextField
+    label="Assignment Title"
+    value={title}
+    onChange={(e) => setTitle(e.target.value)}
+    required
+    size="small"
+    sx={{ minWidth: 180, backgroundColor: "#fff" }}
+  />
+  <TextField
+    type="date"
+    value={dueDate}
+    onChange={(e) => setDueDate(e.target.value)}
+    label="Due Date"
+    InputLabelProps={{ shrink: true }}
+    size="small"
+    sx={{ minWidth: 160, backgroundColor: "#fff" }}
+  />
+  <Select
+    value={lectureId}
+    onChange={(e) => setLectureId(e.target.value)}
+    displayEmpty
+    required
+    size="small"
+    sx={{ minWidth: 220, backgroundColor: "#fff" }}
+  >
+    <MenuItem value="">
+      <em>-- Select Lecture --</em>
+    </MenuItem>
+    {lectures.map((lecture) => (
+      <MenuItem key={lecture.lectureId} value={lecture.lectureId}>
+        {lecture.title}
+      </MenuItem>
+    ))}
+  </Select>
+  <Button
+    variant="contained"
+    color="secondary"
+    type="submit"
+    size="medium"
+    sx={{ height: "40px", minWidth: "120px" }}
+  >
+    {editingId ? "Update" : "Add"}
+  </Button>
+  {editingId && (
+    <Button
+      variant="outlined"
+      color="inherit"
+      onClick={() => {
+        setEditingId(null);
+        setTitle("");
+        setDueDate("");
+        setLectureId("");
+      }}
+    >
+      Cancel
+    </Button>
+  )}
+</Box>
+
 
       <Paper elevation={3}>
         <Table>

@@ -92,21 +92,34 @@ function Departments() {
       </Typography>
 
       <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ display: "flex", gap: 2, mb: 3 }}
-      >
-        <TextField
-          label="Department Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          fullWidth
-        />
-        <Button variant="contained" color="secondary" type="submit">
-          {editingId ? "Update" : "Add"}
-        </Button>
-      </Box>
+  component="form"
+  onSubmit={handleSubmit}
+  sx={{ display: "flex", gap: 2, mb: 3 }}
+>
+  <TextField
+    label="Department Name"
+    value={name}
+    onChange={(e) => setName(e.target.value)}
+    required
+    fullWidth
+  />
+  <Button variant="contained" color="secondary" type="submit">
+    {editingId ? "Update" : "Add"}
+  </Button>
+  {editingId && (
+    <Button
+      variant="outlined"
+      color="inherit"
+      onClick={() => {
+        setEditingId(null);
+        setName("");
+      }}
+    >
+      Cancel
+    </Button>
+  )}
+</Box>
+
 
       <Paper elevation={3}>
         <Table>

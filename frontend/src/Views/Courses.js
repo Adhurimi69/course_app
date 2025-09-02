@@ -19,7 +19,6 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 
 import CourseCard from "../components/CourseCard";
-import CourseModal from "../components/CourseModal";
 
 export default function Courses({ teacherView = false, studentView = false }) {
   const location = useLocation();
@@ -31,12 +30,10 @@ export default function Courses({ teacherView = false, studentView = false }) {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [availableCourses, setAvailableCourses] = useState([]);
 
+  // Admin inline form states
   const [title, setTitle] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [editingId, setEditingId] = useState(null);
-
-  const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState("create"); // "create" or "edit"
 
   useEffect(() => {
     fetchDepartments();
@@ -92,16 +89,14 @@ export default function Courses({ teacherView = false, studentView = false }) {
     }
   };
 
-  const handleSubmitInline = async (e) => {
+  // Admin add/update course
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!departmentId) return alert("Please select a department.");
     const payload = { title, departmentId };
     try {
       if (editingId) {
-        await axios.put(
-          `http://localhost:5000/api/commands/courses/${editingId}`,
-          payload
-        );
+        await axios.put(`http://localhost:5000/api/commands/courses/${editingId}`, payload);
         setEditingId(null);
       } else {
         await axios.post("http://localhost:5000/api/commands/courses", payload);
@@ -112,6 +107,12 @@ export default function Courses({ teacherView = false, studentView = false }) {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleEdit = (course) => {
+    setEditingId(course.courseId);
+    setTitle(course.title);
+    setDepartmentId(course.departmentId);
   };
 
   const handleDelete = async (id) => {
@@ -125,100 +126,83 @@ export default function Courses({ teacherView = false, studentView = false }) {
     }
   };
 
-  const openModal = (action, course = null) => {
-    setMode(action);
-    if (action === "edit" && course) {
-      setEditingId(course.courseId);
-      setTitle(course.title);
-      setDepartmentId(course.departmentId);
-    } else {
-      setEditingId(null);
-      setTitle("");
-      setDepartmentId("");
-    }
-    setOpen(true);
-  };
-  const closeModal = () => setOpen(false);
-
-  const handleSubmitModal = async () => {
-    if (!departmentId) return alert("Please select a department.");
-    const payload = { title, departmentId };
-    try {
-      if (mode === "edit") {
-        await axios.put(
-          `http://localhost:5000/api/commands/courses/${editingId}`,
-          payload
-        );
-      } else {
-        await axios.post("http://localhost:5000/api/commands/courses", payload);
-      }
-      closeModal();
-      fetchCourses();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
     <Box p={3}>
       <Typography variant="h4" gutterBottom>
         Course Management
       </Typography>
 
-      {/* Admin View */}
+      {/* Admin Inline Form */}
       {!teacherView && !studentView && (
         <>
           <Box
-            component="form"
-            onSubmit={handleSubmitInline}
-            sx={{
-              display: "flex",
-              gap: 2,
-              alignItems: "center",
-              mb: 3,
-              backgroundColor: "#f3e5f5",
-              p: 2,
-              borderRadius: 2,
-              boxShadow: 1,
-              flexWrap: "wrap",
-            }}
-          >
-            <TextField
-              label="Course Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              size="small"
-              sx={{ minWidth: 200, backgroundColor: "#fff" }}
-            />
-            <Select
-              value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-              displayEmpty
-              required
-              size="small"
-              sx={{ minWidth: 220, backgroundColor: "#fff" }}
-            >
-              <MenuItem value="">
-                <em>-- Select Department --</em>
-              </MenuItem>
-              {departments.map((d) => (
-                <MenuItem key={d.departmentId} value={d.departmentId}>
-                  {d.name}
-                </MenuItem>
-              ))}
-            </Select>
-            <Button
-              variant="contained"
-              color="secondary"
-              type="submit"
-              size="medium"
-              sx={{ height: 40, minWidth: 120 }}
-            >
-              {editingId ? "Update" : "Add"}
-            </Button>
-          </Box>
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        display: "flex",
+        gap: 2,
+        alignItems: "center",
+        mb: 3,
+        backgroundColor: "#f3e5f5",
+        p: 2,
+        borderRadius: 2,
+        boxShadow: 1,
+        flexWrap: "wrap",
+      }}
+    >
+      <TextField
+        label="Course Title"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+        size="small"
+        sx={{ minWidth: 200, backgroundColor: "#fff" }}
+      />
+      <Select
+        value={departmentId}
+        onChange={(e) => setDepartmentId(e.target.value)}
+        displayEmpty
+        required
+        size="small"
+        sx={{ minWidth: 220, backgroundColor: "#fff" }}
+      >
+        <MenuItem value="">
+          <em>-- Select Department --</em>
+        </MenuItem>
+        {departments.map((d) => (
+          <MenuItem key={d.departmentId} value={d.departmentId}>
+            {d.name}
+          </MenuItem>
+        ))}
+      </Select>
+      <Button
+        variant="contained"
+        color="secondary"
+        type="submit"
+        size="medium"
+        sx={{ height: 40, minWidth: 120 }}
+      >
+        {editingId ? "Update" : "Add"}
+      </Button>
 
+      {/* Cancel button only shows during editing */}
+      {editingId && (
+        <Button
+          variant="outlined"
+          color="inherit"
+          size="medium"
+          onClick={() => {
+            setEditingId(null);
+            setTitle("");
+            setDepartmentId("");
+          }}
+        >
+          Cancel
+        </Button>
+      )}
+    </Box>
+
+          {/* Admin Courses Table */}
           <Paper elevation={3}>
             <Table>
               <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
@@ -231,19 +215,17 @@ export default function Courses({ teacherView = false, studentView = false }) {
               </TableHead>
               <TableBody>
                 {courses.map((course) => (
-                  <TableRow key={course.id}>
-                  <TableCell>{course.course.id  }</TableCell>
+                  <TableRow key={course.courseId}>
+                    <TableCell>{course.courseId}</TableCell>
                     <TableCell>{course.title}</TableCell>
                     <TableCell>
-                      {departments.find(
-                        (d) => d.departmentId === course.departmentId
-                      )?.name || "N/A"}
+                      {departments.find((d) => d.departmentId === course.departmentId)?.name || "N/A"}
                     </TableCell>
                     <TableCell align="right">
-                      <Button size="small" onClick={() => openModal("edit", course)} sx={{ mr: 1 }}>
+                      <Button size="small" onClick={() => handleEdit(course)} sx={{ mr: 1 }}>
                         Edit
                       </Button>
-                      <Button size="small" color="error" onClick={() => handleDelete(course.id)}>
+                      <Button size="small" color="error" onClick={() => handleDelete(course.courseId)}>
                         Delete
                       </Button>
                     </TableCell>
@@ -255,10 +237,10 @@ export default function Courses({ teacherView = false, studentView = false }) {
         </>
       )}
 
-      {/* Teacher Button */}
+      {/* Teacher View */}
       {teacherView && !studentView && (
         <Box display="flex" justifyContent="flex-end" mb={2}>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => openModal("create")}>
+          <Button variant="contained" startIcon={<AddIcon />}>
             Add Course
           </Button>
         </Box>
@@ -270,10 +252,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
           <Typography variant="h5" mt={4} gutterBottom>Enrolled Courses</Typography>
           <Grid container spacing={4}>
             {enrolledCourses.map((course) => (
-              <Grid item xs={12} sm={6} md={4} key={course.id}>
-              {console.log(course)}
-
-                {/* {console.log(course)} */}
+              <Grid item xs={12} sm={6} md={4} key={course.courseId}>
                 <CourseCard
                   course={course}
                   isEnrolled
@@ -287,52 +266,17 @@ export default function Courses({ teacherView = false, studentView = false }) {
           <Typography variant="h5" mt={6} gutterBottom>Available Courses</Typography>
           <Grid container spacing={4}>
             {availableCourses.map((course) => (
-              <Grid item xs={12} sm={6} md={4} key={course.id}>
-              {console.log(course)}
-
+              <Grid item xs={12} sm={6} md={4} key={course.courseId}>
                 <CourseCard
                   course={course}
                   departments={departments}
                   role="student"
-                  onEnroll={() => enrollCourse(course.id)}
+                  onEnroll={() => enrollCourse(course.courseId)}
                 />
               </Grid>
             ))}
           </Grid>
         </>
-      )}
-
-      {/* Teacher & Student shared card view */}
-      {(teacherView || (studentView && isViewingCourse)) && !(!studentView && !teacherView) && (
-        <Grid container spacing={4}>
-          {courses.map((course) => (
-            <Grid item xs={12} sm={6} md={4} key={course.id}>
-              {console.log(course)}
-              <CourseCard
-                course={course}
-                departments={departments}
-                {...(teacherView
-                  ? { openModal, onDelete: handleDelete, role: "teacher" }
-                  : { role: "student" })}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      )}
-
-      {/* Modal for Admin & Teacher */}
-      {!studentView && (
-        <CourseModal
-          open={open}
-          mode={mode}
-          title={title}
-          departmentId={departmentId}
-          departments={departments}
-          onClose={closeModal}
-          onChangeTitle={setTitle}
-          onChangeDept={setDepartmentId}
-          onSubmit={handleSubmitModal}
-        />
       )}
     </Box>
   );

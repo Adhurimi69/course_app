@@ -7,13 +7,12 @@ import {
   TextField,
   Select,
   MenuItem,
+  Paper,
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
-  Paper,
 } from "@mui/material";
 
 export default function Exams() {
@@ -54,7 +53,10 @@ export default function Exams() {
     const data = { title, courseId, date };
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/commands/exams/${editingId}`, data);
+        await axios.put(
+          `http://localhost:5000/api/commands/exams/${editingId}`,
+          data
+        );
         setEditingId(null);
       } else {
         await axios.post("http://localhost:5000/api/commands/exams", data);
@@ -72,17 +74,16 @@ export default function Exams() {
     setEditingId(exam.examId);
     setTitle(exam.title);
     setDate(exam.date ? exam.date.slice(0, 10) : "");
-    setCourseId(exam.courseId || "");
+    setCourseId(exam.courseId ?? "");
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this exam?")) {
-      try {
-        await axios.delete(`http://localhost:5000/api/commands/exams/${id}`);
-        fetchExams();
-      } catch (err) {
-        console.error("Error deleting exam:", err);
-      }
+    if (!window.confirm("Are you sure you want to delete this exam?")) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/commands/exams/${id}`);
+      fetchExams();
+    } catch (err) {
+      console.error("Error deleting exam:", err);
     }
   };
 
@@ -101,10 +102,10 @@ export default function Exams() {
           alignItems: "center",
           mb: 3,
           backgroundColor: "#f3e5f5",
-          padding: 2,
+          p: 2,
           borderRadius: 2,
           boxShadow: 1,
-          flexWrap: "wrap"
+          flexWrap: "wrap",
         }}
       >
         <TextField
@@ -135,7 +136,7 @@ export default function Exams() {
             <em>-- Select Course --</em>
           </MenuItem>
           {courses.map((course) => (
-            <MenuItem key={course.id} value={course.id}>
+            <MenuItem key={course.courseId} value={course.courseId}>
               {course.title}
             </MenuItem>
           ))}
@@ -145,10 +146,23 @@ export default function Exams() {
           color="secondary"
           type="submit"
           size="medium"
-          sx={{ height: "40px", minWidth: "120px" }}
+          sx={{ height: 40, minWidth: 120 }}
         >
           {editingId ? "Update" : "Add"}
         </Button>
+          {editingId && (
+            <Button 
+            variant="outlined"
+      color="inherit"
+      onClick={() => {
+        setEditingId(null);
+        setTitle("");
+        setDate("");
+        setCourseId("");
+      }}>
+              Cancel
+            </Button>
+          )}
       </Box>
 
       <Paper elevation={3}>

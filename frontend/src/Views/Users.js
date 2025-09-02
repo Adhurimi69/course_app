@@ -100,7 +100,10 @@ function Users() {
       fetchAllUsers();
     } catch (error) {
       console.error("Error submitting user:", error);
-      alert("Error: " + (error.response ? JSON.stringify(error.response.data) : error.message));
+      alert(
+        "Error: " +
+          (error.response ? JSON.stringify(error.response.data) : error.message)
+      );
     }
   };
 
@@ -154,7 +157,7 @@ function Users() {
           alignItems: "center",
           flexWrap: "wrap",
           mb: 4,
-          backgroundColor: "#f9ecf9", // matches the table header
+          backgroundColor: "#f9ecf9",
           p: 3,
           borderRadius: 2,
           boxShadow: "0px 2px 8px rgba(0,0,0,0.05)",
@@ -217,6 +220,8 @@ function Users() {
           <MenuItem value="teacher">Teacher</MenuItem>
           <MenuItem value="student">Student</MenuItem>
         </Select>
+
+        {/* Update / Add button */}
         <Button
           variant="contained"
           color="secondary"
@@ -226,9 +231,25 @@ function Users() {
         >
           {editingId ? "Update User" : "Add User"}
         </Button>
+
+        {/* Cancel button, only shows when editing */}
+        {editingId && (
+          <Button
+            variant="outlined"
+            color="inherit"
+            size="small"
+            onClick={() => {
+              setEditingId(null);
+              setName("");
+              setEmail("");
+              setPassword("");
+              setRole("");
+            }}
+          >
+            Cancel
+          </Button>
+        )}
       </Box>
-
-
 
       <Typography variant="h5" gutterBottom>
         Users List
@@ -238,11 +259,21 @@ function Users() {
         <Table>
           <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
             <TableRow>
-              <TableCell><strong>#</strong></TableCell>
-              <TableCell><strong>Name</strong></TableCell>
-              <TableCell><strong>Email</strong></TableCell>
-              <TableCell><strong>Role</strong></TableCell>
-              <TableCell align="right"><strong>Actions</strong></TableCell>
+              <TableCell>
+                <strong>#</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Name</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Email</strong>
+              </TableCell>
+              <TableCell>
+                <strong>Role</strong>
+              </TableCell>
+              <TableCell align="right">
+                <strong>Actions</strong>
+              </TableCell>
             </TableRow>
           </TableHead>
 

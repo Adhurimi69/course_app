@@ -17,7 +17,7 @@ import {
   Grid,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-
+import CourseModal from "../components/CourseModal";
 import CourseCard from "../components/CourseCard";
 
 export default function Courses({ teacherView = false, studentView = false }) {
@@ -34,6 +34,9 @@ export default function Courses({ teacherView = false, studentView = false }) {
   const [title, setTitle] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [editingId, setEditingId] = useState(null);
+
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState("create");
 
   useEffect(() => {
     fetchDepartments();
@@ -64,13 +67,13 @@ export default function Courses({ teacherView = false, studentView = false }) {
 
   const fetchStudentCourses = async () => {
     try {
-      const enrolledRes = await axios.get(
-        `http://localhost:5000/api/commands/student-courses/enrolled/${studentId}`
-      );
+      // const enrolledRes = await axios.get(
+      //   `http://localhost:5000/api/commands/student-courses/enrolled/${studentId}`
+      // );
       const availableRes = await axios.get(
-        `http://localhost:5000/api/commands/student-courses/available/${studentId}`
+        `http://localhost:5000/api/queries/courses`
       );
-      setEnrolledCourses(enrolledRes.data);
+      // setEnrolledCourses(enrolledRes.data);
       setAvailableCourses(availableRes.data);
     } catch (err) {
       console.error("Error fetching student courses:", err);
@@ -86,6 +89,40 @@ export default function Courses({ teacherView = false, studentView = false }) {
       fetchStudentCourses();
     } catch (err) {
       console.error("Enrollment failed:", err);
+    }
+  };
+
+  const openModal = (action, course = null) => {
+    setMode(action);
+    if (action === "edit" && course) {
+      setEditingId(course.courseId);
+      setTitle(course.title);
+      setDepartmentId(course.departmentId);
+    } else {
+      setEditingId(null);
+      setTitle("");
+      setDepartmentId("");
+    }
+    setOpen(true);
+  };
+  const closeModal = () => setOpen(false);
+
+  const handleSubmitModal = async () => {
+    if (!departmentId) return alert("Please select a department.");
+    const payload = { title, departmentId };
+    try {
+      if (mode === "edit") {
+        await axios.put(
+          `http://localhost:5000/api/commands/courses/${editingId}`,
+          payload
+        );
+      } else {
+        await axios.post("http://localhost:5000/api/commands/courses", payload);
+      }
+      closeModal();
+      fetchCourses();
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -240,10 +277,42 @@ export default function Courses({ teacherView = false, studentView = false }) {
       {/* Teacher View */}
       {teacherView && !studentView && (
         <Box display="flex" justifyContent="flex-end" mb={2}>
-          <Button variant="contained" startIcon={<AddIcon />}>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => openModal("create")}>
             Add Course
           </Button>
         </Box>
+      )}
+
+      {/* Teacher & Student shared card view */}
+      {(teacherView) && !(!studentView && !teacherView) && (
+        <Grid container spacing={4}>
+          {courses.map((course) => (
+            <Grid item xs={12} sm={6} md={4} key={course.id}>
+              {console.log(course)}
+              <CourseCard
+                course={course}
+                departments={departments}
+                {...(teacherView
+                  ? { openModal, onDelete: handleDelete, role: "teacher" }
+                  : { role: "student" })}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+
+      {!studentView && (
+        <CourseModal
+          open={open}
+          mode={mode}
+          title={title}
+          departmentId={departmentId}
+          departments={departments}
+          onClose={closeModal}
+          onChangeTitle={setTitle}
+          onChangeDept={setDepartmentId}
+          onSubmit={handleSubmitModal}
+        />
       )}
 
       {/* Student View */}

@@ -76,7 +76,7 @@ app.use("/api/queries/grade", gradeQueryRoute);
 app.use("/api/queries/review", reviewQueryRoute);
 app.use("/api/queries/attendance", attendanceQueryRoute);
 app.use("/api/queries/assignment-grade", assignmentGradeQueryRoute);
-app.use("/api/queries/student-course", studentCourseQueryRoute);
+app.use("/api/queries/student-courses", studentCourseQueryRoute);
 app.use("/api/queries/student-exam", studentExamQueryRoute);
 
 // ----- Command APIs (writes to SQL + syncs Mongo) -----

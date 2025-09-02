@@ -9,13 +9,16 @@ const Course = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    enrollment_key: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     timestamps: false,
   }
 );
 
-// Lidhjet me onDelete/onUpdate të plotë
 Department.hasMany(Course, {
   foreignKey: "departmentId",
   onDelete: "CASCADE",

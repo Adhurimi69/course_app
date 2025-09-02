@@ -45,43 +45,43 @@ exports.list = async (req, res) => {
   res.json(entries);
 };
 
-exports.getEnrolledCourses = async (req, res) => {
-  const { studentId } = req.params;
-
-  try {
-    const student = await Student.findByPk(studentId);
-    if (!student) return res.status(404).json({ message: "Student not found" });
-
-    const enrolledCourses = await student.getCourses({
-      attributes: ['id', 'title', 'departmentId']
-    });
-    res.json(enrolledCourses);
-  } catch (err) {
-    console.error("Error fetching enrolled courses:", err);
-    res.status(500).json({ error: "Internal server error" });
+exports.enrollWithCourseKey = async (req, res) => {
+  const { studentId, courseId, key } = req.body;
+  if (!studentId || !courseId || key == null) {
+    return res.status(400).json({ message: "studentId, courseId and key are required" });
   }
-};
-
-exports.getAvailableCourses = async (req, res) => {
-  const { studentId } = req.params;
 
   try {
-    const student = await Student.findByPk(studentId);
+    const [student, course] = await Promise.all([
+      Student.findByPk(studentId, { attributes: ["id", "name", "email"] }),
+      Course.findByPk(courseId,  { attributes: ["id", "title", "departmentId", "enrollmentKey"] }),
+    ]);
     if (!student) return res.status(404).json({ message: "Student not found" });
+    if (!course)  return res.status(404).json({ message: "Course not found" });
 
-    const enrolledCourses = await student.getCourses({ attributes: ['id'] });
-    const enrolledIds = enrolledCourses.map((c) => c.id);
+    // Validate like a password (plain compare)
+    if (course.enrollmentKey && course.enrollmentKey !== key) {
+      return res.status(403).json({ message: "Invalid enrollment key" });
+    }
+    // If course.enrollmentKey is null, treat as open-enrollment (optional).
 
-    const availableCourses = await Course.findAll({
-      where: {
-        id: { [Op.notIn]: enrolledIds }
-      },
-      attributes: ['id', 'title', 'departmentId']
+    let entry;
+    try {
+      entry = await StudentCourse.create({ studentId, courseId });
+    } catch (e) {
+      if (e instanceof UniqueConstraintError) {
+        return res.status(409).json({ message: "Student already enrolled in this course" });
+      }
+      throw e;
+    }
+
+    return res.status(201).json({
+      student,
+      course: { id: course.id, title: course.title, departmentId: course.departmentId },
+      enrolledAt: entry.createdAt,
     });
-
-    res.json(availableCourses);
   } catch (err) {
-    console.error("Error fetching available courses:", err);
-    res.status(500).json({ error: "Internal server error" });
+    console.error("EnrollWithCourseKey error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };

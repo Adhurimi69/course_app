@@ -121,7 +121,7 @@ export default function CourseLayout({ studentView = false }) {
 
           {lectures.map((lec) => (
             <Box key={lec.lectureId} sx={{ mb: 4 }}>
-              <Box sx={{ border: "1px solid #ddd", borderRadius: 1, p: 2 }}>
+              <Box sx={{ border: "1px solid #ddd", backgroundColor:"white", borderRadius: 1, p: 2 }}>
                 <Typography variant="h6">{lec.title}</Typography>
 
                 {/* Edit/Delete Lecture (teachers only) */}
@@ -232,7 +232,7 @@ export default function CourseLayout({ studentView = false }) {
           {exams.map((e) => (
             <Box
               key={e.examId}
-              sx={{ border: "1px solid #ddd", borderRadius: 1, p: 2, mb: 2 }}
+              sx={{ border: "1px solid #ddd", backgroundColor: "white", borderRadius: 1, p: 2, mb: 2 }}
             >
               <Typography>{e.title}</Typography>
               <Typography variant="caption" color="textSecondary">

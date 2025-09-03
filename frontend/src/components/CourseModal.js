@@ -23,6 +23,8 @@ export default function CourseModal({
   onChangeTitle,
   onChangeDept,
   onSubmit,
+  onChangeImage,  // function to handle file input
+  previewImage,    // base64 string for preview
 }) {
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -57,6 +59,33 @@ export default function CourseModal({
               ))}
             </Select>
           </FormControl>
+
+          {/* Image Upload */}
+          <Button variant="outlined" component="label">
+            Upload Image
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={onChangeImage} // call parent handler
+            />
+          </Button>
+
+          {/* Preview */}
+          {previewImage && (
+            <Box mt={2}>
+              <img
+                src={previewImage}
+                alt="Preview"
+                style={{
+                  width: "100%",
+                  maxHeight: "200px",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
+              />
+            </Box>
+          )}
         </Box>
       </DialogContent>
       <DialogActions>

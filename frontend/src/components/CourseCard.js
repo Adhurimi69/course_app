@@ -28,6 +28,9 @@ export default function CourseCard({
     }
   };
 
+  // Load persisted image
+  const persistedImage = localStorage.getItem(`course_img_${course.courseId}`);
+
 
   return (
     <Box className="relative bg-white rounded-2xl shadow-lg p-4 flex flex-col h-full">

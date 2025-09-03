@@ -30,6 +30,11 @@ export default function Courses({ teacherView = false, studentView = false }) {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [availableCourses, setAvailableCourses] = useState([]);
 
+  // IMAGE STATES
+  const [selectedImageCourseId, setSelectedImageCourseId] = useState(null);
+  const [pendingImageBase64, setPendingImageBase64] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
   // Admin inline form states
   const [title, setTitle] = useState("");
   const [departmentId, setDepartmentId] = useState("");
@@ -67,17 +72,29 @@ export default function Courses({ teacherView = false, studentView = false }) {
 
   const fetchStudentCourses = async () => {
     try {
-      // const enrolledRes = await axios.get(
-      //   `http://localhost:5000/api/commands/student-courses/enrolled/${studentId}`
-      // );
       const availableRes = await axios.get(
         `http://localhost:5000/api/queries/courses`
       );
-      // setEnrolledCourses(enrolledRes.data);
       setAvailableCourses(availableRes.data);
     } catch (err) {
       console.error("Error fetching student courses:", err);
     }
+  };
+
+  // IMAGE UPLOAD HANDLER
+  const handleCourseImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreviewImage(reader.result);
+      if (selectedImageCourseId) {
+        localStorage.setItem(`course_img_${selectedImageCourseId}`, reader.result);
+      } else {
+        setPendingImageBase64(reader.result); // new course temporary
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   const enrollCourse = async (courseId) => {
@@ -96,12 +113,18 @@ export default function Courses({ teacherView = false, studentView = false }) {
     setMode(action);
     if (action === "edit" && course) {
       setEditingId(course.courseId);
+      setSelectedImageCourseId(course.courseId);
       setTitle(course.title);
       setDepartmentId(course.departmentId);
+      setPreviewImage(localStorage.getItem(`course_img_${course.courseId}`) || null);
+      setPendingImageBase64(null);
     } else {
       setEditingId(null);
+      setSelectedImageCourseId(null);
       setTitle("");
       setDepartmentId("");
+      setPreviewImage(null);
+      setPendingImageBase64(null);
     }
     setOpen(true);
   };
@@ -117,7 +140,12 @@ export default function Courses({ teacherView = false, studentView = false }) {
           payload
         );
       } else {
-        await axios.post("http://localhost:5000/api/commands/courses", payload);
+        const res = await axios.post("http://localhost:5000/api/commands/courses", payload);
+        const newCourseId = res.data.courseId || res.data.id; 
+        if (pendingImageBase64) {
+          localStorage.setItem(`course_img_${newCourseId}`, pendingImageBase64);
+          setPendingImageBase64(null);
+        }
       }
       closeModal();
       fetchCourses();
@@ -156,8 +184,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
     if (!window.confirm("Delete this course?")) return;
     try {
       await axios.delete(`http://localhost:5000/api/commands/courses/${id}`);
-      if (studentView) fetchStudentCourses();
-      else fetchCourses();
+      fetchCourses();
     } catch (err) {
       console.error(err);
     }
@@ -173,71 +200,69 @@ export default function Courses({ teacherView = false, studentView = false }) {
       {!teacherView && !studentView && (
         <>
           <Box
-      component="form"
-      onSubmit={handleSubmit}
-      sx={{
-        display: "flex",
-        gap: 2,
-        alignItems: "center",
-        mb: 3,
-        backgroundColor: "#f3e5f5",
-        p: 2,
-        borderRadius: 2,
-        boxShadow: 1,
-        flexWrap: "wrap",
-      }}
-    >
-      <TextField
-        label="Course Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        required
-        size="small"
-        sx={{ minWidth: 200, backgroundColor: "#fff" }}
-      />
-      <Select
-        value={departmentId}
-        onChange={(e) => setDepartmentId(e.target.value)}
-        displayEmpty
-        required
-        size="small"
-        sx={{ minWidth: 220, backgroundColor: "#fff" }}
-      >
-        <MenuItem value="">
-          <em>-- Select Department --</em>
-        </MenuItem>
-        {departments.map((d) => (
-          <MenuItem key={d.departmentId} value={d.departmentId}>
-            {d.name}
-          </MenuItem>
-        ))}
-      </Select>
-      <Button
-        variant="contained"
-        color="secondary"
-        type="submit"
-        size="medium"
-        sx={{ height: 40, minWidth: 120 }}
-      >
-        {editingId ? "Update" : "Add"}
-      </Button>
-
-      {/* Cancel button only shows during editing */}
-      {editingId && (
-        <Button
-          variant="outlined"
-          color="inherit"
-          size="medium"
-          onClick={() => {
-            setEditingId(null);
-            setTitle("");
-            setDepartmentId("");
-          }}
-        >
-          Cancel
-        </Button>
-      )}
-    </Box>
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{
+              display: "flex",
+              gap: 2,
+              alignItems: "center",
+              mb: 3,
+              backgroundColor: "#f3e5f5",
+              p: 2,
+              borderRadius: 2,
+              boxShadow: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            <TextField
+              label="Course Title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              size="small"
+              sx={{ minWidth: 200, backgroundColor: "#fff" }}
+            />
+            <Select
+              value={departmentId}
+              onChange={(e) => setDepartmentId(e.target.value)}
+              displayEmpty
+              required
+              size="small"
+              sx={{ minWidth: 220, backgroundColor: "#fff" }}
+            >
+              <MenuItem value="">
+                <em>-- Select Department --</em>
+              </MenuItem>
+              {departments.map((d) => (
+                <MenuItem key={d.departmentId} value={d.departmentId}>
+                  {d.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Button
+              variant="contained"
+              color="secondary"
+              type="submit"
+              size="medium"
+              sx={{ height: 40, minWidth: 120 }}
+            >
+              {editingId ? "Update" : "Add"}
+            </Button>
+            {editingId && (
+              <Button
+                variant="outlined"
+                color="inherit"
+                size="medium"
+                onClick={() => {
+                  setEditingId(null);
+                  setTitle("");
+                  setDepartmentId("");
+                }}
+              >
+                Cancel
+              </Button>
+            )}
+          </Box>
 
           {/* Admin Courses Table */}
           <Paper elevation={3}>
@@ -283,14 +308,16 @@ export default function Courses({ teacherView = false, studentView = false }) {
         </Box>
       )}
 
-      {/* Teacher & Student shared card view */}
+      {/* Teacher & Student card view */}
       {(teacherView) && !(!studentView && !teacherView) && (
         <Grid container spacing={4}>
           {courses.map((course) => (
-            <Grid item xs={12} sm={6} md={4} key={course.id}>
-              {console.log(course)}
+            <Grid item xs={12} sm={6} md={4} key={course.courseId}>
               <CourseCard
-                course={course}
+                course={{
+                  ...course,
+                  imageUrl: localStorage.getItem(`course_img_${course.courseId}`) || null
+                }}
                 departments={departments}
                 {...(teacherView
                   ? { openModal, onDelete: handleDelete, role: "teacher" }
@@ -312,6 +339,8 @@ export default function Courses({ teacherView = false, studentView = false }) {
           onChangeTitle={setTitle}
           onChangeDept={setDepartmentId}
           onSubmit={handleSubmitModal}
+          onChangeImage={handleCourseImageUpload}
+          previewImage={previewImage}
         />
       )}
 
@@ -323,7 +352,10 @@ export default function Courses({ teacherView = false, studentView = false }) {
             {enrolledCourses.map((course) => (
               <Grid item xs={12} sm={6} md={4} key={course.courseId}>
                 <CourseCard
-                  course={course}
+                  course={{
+                    ...course,
+                    imageUrl: localStorage.getItem(`course_img_${course.courseId}`) || null
+                  }}
                   isEnrolled
                   departments={departments}
                   role="student"
@@ -337,7 +369,10 @@ export default function Courses({ teacherView = false, studentView = false }) {
             {availableCourses.map((course) => (
               <Grid item xs={12} sm={6} md={4} key={course.courseId}>
                 <CourseCard
-                  course={course}
+                  course={{
+                    ...course,
+                    imageUrl: localStorage.getItem(`course_img_${course.courseId}`) || null
+                  }}
                   departments={departments}
                   role="student"
                   onEnroll={() => enrollCourse(course.courseId)}

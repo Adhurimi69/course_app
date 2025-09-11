@@ -1,111 +1,79 @@
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const Student = require("../../models/sql/student");
+const { signAccessToken, signRefreshToken, verifyRefresh } = require("../../middleware/tokens");
+
+const COOKIE_NAME = "jwt";
+const IDLE_MS = Number(process.env.IDLE_TIMEOUT_MS || 30 * 60 * 1000);
+
+function setRefreshCookie(res, token) {
+  res.cookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "Strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+}
 
 // LOGIN
 const loginStudent = async (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
-    return res
-      .status(400)
-      .json({ message: "Email and password are required." });
+  if (!email || !password) return res.status(400).json({ message: "Email and password are required." });
 
-  try {
-    const student = await Student.findOne({ where: { email } });
-    if (!student)
-      return res.status(401).json({ message: "Invalid credentials" });
+  const student = await Student.findOne({ where: { email } });
+  if (!student) return res.status(401).json({ message: "Invalid credentials" });
 
-    const isMatch = await bcrypt.compare(password, student.password);
-    if (!isMatch)
-      return res.status(401).json({ message: "Invalid credentials" });
+  const isMatch = await bcrypt.compare(password, student.password);
+  if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
 
-    const accessToken = jwt.sign(
-      { id: student.id, email: student.email, role: student.role },
-      process.env.JWT_SECRET || "accesssecret",
-      { expiresIn: "15m" }
-    );
+  const now = Date.now();
+  const accessToken = signAccessToken(student);
+  const refreshToken = signRefreshToken(student, { lastSeen: now });
 
-    const refreshToken = jwt.sign(
-      { id: student.id, email: student.email, role: student.role },
-      process.env.JWT_REFRESH_SECRET || "refreshsecret",
-      { expiresIn: "7d" }
-    );
+  student.refreshToken = refreshToken;
+  await student.save();
 
-    student.refreshToken = refreshToken;
-    await student.save();
-
-    res.cookie("jwt", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.json({ accessToken });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  setRefreshCookie(res, refreshToken);
+  res.json({ accessToken });
 };
 
 // REFRESH
 const handleRefreshToken = async (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(401);
+  const incoming = req.cookies?.[COOKIE_NAME];
+  if (!incoming) return res.sendStatus(401);
 
-  const refreshToken = cookies.jwt;
+  const student = await Student.findOne({ where: { refreshToken: incoming } });
+  if (!student) return res.sendStatus(403);
 
-  try {
-    const student = await Student.findOne({ where: { refreshToken } });
-    if (!student) return res.sendStatus(403); // Forbidden
+  let decoded;
+  try { decoded = verifyRefresh(incoming); } catch { return res.sendStatus(403); }
 
-    jwt.verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET || "refreshsecret",
-      (err, decoded) => {
-        if (err || student.email !== decoded.email) return res.sendStatus(403);
+  const now = Date.now();
+  const lastSeen = decoded?.smeta?.lastSeen ?? now;
 
-        const accessToken = jwt.sign(
-          { id: student.id, email: student.email, role: student.role },
-          process.env.JWT_SECRET || "accesssecret",
-          { expiresIn: "15m" }
-        );
-
-        res.json({ accessToken });
-      }
-    );
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  if (IDLE_MS && now - lastSeen > IDLE_MS) {
+    student.refreshToken = null; await student.save();
+    res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: "Strict", secure: process.env.NODE_ENV === "production" });
+    return res.status(401).json({ message: "Session expired (idle timeout)" });
   }
+
+  const accessToken = signAccessToken(student);
+  const newRefresh = signRefreshToken(student, { lastSeen: now });
+  student.refreshToken = newRefresh; await student.save();
+
+  setRefreshCookie(res, newRefresh);
+  res.json({ accessToken });
 };
 
 // LOGOUT
 const handleLogout = async (req, res) => {
-  const cookies = req.cookies;
-  if (!cookies?.jwt) return res.sendStatus(204); // No content
+  const token = req.cookies?.[COOKIE_NAME];
+  if (!token) return res.sendStatus(204);
 
-  const refreshToken = cookies.jwt;
+  const student = await Student.findOne({ where: { refreshToken: token } });
+  if (student) { student.refreshToken = null; await student.save(); }
 
-  try {
-    const student = await Student.findOne({ where: { refreshToken } });
-    if (student) {
-      student.refreshToken = null;
-      await student.save();
-    }
-
-    res.clearCookie("jwt", {
-      httpOnly: true,
-      sameSite: "Strict",
-      secure: process.env.NODE_ENV === "production",
-    });
-
-    res.sendStatus(204);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+  res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: "Strict", secure: process.env.NODE_ENV === "production" });
+  res.sendStatus(204);
 };
 
-module.exports = {
-  loginStudent,
-  handleRefreshToken,
-  handleLogout,
-};
+module.exports = { loginStudent, handleRefreshToken, handleLogout };

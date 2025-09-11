@@ -1,12 +1,38 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
+import { useAuth } from "../context/authContext"; // uses your updated context
 
 const RoleSelectPage = () => {
   const navigate = useNavigate();
+  const { user, setAccessToken } = useAuth(); // user?.role from decoded token
 
-  const handleRoleSelect = (role) => {
-    navigate(`/login/${role}`);
+  const go = (role) => {
+    // already logged in with this role → straight to dashboard
+    if (user?.role === role) {
+      navigate(`/${role}s`);
+    } else {
+      // different role or not authed → go to that role’s login
+      navigate(`/login/${role}`);
+    }
+  };
+
+  // Try restoring via refresh cookie, then route. Fallback to login.
+  const tryRestoreThenGo = async (role) => {
+    // If already authed as same role, skip network
+    if (user?.role === role) return navigate(`/${role}s`);
+    try {
+      const res = await fetch(`/api/auth/${role}s/refresh`, {
+        method: "GET",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json(); // { accessToken }
+        if (setAccessToken) setAccessToken(data.accessToken);
+        return navigate(`/${role}s`);
+      }
+    } catch (_) {}
+    go(role);
   };
 
   return (
@@ -14,9 +40,9 @@ const RoleSelectPage = () => {
       <div style={styles.card}>
         <h2 style={styles.title}>Sign in as</h2>
         <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-          <Button onClick={() => handleRoleSelect("admin")}>Admin</Button>
-          <Button onClick={() => handleRoleSelect("teacher")}>Teacher</Button>
-          <Button onClick={() => handleRoleSelect("student")}>Student</Button>
+          <Button onClick={() => tryRestoreThenGo("admin")}>Admin</Button>
+          <Button onClick={() => tryRestoreThenGo("teacher")}>Teacher</Button>
+          <Button onClick={() => tryRestoreThenGo("student")}>Student</Button>
         </div>
       </div>
     </div>

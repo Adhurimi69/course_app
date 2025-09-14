@@ -13,6 +13,7 @@ export default function CourseCard({
   role = "admin", // default fallback
   isEnrolled = false, // 👈 ADD
   onEnroll,
+  onUnEnroll
 }) {
   const navigate = useNavigate();
 
@@ -112,10 +113,16 @@ export default function CourseCard({
                 Enroll
               </Button>
             ) : (
-              <></>
+              <Button
+                variant="outlined"
+                color="error"
+                size="small"
+                onClick={() => onUnEnroll(course.courseId)}
+              >
+                Unenroll
+              </Button>
             )
           ) : null
-
         }
       </Box>
     </Box>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -74,7 +75,17 @@ export default function Courses({ teacherView = false, studentView = false }) {
       console.error(err);
     }
   };
-
+  // Unenroll function for student
+  const unEnrollCourse = async (courseId) => {
+    try {
+      await axios.delete("http://localhost:5000/api/commands/student-courses", {
+        data: { studentId, courseId }
+      });
+      fetchStudentCourses();
+    } catch (err) {
+      console.error("Unenrollment failed:", err);
+    }
+  };
   const fetchDepartments = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/queries/departments");
@@ -360,6 +371,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
                   isEnrolled
                   departments={departments}
                   role="student"
+                  onUnEnroll={unEnrollCourse}
                 />
               </Grid>
             ))}

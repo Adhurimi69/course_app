@@ -42,6 +42,13 @@ const LoginPage = () => {
     const decoded = jwtDecode(accessToken);
     console.log("Decoded JWT token:", decoded);
 
+    // Save user info in a consistent format
+    localStorage.setItem("user", JSON.stringify({
+      id: decoded?.id,
+      username: decoded?.username,
+      role: decoded?.role
+    }));
+
     const role = decoded?.role;
 
     if (["admin", "teacher", "student"].includes(role)) {

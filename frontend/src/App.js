@@ -22,6 +22,7 @@ import Exams from "./Views/Exams";
 import Courses from "./Views/Courses";
 import TeacherDashboard from "./Views/TeacherDashboard";
 import StudentDashboard from "./Views/StudentDashboard";
+import StudentCoursesHome from "./Views/StudentCoursesHome";
 import CourseLayout from "./components/CourseLayout";
 
 function RoleLayout({ role }) {
@@ -129,7 +130,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="courses" replace />} />
+        <Route index element={<StudentCoursesHome />} />
         <Route
           path="courses"
           element={

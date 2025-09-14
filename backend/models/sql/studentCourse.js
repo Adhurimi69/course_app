@@ -20,9 +20,17 @@ const StudentCourse = sequelize.define("StudentCourse", {
     },
     allowNull: false,
   },
+  enrollmentKey: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 }, { timestamps: false });
+
 
 Student.belongsToMany(Course, { through: StudentCourse, foreignKey: 'studentId' });
 Course.belongsToMany(Student, { through: StudentCourse, foreignKey: 'courseId' });
+
+StudentCourse.belongsTo(Course, { foreignKey: 'courseId' });
+StudentCourse.belongsTo(Student, { foreignKey: 'studentId' });
 
 module.exports = StudentCourse;

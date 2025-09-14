@@ -4,14 +4,14 @@ const { CourseReadModel } = require("../../models/nosql/courseReadModel");
 
 const createCourse = async (req, res) => {
   try {
-    const { title, departmentId } = req.body;
+    const { title, departmentId, enrollmentKey } = req.body;
 
     const department = await Department.findByPk(departmentId);
     if (!department) {
       return res.status(400).json({ error: "Invalid departmentId" });
     }
 
-    const newCourse = await Course.create({ title, departmentId });
+    const newCourse = await Course.create({ title, departmentId, enrollment_key: enrollmentKey || null });
 
     // Sync to MongoDB
     await CourseReadModel.create({
@@ -21,6 +21,7 @@ const createCourse = async (req, res) => {
       departmentName: department.name,
       createdAt: newCourse.createdAt,
       updatedAt: newCourse.updatedAt,
+      enrollmentKey: newCourse.enrollment_key,
     });
 
     res.status(201).json(newCourse);
@@ -32,7 +33,7 @@ const createCourse = async (req, res) => {
 const updateCourse = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, departmentId } = req.body;
+    const { title, departmentId, enrollmentKey } = req.body;
 
     const course = await Course.findByPk(id);
     if (!course) {
@@ -49,6 +50,7 @@ const updateCourse = async (req, res) => {
     }
 
     course.title = title || course.title;
+    if (enrollmentKey !== undefined) course.enrollment_key = enrollmentKey;
     await course.save();
 
     // Update Mongo
@@ -59,6 +61,7 @@ const updateCourse = async (req, res) => {
         departmentId: departmentId || course.departmentId,
         departmentName: department ? department.name : undefined,
         updatedAt: new Date(),
+        enrollmentKey: course.enrollment_key,
       }
     );
 

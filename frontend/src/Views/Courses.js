@@ -1,4 +1,8 @@
 import React, { useEffect, useState } from "react";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import { useLocation } from "react-router-dom";
 import axios from "axios";
 import {
@@ -19,7 +23,10 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import CourseModal from "../components/CourseModal";
 import CourseCard from "../components/CourseCard";
-
+import openModal from "../components/CourseModal";
+import closeModal from "../components/CourseModal";
+import handleSubmitModal from "../components/CourseModal";
+import "./AdminDashboard.css";
 export default function Courses({ teacherView = false, studentView = false }) {
   const location = useLocation();
   const isViewingCourse = /^\/students\/courses\/\d+/.test(location.pathname);
@@ -38,10 +45,17 @@ export default function Courses({ teacherView = false, studentView = false }) {
   // Admin inline form states
   const [title, setTitle] = useState("");
   const [departmentId, setDepartmentId] = useState("");
+  const [enrollmentKey, setEnrollmentKey] = useState("");
   const [editingId, setEditingId] = useState(null);
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("create");
+  // Track key input per course
+  const [keyInputs, setKeyInputs] = useState({});
+  // Modal state for key entry
+  const [keyModalOpen, setKeyModalOpen] = useState(false);
+  const [modalCourseId, setModalCourseId] = useState(null);
+  const [modalKey, setModalKey] = useState("");
 
   useEffect(() => {
     fetchDepartments();
@@ -72,8 +86,12 @@ export default function Courses({ teacherView = false, studentView = false }) {
 
   const fetchStudentCourses = async () => {
     try {
+      const enrolledRes = await axios.get(
+        `http://localhost:5000/api/commands/student-courses/enrolled/${studentId}`
+      );
+      setEnrolledCourses(enrolledRes.data);
       const availableRes = await axios.get(
-        `http://localhost:5000/api/queries/courses`
+        `http://localhost:5000/api/commands/student-courses/available/${studentId}`
       );
       setAvailableCourses(availableRes.data);
     } catch (err) {
@@ -97,68 +115,42 @@ export default function Courses({ teacherView = false, studentView = false }) {
     reader.readAsDataURL(file);
   };
 
-  const enrollCourse = async (courseId) => {
+  const enrollCourse = async (courseId, key = "") => {
     try {
       await axios.post("http://localhost:5000/api/commands/student-courses", {
         studentId,
         courseId,
+        key
       });
-      fetchStudentCourses();
+      fetchStudentCourses(); // Refresh lists
     } catch (err) {
       console.error("Enrollment failed:", err);
     }
   };
 
-  const openModal = (action, course = null) => {
-    setMode(action);
-    if (action === "edit" && course) {
-      setEditingId(course.courseId);
-      setSelectedImageCourseId(course.courseId);
-      setTitle(course.title);
-      setDepartmentId(course.departmentId);
-      setPreviewImage(localStorage.getItem(`course_img_${course.courseId}`) || null);
-      setPendingImageBase64(null);
+  const handleEnrollClick = (course) => {
+    const courseId = course.courseId || course.id;
+    // If course requires key, show modal
+    if (course.hasEnrollmentKey) {
+      setModalCourseId(courseId);
+      setModalKey("");
+      setKeyModalOpen(true);
     } else {
-      setEditingId(null);
-      setSelectedImageCourseId(null);
-      setTitle("");
-      setDepartmentId("");
-      setPreviewImage(null);
-      setPendingImageBase64(null);
-    }
-    setOpen(true);
-  };
-  const closeModal = () => setOpen(false);
-
-  const handleSubmitModal = async () => {
-    if (!departmentId) return alert("Please select a department.");
-    const payload = { title, departmentId };
-    try {
-      if (mode === "edit") {
-        await axios.put(
-          `http://localhost:5000/api/commands/courses/${editingId}`,
-          payload
-        );
-      } else {
-        const res = await axios.post("http://localhost:5000/api/commands/courses", payload);
-        const newCourseId = res.data.courseId || res.data.id; 
-        if (pendingImageBase64) {
-          localStorage.setItem(`course_img_${newCourseId}`, pendingImageBase64);
-          setPendingImageBase64(null);
-        }
-      }
-      closeModal();
-      fetchCourses();
-    } catch (err) {
-      console.error(err);
+      enrollCourse(courseId);
     }
   };
 
+  const handleModalEnroll = () => {
+    enrollCourse(modalCourseId, modalKey);
+    setKeyModalOpen(false);
+  };
+  
   // Admin add/update course
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!departmentId) return alert("Please select a department.");
     const payload = { title, departmentId };
+    if (enrollmentKey) payload.enrollmentKey = enrollmentKey;
     try {
       if (editingId) {
         await axios.put(`http://localhost:5000/api/commands/courses/${editingId}`, payload);
@@ -168,6 +160,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
       }
       setTitle("");
       setDepartmentId("");
+      setEnrollmentKey("");
       fetchCourses();
     } catch (err) {
       console.error(err);
@@ -239,6 +232,14 @@ export default function Courses({ teacherView = false, studentView = false }) {
                 </MenuItem>
               ))}
             </Select>
+            <TextField
+              label="Enrollment Key (optional)"
+              value={enrollmentKey}
+              onChange={e => setEnrollmentKey(e.target.value)}
+              size="small"
+              sx={{ minWidth: 200, backgroundColor: "#fff" }}
+              helperText="Leave blank for open enrollment"
+            />
             <Button
               variant="contained"
               color="secondary"
@@ -366,22 +367,45 @@ export default function Courses({ teacherView = false, studentView = false }) {
 
           <Typography variant="h5" mt={6} gutterBottom>Available Courses</Typography>
           <Grid container spacing={4}>
-            {availableCourses.map((course) => (
-              <Grid item xs={12} sm={6} md={4} key={course.courseId}>
-                <CourseCard
-                  course={{
-                    ...course,
-                    imageUrl: localStorage.getItem(`course_img_${course.courseId}`) || null
-                  }}
-                  departments={departments}
-                  role="student"
-                  onEnroll={() => enrollCourse(course.courseId)}
-                />
-              </Grid>
-            ))}
+            {availableCourses.map((course) => {
+              const courseId = course.courseId || course.id;
+              return (
+                <Grid item xs={12} sm={6} md={4} key={courseId}>
+                  <CourseCard
+                    course={{
+                      ...course,
+                      imageUrl: localStorage.getItem(`course_img_${courseId}`) || null
+                    }}
+                    departments={departments}
+                    role="student"
+                    onEnroll={handleEnrollClick}
+                  />
+                </Grid>
+              );
+            })}
           </Grid>
+
+          {/* Enrollment Key Modal */}
+          <Dialog open={keyModalOpen} onClose={() => setKeyModalOpen(false)}>
+            <DialogTitle>Enter Enrollment Key</DialogTitle>
+            <DialogContent>
+              <TextField
+                label="Enrollment Key"
+                value={modalKey}
+                onChange={e => setModalKey(e.target.value)}
+                fullWidth
+                autoFocus
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setKeyModalOpen(false)}>Cancel</Button>
+              <Button onClick={handleModalEnroll} variant="contained" color="primary">Enroll</Button>
+            </DialogActions>
+          </Dialog>
         </>
       )}
+      
     </Box>
   );
 }
+  

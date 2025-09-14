@@ -107,7 +107,7 @@ export default function CourseCard({
               <Button
                 variant="contained"
                 size="small"
-                onClick={() => onEnroll(course.id)}
+                onClick={() => onEnroll(course)}
               >
                 Enroll
               </Button>

@@ -19,9 +19,11 @@ export default function CourseModal({
   title,
   departmentId,
   departments,
+  enrollmentKey,
   onClose,
   onChangeTitle,
   onChangeDept,
+  onChangeEnrollmentKey,
   onSubmit,
   onChangeImage,  // function to handle file input
   previewImage,    // base64 string for preview
@@ -59,6 +61,15 @@ export default function CourseModal({
               ))}
             </Select>
           </FormControl>
+
+          {/* Enrollment Key */}
+          <TextField
+            label="Enrollment Key (optional)"
+            value={enrollmentKey || ""}
+            onChange={(e) => onChangeEnrollmentKey(e.target.value)}
+            fullWidth
+            helperText="Leave blank for open enrollment"
+          />
 
           {/* Image Upload */}
           <Button variant="outlined" component="label">

@@ -10,8 +10,8 @@ export default function CourseCard({
   departments,
   openModal,
   onDelete,
-  role = "admin", // default fallback
-  isEnrolled = false, // 👈 ADD
+  role = "admin",
+  isEnrolled = false,
   onEnroll,
   onUnEnroll
 }) {
@@ -28,10 +28,6 @@ export default function CourseCard({
       navigate(`/teachers/courses/${course.courseId}`);
     }
   };
-
-  // Load persisted image
-  const persistedImage = localStorage.getItem(`course_img_${course.courseId}`);
-
 
   return (
     <Box className="relative bg-white rounded-2xl shadow-lg p-4 flex flex-col h-full">
@@ -66,64 +62,35 @@ export default function CourseCard({
         </Box>
       </Box>
 
-      <Box
-        mt="auto"
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
+      <Box mt="auto" display="flex" justifyContent="space-between" alignItems="center">
         {role === "admin" || role === "teacher" ? (
           <Box className="flex space-x-4">
-            {role !== "student" && (
-              <>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={() => openModal("edit", course)}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  size="small"
-                  onClick={() => onDelete(course.courseId)}
-                >
-                  Delete
-                </Button>
-              </>
-            )}
+            <Button variant="outlined" size="small" onClick={() => openModal("edit", course)}>
+              Edit
+            </Button>
+            <Button variant="contained" color="error" size="small" onClick={() => onDelete(course.courseId)}>
+              Delete
+            </Button>
             <Button variant="contained" size="small" onClick={handleViewClick}>
               View
             </Button>
           </Box>
-        ) : (
-          <Button variant="contained" size="small" onClick={handleViewClick}>
-            View Course
-          </Button>
-        )}
-        {
-          role === "student" ? (
-            !isEnrolled ? (
-              <Button
-                variant="contained"
-                size="small"
-                onClick={() => onEnroll(course)}
-              >
-                Enroll
+        ) : role === "student" ? (
+          !isEnrolled ? (
+            <Button variant="contained" size="small" onClick={() => onEnroll(course)}>
+              Enroll
+            </Button>
+          ) : (
+            <Box display="flex" gap={1}>
+              <Button variant="contained" size="small" onClick={handleViewClick}>
+                View
               </Button>
-            ) : (
-              <Button
-                variant="outlined"
-                color="error"
-                size="small"
-                onClick={() => onUnEnroll(course.courseId)}
-              >
+              <Button variant="outlined" color="error" size="small" onClick={() => onUnEnroll(course.courseId)}>
                 Unenroll
               </Button>
-            )
-          ) : null
-        }
+            </Box>
+          )
+        ) : null}
       </Box>
     </Box>
   );

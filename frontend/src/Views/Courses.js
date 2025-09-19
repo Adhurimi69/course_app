@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -24,10 +23,8 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import CourseModal from "../components/CourseModal";
 import CourseCard from "../components/CourseCard";
-import openModal from "../components/CourseModal";
-import closeModal from "../components/CourseModal";
-import handleSubmitModal from "../components/CourseModal";
 import "./AdminDashboard.css";
+
 export default function Courses({ teacherView = false, studentView = false }) {
   const location = useLocation();
   const isViewingCourse = /^\/students\/courses\/\d+/.test(location.pathname);
@@ -51,6 +48,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
 
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState("create");
+
   // Track key input per course
   const [keyInputs, setKeyInputs] = useState({});
   // Modal state for key entry
@@ -75,7 +73,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
       console.error(err);
     }
   };
-  // Unenroll function for student
+
   const unEnrollCourse = async (courseId) => {
     try {
       await axios.delete("http://localhost:5000/api/commands/student-courses", {
@@ -86,6 +84,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
       console.error("Unenrollment failed:", err);
     }
   };
+
   const fetchDepartments = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/queries/departments");
@@ -110,7 +109,6 @@ export default function Courses({ teacherView = false, studentView = false }) {
     }
   };
 
-  // IMAGE UPLOAD HANDLER
   const handleCourseImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -120,7 +118,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
       if (selectedImageCourseId) {
         localStorage.setItem(`course_img_${selectedImageCourseId}`, reader.result);
       } else {
-        setPendingImageBase64(reader.result); // new course temporary
+        setPendingImageBase64(reader.result);
       }
     };
     reader.readAsDataURL(file);
@@ -133,7 +131,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
         courseId,
         key
       });
-      fetchStudentCourses(); // Refresh lists
+      fetchStudentCourses();
     } catch (err) {
       console.error("Enrollment failed:", err);
     }
@@ -141,7 +139,6 @@ export default function Courses({ teacherView = false, studentView = false }) {
 
   const handleEnrollClick = (course) => {
     const courseId = course.courseId || course.id;
-    // If course requires key, show modal
     if (course.hasEnrollmentKey) {
       setModalCourseId(courseId);
       setModalKey("");
@@ -155,8 +152,7 @@ export default function Courses({ teacherView = false, studentView = false }) {
     enrollCourse(modalCourseId, modalKey);
     setKeyModalOpen(false);
   };
-  
-  // Admin add/update course
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!departmentId) return alert("Please select a department.");
@@ -194,230 +190,270 @@ export default function Courses({ teacherView = false, studentView = false }) {
     }
   };
 
-  return (
-    <Box p={3}>
-      <Typography variant="h4" gutterBottom>
-        Course Management
-      </Typography>
+  // --------- MODAL HANDLERS ----------
+  const openCourseModal = (mode = "create", course = null) => {
+    setMode(mode);
+    setOpen(true);
+    if (mode === "edit" && course) {
+      setEditingId(course.courseId);
+      setTitle(course.title);
+      setDepartmentId(course.departmentId);
+      setEnrollmentKey(course.enrollmentKey || "");
+      const img = localStorage.getItem(`course_img_${course.courseId}`);
+      setPreviewImage(img || null);
+    } else {
+      setEditingId(null);
+      setTitle("");
+      setDepartmentId("");
+      setEnrollmentKey("");
+      setPreviewImage(null);
+    }
+  };
 
-      {/* Admin Inline Form */}
-      {!teacherView && !studentView && (
-        <>
-          <Box
-            component="form"
-            onSubmit={handleSubmit}
-            sx={{
-              display: "flex",
-              gap: 2,
-              alignItems: "center",
-              mb: 3,
-              backgroundColor: "#f3e5f5",
-              p: 2,
-              borderRadius: 2,
-              boxShadow: 1,
-              flexWrap: "wrap",
-            }}
+  const closeCourseModal = () => {
+    setOpen(false);
+    setEditingId(null);
+    setTitle("");
+    setDepartmentId("");
+    setEnrollmentKey("");
+    setPreviewImage(null);
+  };
+
+  const submitCourseModal = (e) => {
+    handleSubmit(e);
+    closeCourseModal();
+  };
+
+  // --------- RENDER ----------
+return (
+  <Box p={3}>
+    <Typography variant="h4" gutterBottom>
+      Course Management
+    </Typography>
+
+    {/* Admin Inline Form */}
+    {!teacherView && !studentView && (
+      <>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{
+            display: "flex",
+            gap: 2,
+            alignItems: "center",
+            mb: 3,
+            backgroundColor: "#f3e5f5",
+            p: 2,
+            borderRadius: 2,
+            boxShadow: 1,
+            flexWrap: "wrap",
+          }}
+        >
+          <TextField
+            label="Course Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            size="small"
+            sx={{ minWidth: 200, backgroundColor: "#fff" }}
+          />
+          <Select
+            value={departmentId}
+            onChange={(e) => setDepartmentId(e.target.value)}
+            displayEmpty
+            required
+            size="small"
+            sx={{ minWidth: 220, backgroundColor: "#fff" }}
           >
-            <TextField
-              label="Course Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              size="small"
-              sx={{ minWidth: 200, backgroundColor: "#fff" }}
-            />
-            <Select
-              value={departmentId}
-              onChange={(e) => setDepartmentId(e.target.value)}
-              displayEmpty
-              required
-              size="small"
-              sx={{ minWidth: 220, backgroundColor: "#fff" }}
-            >
-              <MenuItem value="">
-                <em>-- Select Department --</em>
+            <MenuItem value="">
+              <em>-- Select Department --</em>
+            </MenuItem>
+            {departments.map((d) => (
+              <MenuItem key={d.departmentId} value={d.departmentId}>
+                {d.name}
               </MenuItem>
-              {departments.map((d) => (
-                <MenuItem key={d.departmentId} value={d.departmentId}>
-                  {d.name}
-                </MenuItem>
-              ))}
-            </Select>
-            <TextField
-              label="Enrollment Key (optional)"
-              value={enrollmentKey}
-              onChange={e => setEnrollmentKey(e.target.value)}
-              size="small"
-              sx={{ minWidth: 200, backgroundColor: "#fff" }}
-              helperText="Leave blank for open enrollment"
-            />
+            ))}
+          </Select>
+          <TextField
+            label="Enrollment Key (optional)"
+            value={enrollmentKey}
+            onChange={e => setEnrollmentKey(e.target.value)}
+            size="small"
+            sx={{ minWidth: 200, backgroundColor: "#fff" }}
+            helperText="Leave blank for open enrollment"
+          />
+          <Button
+            variant="contained"
+            color="secondary"
+            type="submit"
+            size="medium"
+            sx={{ height: 40, minWidth: 120 }}
+          >
+            {editingId ? "Update" : "Add"}
+          </Button>
+          {editingId && (
             <Button
-              variant="contained"
-              color="secondary"
-              type="submit"
+              variant="outlined"
+              color="inherit"
               size="medium"
-              sx={{ height: 40, minWidth: 120 }}
+              onClick={() => {
+                setEditingId(null);
+                setTitle("");
+                setDepartmentId("");
+              }}
             >
-              {editingId ? "Update" : "Add"}
+              Cancel
             </Button>
-            {editingId && (
-              <Button
-                variant="outlined"
-                color="inherit"
-                size="medium"
-                onClick={() => {
-                  setEditingId(null);
-                  setTitle("");
-                  setDepartmentId("");
-                }}
-              >
-                Cancel
-              </Button>
-            )}
-          </Box>
+          )}
+        </Box>
 
-          {/* Admin Courses Table */}
-          <Paper elevation={3}>
-            <Table>
-              <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
-                <TableRow>
-                  <TableCell><strong>ID</strong></TableCell>
-                  <TableCell><strong>Title</strong></TableCell>
-                  <TableCell><strong>Department</strong></TableCell>
-                  <TableCell align="right"><strong>Actions</strong></TableCell>
+        {/* Admin Courses Table */}
+        <Paper elevation={3}>
+          <Table>
+            <TableHead sx={{ backgroundColor: "#f3e5f5" }}>
+              <TableRow>
+                <TableCell><strong>ID</strong></TableCell>
+                <TableCell><strong>Title</strong></TableCell>
+                <TableCell><strong>Department</strong></TableCell>
+                <TableCell align="right"><strong>Actions</strong></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {courses.map((course) => (
+                <TableRow key={course.courseId}>
+                  <TableCell>{course.courseId}</TableCell>
+                  <TableCell>{course.title}</TableCell>
+                  <TableCell>
+                    {departments.find((d) => d.departmentId === course.departmentId)?.name || "N/A"}
+                  </TableCell>
+                  <TableCell align="right">
+                    <Button size="small" onClick={() => handleEdit(course)} sx={{ mr: 1 }}>
+                      Edit
+                    </Button>
+                    <Button size="small" color="error" onClick={() => handleDelete(course.courseId)}>
+                      Delete
+                    </Button>
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {courses.map((course) => (
-                  <TableRow key={course.courseId}>
-                    <TableCell>{course.courseId}</TableCell>
-                    <TableCell>{course.title}</TableCell>
-                    <TableCell>
-                      {departments.find((d) => d.departmentId === course.departmentId)?.name || "N/A"}
-                    </TableCell>
-                    <TableCell align="right">
-                      <Button size="small" onClick={() => handleEdit(course)} sx={{ mr: 1 }}>
-                        Edit
-                      </Button>
-                      <Button size="small" color="error" onClick={() => handleDelete(course.courseId)}>
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Paper>
-        </>
-      )}
+              ))}
+            </TableBody>
+          </Table>
+        </Paper>
+      </>
+    )}
 
-      {/* Teacher View */}
-      {teacherView && !studentView && (
+    {/* Teacher View */}
+    {teacherView && !studentView && (
+      <>
         <Box display="flex" justifyContent="flex-end" mb={2}>
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => openModal("create")}>
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => openCourseModal("create")}>
             Add Course
           </Button>
         </Box>
-      )}
-
-      {/* Teacher & Student card view */}
-      {(teacherView) && !(!studentView && !teacherView) && (
         <Grid container spacing={4}>
-          {courses.map((course) => (
-            <Grid item xs={12} sm={6} md={4} key={course.courseId}>
-              <CourseCard
-                course={{
-                  ...course,
-                  imageUrl: localStorage.getItem(`course_img_${course.courseId}`) || null
-                }}
-                departments={departments}
-                {...(teacherView
-                  ? { openModal, onDelete: handleDelete, role: "teacher" }
-                  : { role: "student" })}
-              />
-            </Grid>
-          ))}
-        </Grid>
-      )}
-
-      {!studentView && (
-        <CourseModal
-          open={open}
-          mode={mode}
-          title={title}
-          departmentId={departmentId}
-          departments={departments}
-          onClose={closeModal}
-          onChangeTitle={setTitle}
-          onChangeDept={setDepartmentId}
-          onSubmit={handleSubmitModal}
-          onChangeImage={handleCourseImageUpload}
-          previewImage={previewImage}
-        />
-      )}
-
-      {/* Student View */}
-      {studentView && !isViewingCourse && (
-        <>
-          <Typography variant="h5" mt={4} gutterBottom>Enrolled Courses</Typography>
-          <Grid container spacing={4}>
-            {enrolledCourses.map((course) => (
-              <Grid item xs={12} sm={6} md={4} key={course.courseId}>
+          {courses.map(course => {
+            const courseId = course.courseId || course.id;
+            return (
+              <Grid item xs={12} sm={6} md={4} key={courseId}>
                 <CourseCard
-                  course={{
-                    ...course,
-                    imageUrl: localStorage.getItem(`course_img_${course.courseId}`) || null
-                  }}
-                  isEnrolled
+                  course={{ ...course, imageUrl: localStorage.getItem(`course_img_${courseId}`) || null }}
                   departments={departments}
-                  role="student"
-                  onUnEnroll={unEnrollCourse}
+                  role="teacher"
+                  openModal={openCourseModal}
+                  onDelete={handleDelete}
                 />
               </Grid>
-            ))}
-          </Grid>
+            );
+          })}
+        </Grid>
+      </>
+    )}
 
-          <Typography variant="h5" mt={6} gutterBottom>Available Courses</Typography>
-          <Grid container spacing={4}>
-            {availableCourses.map((course) => {
-              const courseId = course.courseId || course.id;
-              return (
-                <Grid item xs={12} sm={6} md={4} key={courseId}>
-                  <CourseCard
-                    course={{
-                      ...course,
-                      imageUrl: localStorage.getItem(`course_img_${courseId}`) || null
-                    }}
-                    departments={departments}
-                    role="student"
-                    onEnroll={handleEnrollClick}
-                  />
-                </Grid>
-              );
-            })}
+    {/* Student View with visual separation */}
+{studentView && !isViewingCourse && (
+  <>
+    <Typography variant="h5" mt={6} gutterBottom>Enrolled Courses</Typography>
+    <Grid container spacing={4}>
+      {enrolledCourses.map(course => {
+        const courseId = course.courseId || course.id;
+        return (
+          <Grid item xs={12} sm={6} md={4} key={courseId}>
+            <CourseCard
+              course={{ ...course, imageUrl: localStorage.getItem(`course_img_${courseId}`) || null }}
+              departments={departments}
+              role="student"
+              isEnrolled={true} // 👈 shenon qe eshte enrolled
+              onEnroll={handleEnrollClick} // nuk do te shfaqet sepse isEnrolled=true
+              onUnEnroll={unEnrollCourse} // 👈 Unenroll button funksional
+            />
           </Grid>
+        );
+      })}
+    </Grid>
 
-          {/* Enrollment Key Modal */}
-          <Dialog open={keyModalOpen} onClose={() => setKeyModalOpen(false)}>
-            <DialogTitle>Enter Enrollment Key</DialogTitle>
-            <DialogContent>
-              <TextField
-                label="Enrollment Key"
-                value={modalKey}
-                onChange={e => setModalKey(e.target.value)}
-                fullWidth
-                autoFocus
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setKeyModalOpen(false)}>Cancel</Button>
-              <Button onClick={handleModalEnroll} variant="contained" color="primary">Enroll</Button>
-            </DialogActions>
-          </Dialog>
-        </>
-      )}
-      
-    </Box>
-  );
+    <Typography variant="h5" mt={6} gutterBottom>Available Courses</Typography>
+    <Grid container spacing={4}>
+      {availableCourses.map(course => {
+        const courseId = course.courseId || course.id;
+        return (
+          <Grid item xs={12} sm={6} md={4} key={courseId}>
+            <CourseCard
+              course={{ ...course, imageUrl: localStorage.getItem(`course_img_${courseId}`) || null }}
+              departments={departments}
+              role="student"
+              isEnrolled={false} // 👈 shenon qe nuk eshte enrolled
+              onEnroll={handleEnrollClick} // 👈 Enroll button funksional
+              onUnEnroll={unEnrollCourse} // nuk shfaqet sepse isEnrolled=false
+            />
+          </Grid>
+        );
+      })}
+    </Grid>
+  </>
+)}
+
+
+
+    {/* Course Modal */}
+    {!studentView && (
+      <CourseModal
+        open={open}
+        mode={mode}
+        title={title}
+        departmentId={departmentId}
+        departments={departments || []}
+        enrollmentKey={enrollmentKey}
+        onChangeEnrollmentKey={setEnrollmentKey}
+        onClose={closeCourseModal}
+        onChangeTitle={setTitle}
+        onChangeDept={setDepartmentId}
+        onSubmit={submitCourseModal}
+        onChangeImage={handleCourseImageUpload}
+        previewImage={previewImage}
+      />
+    )}
+
+    {/* Enrollment Key Modal */}
+    {studentView && !isViewingCourse && (
+      <Dialog open={keyModalOpen} onClose={() => setKeyModalOpen(false)}>
+        <DialogTitle>Enter Enrollment Key</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Enrollment Key"
+            value={modalKey}
+            onChange={e => setModalKey(e.target.value)}
+            fullWidth
+            autoFocus
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setKeyModalOpen(false)}>Cancel</Button>
+          <Button onClick={handleModalEnroll} variant="contained" color="primary">Enroll</Button>
+        </DialogActions>
+      </Dialog>
+    )}
+
+  </Box>
+);
+
 }
-  

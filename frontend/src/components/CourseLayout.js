@@ -1,5 +1,4 @@
 // src/Views/CourseLayout.js
-
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
@@ -12,11 +11,16 @@ import ExamModal from "../components/ExamModal";
 
 export default function CourseLayout({ studentView = false }) {
   const { courseId } = useParams();
+  const studentId = JSON.parse(localStorage.getItem("user"))?.id;
 
   const [lectures, setLectures] = useState([]);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // student upload state
+  const [selectedFiles, setSelectedFiles] = useState({});
+  const [uploading, setUploading] = useState({});
 
   // Lecture modal state
   const [openLectureModal, setOpenLectureModal] = useState(false);
@@ -30,6 +34,35 @@ export default function CourseLayout({ studentView = false }) {
   // Exam modal state
   const [openExamModal, setOpenExamModal] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
+
+  // ---- student upload handlers ----
+  const handleSelectFile = (assignmentId, file) => {
+    setSelectedFiles((prev) => ({ ...prev, [assignmentId]: file }));
+  };
+
+  const handleUpload = async (assignmentId) => {
+    const file = selectedFiles[assignmentId];
+    if (!file) return alert("Choose a file first.");
+    if (!studentId) return alert("Not logged in.");
+
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("assignmentId", assignmentId);
+    fd.append("studentId", studentId);
+
+    try {
+      setUploading((p) => ({ ...p, [assignmentId]: true }));
+      await axios.post(`http://localhost:5000/api/commands/upload`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("Upload successful!");
+    } catch (err) {
+      console.error(err);
+      alert("Upload failed.");
+    } finally {
+      setUploading((p) => ({ ...p, [assignmentId]: false }));
+    }
+  };
 
   // Fetch all data (lectures with assignments, and exams)
   const fetchData = async () => {
@@ -47,7 +80,7 @@ export default function CourseLayout({ studentView = false }) {
           const asgRes = await axios.get(
             `http://localhost:5000/api/queries/assignments/lecture/${lec.lectureId}`
           );
-          return { ...lec, assignments: asgRes.data };
+          return { ...lec, assignments: asgRes.data || [] };
         })
       );
       setLectures(lecturesWithAssignments);
@@ -56,7 +89,7 @@ export default function CourseLayout({ studentView = false }) {
       const examRes = await axios.get(
         `http://localhost:5000/api/queries/exams/course/${courseId}`
       );
-      setExams(examRes.data);
+      setExams(examRes.data || []);
 
       setError(null);
     } catch (err) {
@@ -69,6 +102,7 @@ export default function CourseLayout({ studentView = false }) {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseId]);
 
   if (loading) return <Typography>Loading...</Typography>;
@@ -116,12 +150,19 @@ export default function CourseLayout({ studentView = false }) {
         {/* Lectures & Assignments */}
         <Box sx={{ flex: 2, p: 3, overflowY: "auto" }}>
           <Typography variant="h5" gutterBottom>
-            Lectures & Assignments
+            Lectures &amp; Assignments
           </Typography>
 
           {lectures.map((lec) => (
             <Box key={lec.lectureId} sx={{ mb: 4 }}>
-              <Box sx={{ border: "1px solid #ddd", backgroundColor:"white", borderRadius: 1, p: 2 }}>
+              <Box
+                sx={{
+                  border: "1px solid #ddd",
+                  backgroundColor: "white",
+                  borderRadius: 1,
+                  p: 2,
+                }}
+              >
                 <Typography variant="h6">{lec.title}</Typography>
 
                 {/* Edit/Delete Lecture (teachers only) */}
@@ -147,45 +188,96 @@ export default function CourseLayout({ studentView = false }) {
                 )}
 
                 {/* Assignments */}
-                {lec.assignments.map((a) => (
-                  <Box
-                    key={a.assignmentId}
-                    sx={{
-                      border: "1px solid #ccc",
-                      borderRadius: 1,
-                      p: 1,
-                      mt: 2,
-                    }}
-                  >
-                    <Typography>{a.title}</Typography>
-                    <Typography variant="caption" color="textSecondary">
-                      Due: {new Date(a.dueDate).toLocaleDateString()}
-                    </Typography>
+                {lec.assignments.map((a) => {
+                  const due =
+                    a.dueDate ? new Date(a.dueDate).toLocaleDateString() : "—";
+                  return (
+                    <Box
+                      key={a.assignmentId}
+                      sx={{
+                        border: "1px solid #ccc",
+                        borderRadius: 1,
+                        p: 1,
+                        mt: 2,
+                      }}
+                    >
+                      <Typography>{a.title}</Typography>
+                      <Typography variant="caption" color="textSecondary">
+                        Due: {due}
+                      </Typography>
 
-                    {/* Edit/Delete Assignment (teachers only) */}
-                    {!studentView && (
-                      <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-                        <Button
-                          size="small"
-                          onClick={() => {
-                            setCurrentLectureId(lec.lectureId);
-                            setEditingAssignment(a);
-                            setOpenAssignmentModal(true);
+                      {/* Edit/Delete Assignment (teachers only) */}
+                      {!studentView && (
+                        <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+                          <Button
+                            size="small"
+                            onClick={() => {
+                              setCurrentLectureId(lec.lectureId);
+                              setEditingAssignment(a);
+                              setOpenAssignmentModal(true);
+                            }}
+                          >
+                            Edit
+                          </Button>
+                          <Button
+                            size="small"
+                            color="error"
+                            onClick={() =>
+                              handleAssignmentDelete(a.assignmentId)
+                            }
+                          >
+                            Delete
+                          </Button>
+                        </Box>
+                      )}
+
+                      {/* Student upload */}
+                      {studentView && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            mt: 1,
+                            alignItems: "center",
+                            flexWrap: "wrap",
                           }}
                         >
-                          Edit
-                        </Button>
-                        <Button
-                          size="small"
-                          color="error"
-                          onClick={() => handleAssignmentDelete(a.assignmentId)}
-                        >
-                          Delete
-                        </Button>
-                      </Box>
-                    )}
-                  </Box>
-                ))}
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            component="label"
+                          >
+                            Choose file
+                            <input
+                              type="file"
+                              hidden
+                              onChange={(e) =>
+                                handleSelectFile(
+                                  a.assignmentId,
+                                  e.target.files?.[0]
+                                )
+                              }
+                            />
+                          </Button>
+                          <Typography variant="caption">
+                            {selectedFiles[a.assignmentId]?.name ||
+                              "No file chosen"}
+                          </Typography>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            disabled={!!uploading[a.assignmentId]}
+                            onClick={() => handleUpload(a.assignmentId)}
+                          >
+                            {uploading[a.assignmentId]
+                              ? "Uploading..."
+                              : "Upload"}
+                          </Button>
+                        </Box>
+                      )}
+                    </Box>
+                  );
+                })}
 
                 {/* Add Assignment (teachers only) */}
                 {!studentView && (
@@ -232,11 +324,17 @@ export default function CourseLayout({ studentView = false }) {
           {exams.map((e) => (
             <Box
               key={e.examId}
-              sx={{ border: "1px solid #ddd", backgroundColor: "white", borderRadius: 1, p: 2, mb: 2 }}
+              sx={{
+                border: "1px solid #ddd",
+                backgroundColor: "white",
+                borderRadius: 1,
+                p: 2,
+                mb: 2,
+              }}
             >
               <Typography>{e.title}</Typography>
               <Typography variant="caption" color="textSecondary">
-                Date: {new Date(e.date).toLocaleDateString()}
+                Date: {e.date ? new Date(e.date).toLocaleDateString() : "—"}
               </Typography>
 
               {/* Edit/Delete Exam (teachers only) */}

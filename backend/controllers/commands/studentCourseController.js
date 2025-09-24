@@ -93,13 +93,33 @@ exports.getEnrolledCourses = async (req, res) => {
     return res.status(400).json({ message: "studentId is required" });
   }
   try {
-    const enrolledCourses = await StudentCourse.findAll({
+    // Find all courseIds the student is enrolled in
+    const enrolled = await StudentCourse.findAll({
       where: { studentId },
-      include: [
-        { model: Course, attributes: ['id', 'title', 'departmentId'] }
-      ]
+      attributes: ['courseId']
     });
-    console.log('Enrolled courses raw:', JSON.stringify(enrolledCourses, null, 2));
+    const enrolledIds = enrolled.map(e => e.courseId);
+    console.log('Enrolled course IDs:', enrolledIds);
+
+    if (enrolledIds.length === 0) {
+      return res.json([]);
+    }
+
+    // Get those courses
+    const enrolledCoursesRaw = await Course.findAll({
+      where: { id: { [Op.in]: enrolledIds } },
+      attributes: ['id', 'title', 'departmentId', 'enrollment_key']
+    });
+
+    // Map to hasEnrollmentKey boolean and remove enrollment_key
+    const enrolledCourses = enrolledCoursesRaw.map(course => ({
+      id: course.id,
+      title: course.title,
+      departmentId: course.departmentId,
+      hasEnrollmentKey: !!course.enrollment_key
+    }));
+
+    console.log('Enrolled courses mapped:', JSON.stringify(enrolledCourses, null, 2));
     res.json(enrolledCourses);
   } catch (err) {
     res.status(500).json({ message: "Error fetching enrolled courses", error: err.message });
@@ -114,10 +134,10 @@ exports.enrollWithCourseKey = async (req, res) => {
   try {
     const [student, course] = await Promise.all([
       Student.findByPk(studentId, { attributes: ["id", "name", "email"] }),
-      Course.findByPk(courseId,  { attributes: ["id", "title", "departmentId", "enrollment_key"] }),
+      Course.findByPk(courseId, { attributes: ["id", "title", "departmentId", "enrollment_key"] }),
     ]);
     if (!student) return res.status(404).json({ message: "Student not found" });
-    if (!course)  return res.status(404).json({ message: "Course not found" });
+    if (!course) return res.status(404).json({ message: "Course not found" });
     // If enrollment_key is null, auto-enroll
     if (course.enrollment_key == null) {
       const entry = await StudentCourse.create({ studentId, courseId });

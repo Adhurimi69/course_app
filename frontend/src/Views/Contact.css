@@ -1,22 +1,4 @@
-/* Reset & Base */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #1e2a3b;
-    background: #f7f7f7;
-}
-
-a {
-    color: inherit;
-    text-decoration: none;
-}
-
-/* Container */
+/* Container helper */
 .container {
     width: 1200px;
     max-width: 100%;
@@ -24,7 +6,7 @@ a {
     padding: 0 20px;
 }
 
-/* HERO */
+/* ================= HERO ================= */
 .contact-hero {
     position: relative;
     background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
@@ -45,17 +27,18 @@ a {
 
 .breadcrumb a {
     color: #1e2a3b;
+    text-decoration: none;
 }
 
 .breadcrumb span {
     margin: 0 5px;
 }
 
-/* Decorative shapes */
+/* Shapes as <img> for reliable resolution */
 .shape {
     position: absolute;
-    background-size: contain;
-    background-repeat: no-repeat;
+    pointer-events: none;
+    user-select: none;
 }
 
 .shape-dots {
@@ -63,7 +46,6 @@ a {
     left: 40px;
     width: 40px;
     height: 40px;
-    background-image: url('../images/shape.svg');
 }
 
 .shape-wave {
@@ -71,7 +53,6 @@ a {
     right: 80px;
     width: 80px;
     height: 20px;
-    background-image: url('../images/wave.svg');
 }
 
 .shape-star {
@@ -79,7 +60,6 @@ a {
     left: 80px;
     width: 20px;
     height: 20px;
-    background-image: url('../images/image.svg');
 }
 
 .shape-arc {
@@ -87,61 +67,154 @@ a {
     right: 50px;
     width: 100px;
     height: 100px;
-    background-image: url('../images/arc.svg');
 }
 
-/* MAIN CONTENT */
-.contact-content {
-    padding: 80px 0;
+/* ================= CONTENT ================= */
+.contact-categories {
+    margin-top: 0;
+    /* kiss the hero */
 }
 
-.get-in-touch {
-    background: #fff;
-    padding: 40px;
-    border-radius: 6px;
+/* Equal-height columns */
+.contact-grid-equal {
+    align-items: stretch;
+    /* grid items same row height */
 }
 
-.get-in-touch h2 {
-    font-size: 28px;
+.contact-grid-equal>.category-card {
+    height: 100%;
+    display: flex;
+    /* make card stretch internally */
+    flex-direction: column;
 }
 
-.get-in-touch p {
-    margin-top: 8px;
+/* Nudge LEFT card content down a bit (without affecting layout) */
+.contact-info-card {
+    padding-top: 36px;
+    /* extra top padding only on left card */
+}
+
+/* Availability pill */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 13px;
+    width: fit-content;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .06);
+}
+
+.status-pill .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-pill.open {
+    background: #e9fff5;
+    color: #0b7454;
+}
+
+.status-pill.open .dot {
+    background: #23c083;
+    box-shadow: 0 0 0 6px rgba(35, 192, 131, 0.18);
+    animation: pulse 2s infinite;
+}
+
+.status-pill.closed {
+    background: #ffe9f1;
+    color: #9d1f52;
+}
+
+.status-pill.closed .dot {
+    background: #ff5c8a;
+    box-shadow: 0 0 0 6px rgba(255, 92, 138, 0.18);
+}
+
+/* Pulse */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(35, 192, 131, 0.28);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(35, 192, 131, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(35, 192, 131, 0);
+    }
+}
+
+/* Info rows — text-only */
+.info-row {
+    display: block;
+    margin-top: 10px;
+}
+
+.info-heading {
+    margin: 0 0 6px 0;
+    font-weight: 700;
+}
+
+.info-text {
+    margin: 0;
     color: #555;
 }
 
-.contact-cards {
-    display: flex;
-    gap: 40px;
-    margin-top: 40px;
-    flex-wrap: wrap;
-    align-items: flex-start;
+/* Keep bottoms aligned — pushes stat boxes to the bottom */
+.push-space {
+    margin-top: auto;
 }
 
-/* INFO CARD */
-.info-card {
-    flex: 1;
-    min-width: 300px;
-    max-width: 500px;
+/* Simple, friendly stats (bottom of left card) */
+.stat-strip {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 14px 0 0 0;
+    padding: 0;
 }
 
-/* CONTACT FORM */
-.contact-form {
-    flex: 1;
-    min-width: 320px;
-    max-width: 540px;
-    padding: 32px;
-    background: #fafafa;
-    border: 1px solid #eee;
-    border-radius: 8px;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04);
+.stat-strip li {
+    background: #f4f4f9;
+    border: 1px solid rgba(0, 0, 0, .06);
+    border-radius: 12px;
+    padding: 12px;
+    display: grid;
+    gap: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, .04);
+    text-align: center;
 }
 
-.contact-form .form-group {
-    margin-bottom: 20px;
+.stat-number {
+    font-weight: 800;
+    color: #6c63ff;
+    font-size: 16px;
+    line-height: 1;
 }
 
-.contact-form .form-group label {
+.stat-label {
+    font-size: 12px;
+    color: #555;
+}
+
+/* Form card */
+.contact-form-card {
+    text-align: left;
+}
+
+.contact-form-card .form-grid {
+    display: grid;
+    gap: 14px;
+    flex: 1 1 auto;
+}
+
+.form-group label {
     font-size: 13px;
     font-weight: 500;
     color: #333;
@@ -149,198 +222,34 @@ a {
     display: block;
 }
 
-.contact-form input,
-.contact-form textarea {
+.form-group input,
+.form-group textarea {
     width: 100%;
     padding: 10px 14px;
     font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background-color: #fff;
-    transition: border 0.2s;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    transition: border-color .2s ease;
 }
 
-.contact-form input:focus,
-.contact-form textarea:focus {
-    border-color: #7c5dfa;
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #6c63ff;
     outline: none;
 }
 
-.contact-form textarea {
+.form-group textarea {
     resize: vertical;
 }
 
-.contact-form .submit-btn {
-    background: #7c5dfa;
-    color: #fff;
-    font-size: 14px;
-    padding: 12px 22px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.3s;
-}
+/* Responsive tweaks */
+@media (max-width: 768px) {
+    .shape-wave {
+        right: 20px;
+    }
 
-.contact-form .submit-btn:hover {
-    background: #684fd1;
-}
-
-/* FOOTER */
-.footer {
-    background: #0d0d0d;
-    color: #fff;
-    padding-top: 40px;
-}
-
-.footer-top {
-    border-bottom: 1px solid #333;
-    padding-bottom: 24px;
-}
-
-.footer-contact {
-    display: flex;
-    justify-content: space-between;
-    gap: 40px;
-    flex-wrap: wrap;
-}
-
-.footer-item {
-    display: flex;
-    align-items: center;
-    /* aligns icon + text vertically */
-    gap: 16px;
-    flex: 1 1 30%;
-}
-
-.footer-icon {
-    width: 42px;
-    height: 45px;
-    object-fit: contain;
-    flex-shrink: 0;
-}
-
-.footer-item div {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.footer-item h4 {
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-    margin: 0;
-    line-height: 1.3;
-}
-
-.footer-item p {
-    font-size: 14px;
-    color: #ccc;
-    margin: 2px 0 0 0;
-    line-height: 1.4;
-}
-
-
-
-/* Footer main */
-.footer-main {
-    display: flex;
-    gap: 40px;
-    padding: 40px 0;
-}
-
-.footer-about {
-    flex: 2;
-}
-
-.footer-about h2 {
-    font-size: 24px;
-    margin-bottom: 12px;
-}
-
-.footer-about p {
-    font-size: 14px;
-    color: #ccc;
-    margin-bottom: 16px;
-}
-
-.footer-services,
-.footer-gallery,
-.footer-subscribe {
-    flex: 1;
-}
-
-.footer-services h4,
-.footer-gallery h4,
-.footer-subscribe h4 {
-    font-size: 16px;
-    margin-bottom: 12px;
-}
-
-.footer-services ul {
-    list-style: none;
-    padding: 0;
-}
-
-.footer-services li {
-    font-size: 14px;
-    color: #ccc;
-    margin-bottom: 8px;
-    position: relative;
-    padding-left: 14px;
-}
-
-.footer-services li:before {
-    content: '›';
-    position: absolute;
-    left: 0;
-    color: #7c5dfa;
-}
-
-/* Gallery */
-.footer-gallery .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-}
-
-.footer-gallery img {
-    width: 100%;
-    border-radius: 4px;
-}
-
-/* Subscribe */
-.footer-subscribe p {
-    font-size: 14px;
-    color: #ccc;
-    margin-bottom: 12px;
-}
-
-.subscribe-form {
-    display: flex;
-}
-
-.subscribe-form input {
-    flex: 1;
-    padding: 12px;
-    border: none;
-    border-radius: 4px 0 0 4px;
-    font-size: 14px;
-}
-
-.subscribe-form button {
-    background: #ff5c35;
-    color: #fff;
-    padding: 12px 16px;
-    border: none;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
-}
-
-/* Footer bottom */
-.footer-bottom {
-    text-align: center;
-    padding: 16px 0;
-    font-size: 12px;
-    color: #666;
+    .shape-arc {
+        right: 10px;
+    }
 }

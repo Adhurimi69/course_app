@@ -1,5 +1,4 @@
 // src/App.js
-
 import React from "react";
 import { Routes, Route, Navigate, Outlet } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -55,6 +54,9 @@ export default function App() {
       <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<ContactUs />} />
 
+      {/* ✅ Friendly alias used by pricing CTAs */}
+      <Route path="/talk-to-an-advisor" element={<ContactUs />} />
+
       {/* Admin routes */}
       <Route
         path="/admins"
@@ -66,11 +68,7 @@ export default function App() {
       >
         <Route
           index
-          element={
-            <div style={{ padding: "1rem" }}>
-              Welcome to the Admin Dashboard
-            </div>
-          }
+          element={<div style={{ padding: "1rem" }}>Welcome to the Admin Dashboard</div>}
         />
         <Route path="courses" element={<Courses />} />
         <Route path="courses/:id" element={<Courses />} />

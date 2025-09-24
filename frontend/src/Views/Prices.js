@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./Home.css";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 function Prices() {
+    const navigate = useNavigate();
 
     const plans = [
         {
@@ -40,128 +43,147 @@ function Prices() {
     const testimonials = [
         {
             name: "Sarah A.",
-            feedback: "The Premium plan was a game-changer. I landed a job 1 month after completing the career path!",
+            feedback:
+                "The Premium plan was a game-changer. I landed a job 1 month after completing the career path!",
         },
         {
             name: "James M.",
-            feedback: "I loved the 1-on-1 mentorship. Having a real person guide me made all the difference.",
+            feedback:
+                "I loved the 1-on-1 mentorship. Having a real person guide me made all the difference.",
         },
         {
             name: "Lina K.",
-            feedback: "As a working mom, the flexible access and supportive community helped me complete 3 certificates this year!",
+            feedback:
+                "As a working mom, the flexible access and supportive community helped me complete 3 certificates this year!",
         },
     ];
 
-    return (
-        <div className="home-wrapper">
-            {/* ✅ Navbar includes alert and wrapper */}
-            <Navbar />
+    const handleContact = (planName) => {
+        navigate(`/talk-to-an-advisor?from=pricing&plan=${encodeURIComponent(planName)}`);
+    };
 
-            {/* 💰 Pricing Plans */}
-            <section className="categories">
-                <h2 style={{ fontSize: "42px", marginBottom: "10px" }}>Our Pricing Plans</h2>
-                <p style={{ fontSize: "18px", color: "#555", marginBottom: "40px" }}>
-                    Choose a plan that fits your learning style and goals.
-                </p>
-                <div className="category-grid">
-                    {plans.map((plan, index) => (
-                        <div
-                            className="category-card"
-                            key={index}
-                            style={{
-                                width: "100%",
-                                maxWidth: "400px",
-                                padding: "40px",
-                                position: "relative",
-                                border: plan.popular ? "3px solid #6c63ff" : undefined,
-                            }}
-                        >
-                            {plan.popular && (
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        top: "-15px",
-                                        right: "-15px",
-                                        background: "#FFD25D",
-                                        color: "#222",
-                                        padding: "6px 12px",
-                                        fontWeight: "bold",
-                                        fontSize: "13px",
-                                        borderRadius: "20px",
-                                        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                                    }}
-                                >
-                                    MOST POPULAR
-                                </div>
-                            )}
-                            <h3 style={{ fontSize: "32px", marginBottom: "10px" }}>{plan.name}</h3>
-                            <p style={{ fontSize: "24px", fontWeight: "bold", color: "#6c63ff" }}>{plan.price}</p>
-                            <ul style={{ textAlign: "left", marginTop: "20px" }}>
-                                {plan.features.map((f, i) => (
-                                    <li
-                                        key={i}
+    return (
+        <>
+            <div className="home-wrapper">
+                {/* ✅ Navbar */}
+                <Navbar />
+
+                {/* 💰 Pricing Plans */}
+                <section className="categories">
+                    <h2 style={{ fontSize: "42px", marginBottom: "10px" }}>Our Pricing Plans</h2>
+                    <p style={{ fontSize: "18px", color: "#555", marginBottom: "40px" }}>
+                        Choose a plan that fits your learning style and goals.
+                    </p>
+
+                    <div className="category-grid">
+                        {plans.map((plan, index) => (
+                            <div
+                                className="category-card"
+                                key={index}
+                                style={{
+                                    width: "100%",
+                                    maxWidth: "400px",
+                                    padding: "40px",
+                                    position: "relative",
+                                    border: plan.popular ? "3px solid #6c63ff" : undefined,
+                                }}
+                            >
+                                {plan.popular && (
+                                    <div
                                         style={{
-                                            fontSize: "17px",
-                                            marginBottom: "10px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "8px",
+                                            position: "absolute",
+                                            top: "-15px",
+                                            right: "-15px",
+                                            background: "#FFD25D",
+                                            color: "#222",
+                                            padding: "6px 12px",
+                                            fontWeight: "bold",
+                                            fontSize: "13px",
+                                            borderRadius: "20px",
+                                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                                         }}
                                     >
-                                        ✔️ {f.label}
-                                        <span
-                                            title={f.info}
+                                        MOST POPULAR
+                                    </div>
+                                )}
+
+                                <h3 style={{ fontSize: "32px", marginBottom: "10px" }}>{plan.name}</h3>
+                                <p style={{ fontSize: "24px", fontWeight: "bold", color: "#6c63ff" }}>
+                                    {plan.price}
+                                </p>
+
+                                <ul style={{ textAlign: "left", marginTop: "20px" }}>
+                                    {plan.features.map((f, i) => (
+                                        <li
+                                            key={i}
                                             style={{
-                                                fontSize: "14px",
-                                                color: "#6c63ff",
-                                                cursor: "help",
+                                                fontSize: "17px",
+                                                marginBottom: "10px",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "8px",
                                             }}
+                                            title={f.info}
                                         >
-                                            ℹ️
-                                        </span>
-                                    </li>
-                                ))}
-                            </ul>
-                            <button className="load-more" style={{ marginTop: "30px", fontSize: "16px" }}>
-                                Choose Plan →
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </section>
+                                            ✔️ {f.label}
+                                            <span
+                                                style={{ fontSize: "14px", color: "#6c63ff", cursor: "help" }}
+                                                aria-hidden
+                                            >
+                                                ℹ️
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
 
+                                {/* 🎯 Creative CTA + route with plan info */}
+                                <button
+                                    className="load-more"
+                                    style={{ marginTop: "30px", fontSize: "16px" }}
+                                    onClick={() => handleContact(plan.name)}
+                                >
+                                    Talk to an Advisor →
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
-            <section className="categories" style={{ marginTop: "60px" }}>
-                <h2 style={{ fontSize: "36px", marginBottom: "30px" }}>What Our Learners Say</h2>
-                <div className="category-grid">
-                    {testimonials.map((t, i) => (
-                        <div
-                            className="category-card"
-                            key={i}
-                            style={{
-                                maxWidth: "500px",
-                                fontStyle: "italic",
-                                fontSize: "17px",
-                            }}
-                        >
-                            <p>“{t.feedback}”</p>
-                            <p style={{ marginTop: "10px", fontWeight: "bold" }}>— {t.name}</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
+                {/* ⭐ Testimonials */}
+                <section className="categories" style={{ marginTop: "60px" }}>
+                    <h2 style={{ fontSize: "36px", marginBottom: "30px" }}>What Our Learners Say</h2>
+                    <div className="category-grid">
+                        {testimonials.map((t, i) => (
+                            <div
+                                className="category-card"
+                                key={i}
+                                style={{ maxWidth: "500px", fontStyle: "italic", fontSize: "17px" }}
+                            >
+                                <p>“{t.feedback}”</p>
+                                <p style={{ marginTop: "10px", fontWeight: "bold" }}>— {t.name}</p>
+                            </div>
+                        ))}
+                    </div>
+                </section>
 
+                {/* ❓ Nudge */}
+                <section className="categories" style={{ marginTop: "60px", textAlign: "center" }}>
+                    <h2 style={{ fontSize: "34px" }}>Still Not Sure?</h2>
+                    <p style={{ fontSize: "18px", color: "#555", marginBottom: "30px" }}>
+                        Start with our free plan or talk to our team to find the right fit for you.
+                    </p>
+                    <button
+                        className="create-account"
+                        style={{ fontSize: "17px", padding: "14px 32px" }}
+                        onClick={() => navigate("/talk-to-an-advisor?from=pricing")}
+                    >
+                        Help Me Choose →
+                    </button>
+                </section>
+            </div>
 
-            <section className="categories" style={{ marginTop: "60px", textAlign: "center" }}>
-                <h2 style={{ fontSize: "34px" }}>Still Not Sure?</h2>
-                <p style={{ fontSize: "18px", color: "#555", marginBottom: "30px" }}>
-                    Start with our free plan or talk to our team to find the right fit for you.
-                </p>
-                <button className="create-account" style={{ fontSize: "17px", padding: "14px 32px" }}>
-                    Contact Sales
-                </button>
-            </section>
-        </div>
+            <Footer />
+        </>
     );
 }
 

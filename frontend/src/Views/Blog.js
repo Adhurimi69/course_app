@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Home.css";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import blogImg0 from "../images/blog0.jpeg";
 import blogImg1 from "../images/blog1.jpeg";
 import blogImg2 from "../images/blog2.png";
@@ -58,50 +59,55 @@ function Blog() {
     ];
 
     return (
-        <div className="home-wrapper">
-            {/* ✅ Navbar includes alert and wrapper */}
-            <Navbar />
+        <>
+            <div className="home-wrapper">
+                {/* ✅ Navbar includes alert and wrapper */}
+                <Navbar />
 
-            {/* 🔠 Enlarged blog header */}
-            <div className="hero">
-                <div className="hero-text">
-                    <h4 style={{ fontSize: "26px", letterSpacing: "1px" }}>OUR BLOG</h4>
-                    <h1 style={{ fontSize: "60px", fontWeight: "bold" }}>
-                        Stay Updated With Edunity Insights
-                    </h1>
-                    <p style={{ fontSize: "20px" }}>
-                        Explore articles, tips, and educational resources curated for your success.
-                    </p>
+                {/* 🔠 Enlarged blog header */}
+                <div className="hero">
+                    <div className="hero-text">
+                        <h4 style={{ fontSize: "26px", letterSpacing: "1px" }}>OUR BLOG</h4>
+                        <h1 style={{ fontSize: "60px", fontWeight: "bold" }}>
+                            Stay Updated With Edunity Insights
+                        </h1>
+                        <p style={{ fontSize: "20px" }}>
+                            Explore articles, tips, and educational resources curated for your success.
+                        </p>
+                    </div>
+                    <img src={blogImg0} alt="Blog Hero" />
                 </div>
-                <img src={blogImg0} alt="Blog Hero" />
+
+                <section className="categories">
+                    <h2>Latest Blog Posts</h2>
+                    <div className="category-grid">
+                        {posts.map((post) => (
+                            <div className="category-card" key={post.id}>
+                                <img
+                                    src={post.image}
+                                    alt={post.title}
+                                    style={{
+                                        width: "100%",
+                                        borderRadius: "12px",
+                                        marginBottom: "15px",
+                                        height: "200px",
+                                        objectFit: "cover"
+                                    }}
+                                />
+                                <h3>{post.title}</h3>
+                                <p style={{ fontSize: "14px", color: "#777", marginBottom: "10px" }}>{post.date}</p>
+                                <p style={{ fontSize: "15px", marginBottom: "10px" }}>{post.excerpt}</p>
+                                <button className="load-more">Read More →</button>
+                            </div>
+                        ))}
+                    </div>
+                </section>
             </div>
+            <Footer />
+        </>
 
-            <section className="categories">
-                <h2>Latest Blog Posts</h2>
-                <div className="category-grid">
-                    {posts.map((post) => (
-                        <div className="category-card" key={post.id}>
-                            <img
-                                src={post.image}
-                                alt={post.title}
-                                style={{
-                                    width: "100%",
-                                    borderRadius: "12px",
-                                    marginBottom: "15px",
-                                    height: "200px",
-                                    objectFit: "cover"
-                                }}
-                            />
-                            <h3>{post.title}</h3>
-                            <p style={{ fontSize: "14px", color: "#777", marginBottom: "10px" }}>{post.date}</p>
-                            <p style={{ fontSize: "15px", marginBottom: "10px" }}>{post.excerpt}</p>
-                            <button className="load-more">Read More →</button>
-                        </div>
-                    ))}
-                </div>
-            </section>
-        </div>
     );
+
 }
 
 export default Blog;

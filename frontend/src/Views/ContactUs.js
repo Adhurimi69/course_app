@@ -1,90 +1,152 @@
-import React from 'react';
-import Navbar from '../components/Navbar';
-import './Contact.css';
+import React, { useEffect, useMemo } from "react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+
+// Reuse global design (cards, grid, colors)
+import "./Home.css";
+// Page-specific styles
+import "./Contact.css";
+
+// Decorative shapes (kept — they’re part of the hero, not the cards)
+import dotsSvg from "../images/shape.svg";
+import waveSvg from "../images/wave.svg";
+import starSvg from "../images/image.svg";
+import arcSvg from "../images/arc.svg";
 
 export default function ContactUs() {
+    // Scroll to top on mount (prevents landing mid-page)
+    useEffect(() => {
+        if ("scrollRestoration" in window.history) {
+            window.history.scrollRestoration = "manual";
+        }
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }, []);
+
+    // Live availability (Mon–Fri, 9–17) — used only for pill text
+    const nowInfo = useMemo(() => {
+        const now = new Date();
+        const day = now.getDay(); // 0 Sun ... 6 Sat
+        const hour = now.getHours() + now.getMinutes() / 60;
+        const isWeekday = day >= 1 && day <= 5;
+        const openHour = 9;
+        const closeHour = 17;
+        const isOpen = isWeekday && hour >= openHour && hour < closeHour;
+
+        const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        let nextOpenText = "Mon 09:00";
+        if (!isOpen) {
+            const next = new Date(now);
+            if (isWeekday && hour < openHour) {
+                // today at 9:00
+            } else {
+                // push to next weekday
+                do {
+                    next.setDate(next.getDate() + 1);
+                } while (next.getDay() === 0 || next.getDay() === 6);
+            }
+            next.setHours(openHour, 0, 0, 0);
+            nextOpenText = `${dayNames[next.getDay()]} 09:00`;
+        }
+
+        return { isOpen, nextOpenText };
+    }, []);
+
     return (
         <>
             <Navbar />
 
+            {/* HERO — matches your visual system */}
             <header className="contact-hero">
                 <div className="container">
                     <h1>CONTACT US</h1>
                     <nav className="breadcrumb">
-                        <a href="/">Home</a> <span>/</span> <span>Contact Us</span>
                     </nav>
                 </div>
-                {/* Decorative shapes: ensure you have these SVGs in public/icons */}
-                <div className="shape shape-dots" />
-                <div className="shape shape-wave" />
-                <div className="shape shape-star" />
-                <div className="shape shape-arc" />
+
+                {/* Decorative shapes */}
+                <img src={dotsSvg} className="shape shape-dots" alt="" />
+                <img src={waveSvg} className="shape shape-wave" alt="" />
+                <img src={starSvg} className="shape shape-star" alt="" />
+                <img src={arcSvg} className="shape shape-arc" alt="" />
             </header>
 
-            <main className="contact-content">
-                <div className="container get-in-touch">
-                    <h2>Get in Touch</h2>
-                    <p>Suspendisse ultricies gravida dictum fusce placerat ultricies integer.</p>
+            {/* CONTENT — uses your categories + card visuals */}
+            <main className="categories contact-categories">
+                <h2>Get in Touch</h2>
+                <p style={{ fontSize: 18, color: "#555", marginBottom: 30 }}>
+                    Suspendisse ultricies gravida dictum fusce placerat ultricies integer.
+                </p>
 
-                    <div className="contact-cards">
-                        {/* ─── Info Card ─── */}
-                        <div className="info-card">
-                            <div className="info-item">
-                                <img src="/icons/map.svg" className="icon" alt="Map Marker" />
-                                <div>
-                                    <h4>Our Address</h4>
-                                    <p>
-                                        1564 Goosetown Drive<br />
-                                        Matthews, NC 28105
-                                    </p>
-                                </div>
-                            </div>
+                <div className="category-grid contact-grid-equal">
+                    {/* LEFT: Info card — text nudged down via extra top padding */}
+                    <div className="category-card contact-info-card">
+                        {/* Availability (keep “We’ll be back …” when closed) */}
+                        <div
+                            className={`status-pill ${nowInfo.isOpen ? "open" : "closed"}`}
+                            title={nowInfo.isOpen ? "We’re currently within business hours." : "We’re currently closed."}
+                            style={{ marginBottom: 12 }}
+                        >
+                            <span className="dot" />
+                            {nowInfo.isOpen ? "We’re online now" : `We’ll be back • ${nowInfo.nextOpenText}`}
+                        </div>
 
-                            <div className="info-item">
-                                <img src="/icons/clock.svg" className="icon" alt="Clock" />
-                                <div>
-                                    <h4>Hours Of Operation</h4>
-                                    <p>
-                                        Mon - Fri: 9.00am to 5.00pm<br />
-                                        (2nd Sat Holiday)
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="info-item">
-                                <img src="/icons/phone.svg" className="icon" alt="Phone" />
-                                <div>
-                                    <h4>Contact</h4>
-                                    <p>
-                                        +99 - 35895-4565<br />
-                                        supportyou@info.com
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Button styled as link */}
-                            <button type="button" className="customer-care">
-                                Customer Care
-                            </button>
-
-                            <div className="social-icons">
-                                <button type="button" className="social-btn">
-                                    <img src="/icons/facebook.svg" alt="Facebook" />
-                                </button>
-                                <button type="button" className="social-btn">
-                                    <img src="/icons/twitter.svg" alt="Twitter" />
-                                </button>
-                                <button type="button" className="social-btn">
-                                    <img src="/icons/instagram.svg" alt="Instagram" />
-                                </button>
-                                <button type="button" className="social-btn">
-                                    <img src="/icons/linkedin.svg" alt="LinkedIn" />
-                                </button>
+                        {/* Contact info — text-only */}
+                        <div className="info-row no-icon">
+                            <div>
+                                <h4 className="info-heading">Our Address</h4>
+                                <p className="info-text">
+                                    1564 Goosetown Drive
+                                    <br />
+                                    Matthews, NC 28105
+                                </p>
                             </div>
                         </div>
 
-                        {/* ─── Contact Form ─── */}
-                        <form className="contact-form">
+                        <div className="info-row no-icon">
+                            <div>
+                                <h4 className="info-heading">Hours Of Operation</h4>
+                                <p className="info-text">
+                                    Mon - Fri: 9.00am to 5.00pm
+                                    <br />
+                                    (2nd Sat Holiday)
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="info-row no-icon">
+                            <div>
+                                <h4 className="info-heading">Contact</h4>
+                                <p className="info-text">
+                                    +99 - 35895-4565
+                                    <br />
+                                    supportyou@info.com
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* spacer pushes stats to the bottom */}
+                        <div className="push-space" />
+
+                        {/* Friendly, simple stats — pinned to bottom */}
+                        <ul className="stat-strip" aria-label="Service stats">
+                            <li>
+                                <span className="stat-number">~4h</span>
+                                <span className="stat-label">Reply time</span>
+                            </li>
+                            <li>
+                                <span className="stat-number">98%</span>
+                                <span className="stat-label">Happy customers</span>
+                            </li>
+                            <li>
+                                <span className="stat-number">12k+</span>
+                                <span className="stat-label">Requests solved</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* RIGHT: Form card — same height as left */}
+                    <form className="category-card contact-form-card">
+                        <div className="form-grid">
                             <div className="form-group">
                                 <label>Name*</label>
                                 <input type="text" placeholder="Name" />
@@ -103,109 +165,18 @@ export default function ContactUs() {
                             </div>
                             <div className="form-group">
                                 <label>Message*</label>
-                                <textarea rows="4" placeholder="Message"></textarea>
+                                <textarea rows="5" placeholder="Message"></textarea>
                             </div>
-                            <button type="submit" className="submit-btn">
-                                SEND MESSAGE
+
+                            <button type="submit" className="load-more" style={{ alignSelf: "start", marginTop: 6 }}>
+                                Send Message →
                             </button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </main>
 
             <Footer />
         </>
-    );
-}
-
-// ─── Footer ──────────────────────────────────────────────────────────────────
-function Footer() {
-    return (
-        <footer className="footer">
-            <div className="footer-top">
-                <div className="container footer-contact">
-                    <div className="footer-item">
-                        <img src="/Location-icon.png" alt="Address Icon" className="footer-icon" />
-                        <div>
-                            <h4>Address</h4>
-                            <p>1925 Boggess Street</p>
-                        </div>
-                    </div>
-                    <div className="footer-item">
-                        <img src="/Overlay+Border.png" alt="Phone Icon" className="footer-icon" />
-                        <div>
-                            <h4>Phone</h4>
-                            <p>(00) 875 784 568</p>
-                        </div>
-                    </div>
-                    <div className="footer-item">
-                        <img src="/email-icon.png" alt="Email Icon" className="footer-icon" />
-                        <div>
-                            <h4>Email</h4>
-                            <p>info@gmail.com</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div className="container footer-main">
-                <div className="footer-about">
-                    <h2>edunity</h2>
-                    <p>
-                        Interndum velit laoreet id donec ultrices tincidunt arcu.
-                        Tristique tortor aliquam mattis orci fermentum ornare eu.
-                    </p>
-                    <div className="social-icons">
-                        <button type="button" className="social-btn">
-                            <img src="/icons/facebook.svg" alt="Facebook" />
-                        </button>
-                        <button type="button" className="social-btn">
-                            <img src="/icons/twitter.svg" alt="Twitter" />
-                        </button>
-                        <button type="button" className="social-btn">
-                            <img src="/icons/instagram.svg" alt="Instagram" />
-                        </button>
-                        <button type="button" className="social-btn">
-                            <img src="/icons/linkedin.svg" alt="LinkedIn" />
-                        </button>
-                    </div>
-                </div>
-
-                <div className="footer-services">
-                    <h4>Our Services</h4>
-                    <ul>
-                        <li>Web Development</li>
-                        <li>UI/UX Design</li>
-                        <li>Management</li>
-                        <li>Digital Marketing</li>
-                        <li>Blog News</li>
-                    </ul>
-                </div>
-
-                <div className="footer-gallery">
-                    <h4>Gallery</h4>
-                    <div className="gallery-grid">
-                        <img src="https://via.placeholder.com/80" alt="" />
-                        <img src="https://via.placeholder.com/80" alt="" />
-                        <img src="https://via.placeholder.com/80" alt="" />
-                        <img src="https://via.placeholder.com/80" alt="" />
-                    </div>
-                </div>
-
-                <div className="footer-subscribe">
-                    <h4>Subscribe</h4>
-                    <p>Enter your email to get our latest news</p>
-                    <div className="subscribe-form">
-                        <input type="email" placeholder="Enter your email" />
-                        <button type="button">SUBSCRIBE NOW</button>
-                    </div>
-                </div>
-            </div>
-
-            <div className="container footer-bottom">
-                <p>© 2024 edunity | All Rights Reserved</p>
-            </div>
-        </footer>
     );
 }

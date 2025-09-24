@@ -550,12 +550,13 @@ body {
 
 .auth-wrapper {
   max-width: 400px;
-  margin: 80px auto;
+  width: 100%;
   padding: 30px;
   border: 1px solid #eee;
   border-radius: 10px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: #fff; /* add white background for contrast */
 }
 
 .auth-form input {
@@ -577,4 +578,10 @@ body {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s ease-in-out;
+}
+
+.auth-form button:hover {
+  background: #5a52e0;
 }

@@ -140,9 +140,6 @@ body {
   font-weight: inherit;
 }
 
-.nav-links a:hover,
-.nav-links li:hover {
-
   .nav-links a:hover,
   .nav-links li:hover {
     color: #6c63ff;
@@ -250,7 +247,6 @@ body {
     color: #333;
   }
 
-  .category-grid.pretty {
     .category-grid.pretty {
       display: grid;
       grid-template-columns: repeat(3, minmax(260px, 1fr));
@@ -426,7 +422,7 @@ body {
       --bg-hover: #FFE7B3;
       --ring: #F59E0B;
       --ink: #8B5A00;
-
+    }
       /* Arts & Design */
       .cat-mint {
         --bg: #E9FFF5;

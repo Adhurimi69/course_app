@@ -1,0 +1,96 @@
+/* Reuse palette from Home.css */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* ===== Hero ===== */
+.courses-hero{
+  background: linear-gradient(180deg, rgba(108,99,255,.10), rgba(83,72,179,.08));
+  padding: 64px 0 48px;
+  position: relative;
+}
+.courses-hero-inner{
+  max-width: 1200px; margin: 0 auto; padding: 0 24px; text-align: center;
+}
+.courses-hero h1{
+  font-size: 40px; letter-spacing: .5px; color: #0d1321;
+}
+.crumbs{
+  margin-top: 8px; color: #6b7280; font-weight: 600; display: flex; gap: 8px; justify-content: center; align-items: center;
+}
+.crumb-link{ background: none; border: none; color: var(--primary-500); cursor: pointer; font-weight: 700; }
+.crumb-sep{ opacity: .6; }
+.crumb-current{ color: #111827; }
+
+/* ===== Intro Row ===== */
+.courses-intro{
+  display: grid; grid-template-columns: 1.2fr auto; align-items: end; gap: 24px; margin: 40px auto 10px;
+}
+.intro-title{ font-size: 28px; line-height: 1.25; margin-top: 8px; color: #0d1321; }
+.more-compact{ padding: 10px 18px; border-radius: 30px; }
+
+/* ===== Grid ===== */
+.courses-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap: 22px;
+  padding: 22px 0 60px;
+}
+
+.course-card{
+  background: #fff; border-radius: 14px; overflow: hidden; border: 1.5px dashed rgba(108,99,255,.25);
+  box-shadow: 0 10px 24px rgba(0,0,0,.06); display: flex; flex-direction: column;
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+}
+.course-card:hover{ transform: translateY(-6px); box-shadow: 0 18px 36px rgba(0,0,0,.12); border-color: rgba(108,99,255,.45); }
+
+.thumb-wrap{ position: relative; }
+.course-thumb{ width: 100%; height: 190px; object-fit: cover; display: block; }
+
+.course-chip{
+  position: absolute; left: 16px; bottom: 12px; background: #0b0c1f; color: #fff;
+  font-size: 12px; font-weight: 800; padding: 8px 10px; border-radius: 10px;
+  letter-spacing: .2px; box-shadow: 0 8px 16px rgba(0,0,0,.22);
+}
+
+/* body */
+.course-body{ padding: 16px; display: grid; gap: 12px; }
+.course-meta-top{ display: flex; justify-content: space-between; align-items: center; }
+.rating{
+  background: var(--primary-100); color: var(--primary-700);
+  font-weight: 800; padding: 4px 8px; border-radius: 8px; font-size: 12px;
+}
+.price{ color: var(--primary-700); font-weight: 800; }
+
+.course-title{ font-size: 16px; line-height: 1.35; color: #0d1321; }
+
+.facts{
+  display: flex; flex-wrap: wrap; gap: 10px 16px; list-style: none; margin: 0; padding: 0;
+  font-size: 13px; color: #4b5563; border-top: 1px dashed rgba(0,0,0,.08); padding-top: 10px;
+}
+
+.course-footer{
+  display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(0,0,0,.08);
+  padding-top: 12px;
+}
+.teacher{ display: flex; align-items: center; gap: 8px; font-weight: 700; color: #111827; }
+.teacher-avatar{ width: 26px; height: 26px; display: grid; place-items: center; background: var(--primary-100); border-radius: 50%; }
+
+.enroll-btn{
+  background: #fff; color: var(--primary-500); border: 2px solid var(--primary-500);
+  font-weight: 800; padding: 8px 14px; border-radius: 999px; cursor: pointer; transition: .2s;
+}
+.enroll-btn:hover{ background: var(--primary-50); }
+
+/* Hover polish (matches Home.css utilities) */
+.hover-card{ transition: transform .3s ease, box-shadow .3s ease; }
+.hoverable{ transition: transform .45s cubic-bezier(.2,.8,.2,1), filter .35s ease, box-shadow .35s ease; }
+.course-card:hover .course-thumb{ transform: scale(1.04); }
+
+/* ===== Responsive ===== */
+@media (max-width: 1100px){
+  .courses-grid{ grid-template-columns: repeat(2, minmax(240px,1fr)); }
+}
+@media (max-width: 768px){
+  .courses-intro{ grid-template-columns: 1fr; align-items: start; }
+  .intro-right{ justify-self: start; }
+  .courses-grid{ grid-template-columns: 1fr; }
+}

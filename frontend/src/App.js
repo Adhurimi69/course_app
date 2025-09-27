@@ -11,6 +11,7 @@ import Blog from "./Views/Blog";
 import Prices from "./Views/Prices";
 import AboutUs from "./Views/AboutUs";
 import ContactUs from "./Views/ContactUs";
+import Courses1 from "./Views/Courses1"
 
 import AdminDashboard from "./Views/AdminDashboard";
 import Users from "./Views/Users";
@@ -53,6 +54,7 @@ export default function App() {
       <Route path="/prices" element={<Prices />} />
       <Route path="/about" element={<AboutUs />} />
       <Route path="/contact" element={<ContactUs />} />
+      <Route path="/courses1" element={<Courses1 />} />
 
       {/* ✅ Friendly alias used by pricing CTAs */}
       <Route path="/talk-to-an-advisor" element={<ContactUs />} />

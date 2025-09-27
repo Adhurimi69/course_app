@@ -78,7 +78,14 @@
   background: #fff; color: var(--primary-500); border: 2px solid var(--primary-500);
   font-weight: 800; padding: 8px 14px; border-radius: 999px; cursor: pointer; transition: .2s;
 }
-.enroll-btn:hover{ background: var(--primary-50); }
+.enroll-btn:hover {
+  background: var(--primary-500);   /* same as Load More */
+  border-color: var(--primary-500); /* match border */
+  color: #fff;                      /* white text for contrast */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+
 
 /* Hover polish (matches Home.css utilities) */
 .hover-card{ transition: transform .3s ease, box-shadow .3s ease; }

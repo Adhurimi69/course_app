@@ -35,34 +35,55 @@ export default function CourseLayout({ studentView = false }) {
   const [openExamModal, setOpenExamModal] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
 
-  // ---- student upload handlers ----
-  const handleSelectFile = (assignmentId, file) => {
-    setSelectedFiles((prev) => ({ ...prev, [assignmentId]: file }));
-  };
+// ---- file upload handlers (assignments for students, lectures for teachers) ----
+const handleSelectFile = (type, id, file) => {
+  setSelectedFiles((prev) => ({ ...prev, [`${type}-${id}`]: file }));
+};
 
-  const handleUpload = async (assignmentId) => {
-    const file = selectedFiles[assignmentId];
-    if (!file) return alert("Choose a file first.");
+const handleUpload = async (type, id) => {
+  if (!id) return alert("Invalid ID. Please save the lecture/assignment first.");
+
+  const key = `${type}-${id}`;
+  const file = selectedFiles[key];
+  if (!file) return alert("Choose a file first.");
+
+  const fd = new FormData();
+  fd.append("file", file);
+
+  // Append correct ID
+  if (type === "assignment") {
     if (!studentId) return alert("Not logged in.");
-
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("assignmentId", assignmentId);
+    fd.append("assignmentId", id);
     fd.append("studentId", studentId);
+  } else if (type === "lecture") {
+    fd.append("lectureId", id);
+  }
 
-    try {
-      setUploading((p) => ({ ...p, [assignmentId]: true }));
-      await axios.post(`http://localhost:5000/api/commands/upload`, fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      alert("Upload successful!");
-    } catch (err) {
-      console.error(err);
-      alert("Upload failed.");
-    } finally {
-      setUploading((p) => ({ ...p, [assignmentId]: false }));
-    }
-  };
+  // Debug: log what we are sending
+  console.log("Uploading file:", file.name);
+  console.log("FormData keys:", Array.from(fd.keys()));
+  console.log("FormData values:", Array.from(fd.values()));
+
+  try {
+    setUploading((prev) => ({ ...prev, [key]: true }));
+
+    await axios.post("http://localhost:5000/api/commands/upload", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    alert("Upload successful!");
+    await fetchData(); // refresh lectures/assignments
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    alert("Upload failed.");
+  } finally {
+    setUploading((prev) => ({ ...prev, [key]: false }));
+  }
+};
+
+
+
+
 
   // Fetch all data (lectures with assignments, and exams)
   const fetchData = async () => {
@@ -187,6 +208,42 @@ export default function CourseLayout({ studentView = false }) {
                   </Box>
                 )}
 
+                {/* Upload lecture file (teachers only) */}
+{!studentView && (
+  <Box
+    sx={{
+      display: "flex",
+      gap: 1,
+      mt: 1,
+      alignItems: "center",
+      flexWrap: "wrap",
+    }}
+  >
+    <Button variant="outlined" size="small" component="label">
+      Choose file
+      <input
+        type="file"
+        hidden
+        onChange={(e) =>
+          handleSelectFile("lecture", lec.lectureId, e.target.files?.[0])
+        }
+      />
+    </Button>
+    <Typography variant="caption">
+      {selectedFiles[`lecture-${lec.lectureId}`]?.name || "No file chosen"}
+    </Typography>
+    <Button
+      variant="contained"
+      size="small"
+      disabled={!!uploading[`lecture-${lec.lectureId}`]}
+      onClick={() => handleUpload("lecture", lec.lectureId)}
+    >
+      {uploading[`lecture-${lec.lectureId}`] ? "Uploading..." : "Upload"}
+    </Button>
+  </Box>
+)}
+
+
                 {/* Assignments */}
                 {lec.assignments.map((a) => {
                   const due =
@@ -232,49 +289,39 @@ export default function CourseLayout({ studentView = false }) {
                       )}
 
                       {/* Student upload */}
-                      {studentView && (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            gap: 1,
-                            mt: 1,
-                            alignItems: "center",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            component="label"
-                          >
-                            Choose file
-                            <input
-                              type="file"
-                              hidden
-                              onChange={(e) =>
-                                handleSelectFile(
-                                  a.assignmentId,
-                                  e.target.files?.[0]
-                                )
-                              }
-                            />
-                          </Button>
-                          <Typography variant="caption">
-                            {selectedFiles[a.assignmentId]?.name ||
-                              "No file chosen"}
-                          </Typography>
-                          <Button
-                            variant="contained"
-                            size="small"
-                            disabled={!!uploading[a.assignmentId]}
-                            onClick={() => handleUpload(a.assignmentId)}
-                          >
-                            {uploading[a.assignmentId]
-                              ? "Uploading..."
-                              : "Upload"}
-                          </Button>
-                        </Box>
-                      )}
+{studentView && (
+  <Box
+    sx={{
+      display: "flex",
+      gap: 1,
+      mt: 1,
+      alignItems: "center",
+      flexWrap: "wrap",
+    }}
+  >
+    <Button variant="outlined" size="small" component="label">
+      Choose file
+      <input
+        type="file"
+        hidden
+        onChange={(e) =>
+          handleSelectFile("assignment", a.assignmentId, e.target.files?.[0])
+        }
+      />
+    </Button>
+    <Typography variant="caption">
+      {selectedFiles[`assignment-${a.assignmentId}`]?.name || "No file chosen"}
+    </Typography>
+    <Button
+      variant="contained"
+      size="small"
+      disabled={!!uploading[`assignment-${a.assignmentId}`]}
+      onClick={() => handleUpload("assignment", a.assignmentId)}
+    >
+      {uploading[`assignment-${a.assignmentId}`] ? "Uploading..." : "Upload"}
+    </Button>
+  </Box>
+)}
                     </Box>
                   );
                 })}

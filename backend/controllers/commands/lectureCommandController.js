@@ -67,13 +67,15 @@ const updateLecture = async (req, res) => {
 const deleteLecture = async (req, res) => {
   try {
     const lecture = await Lecture.findByPk(req.params.id);
+    if (!lecture) return res.status(404).json({ error: "Lecture not found" });
 
-    if (!lecture) {
-      return res.status(404).json({ error: "Lecture not found" });
+    // Remove uploaded file if exists
+    if (lecture.fileName) { // make sure lecture model has fileName column
+      const filePath = path.join(process.cwd(), "uploads/lectures", lecture.fileName);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 
     await lecture.destroy();
-
     await LectureReadModel.deleteOne({ lectureId: lecture.id });
 
     res.json({ message: "Lecture deleted successfully." });

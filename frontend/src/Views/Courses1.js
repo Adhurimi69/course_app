@@ -151,7 +151,9 @@ export default function Courses() {
                                         <span className="teacher-avatar" aria-hidden>👩‍🏫</span>
                                         <span>{c.instructor}</span>
                                     </div>
-                                    <button className="enroll-btn" type="button">Enroll →</button>
+                                    <button className="enroll-btn" type="button" 
+                                    onClick={() => navigate("/signup")}
+                                    >Enroll →</button>
                                 </div>
                             </div>
                         </article>

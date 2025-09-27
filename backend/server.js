@@ -43,7 +43,7 @@ const lectureQueryRoutes = require("./routes/queries/lectureQueryRoutes");
 const assignmentQueryRoutes = require("./routes/queries/assignmentQueryRoutes");
 const examQueryRoutes = require("./routes/queries/examQueryRoutes");
 // ----- Command Routes -----
-const uploadCommandRoute = require("./routes/commands/uploadRoutes");
+const uploadRoutes = require("./routes/commands/uploadRoutes");
 const gradeCommandRoute = require("./routes/commands/gradeRoutes");
 const reviewCommandRoute = require("./routes/commands/reviewRoutes");
 const attendanceCommandRoute = require("./routes/commands/attendanceRoutes");
@@ -52,7 +52,7 @@ const studentCourseCommandRoute = require("./routes/commands/studentCourseRoutes
 const studentExamCommandRoute = require("./routes/commands/studentExamRoutes");
 
 // ----- Query Routes -----
-const uploadQueryRoute = require("./routes/queries/uploadQueryRoutes");
+const uploadQueryRoutes = require("./routes/queries/uploadQueryRoutes");
 const gradeQueryRoute = require("./routes/queries/gradeQueryRoutes");
 const reviewQueryRoute = require("./routes/queries/reviewQueryRoutes");
 const attendanceQueryRoute = require("./routes/queries/attendanceQueryRoutes");
@@ -61,7 +61,7 @@ const studentCourseQueryRoute = require("./routes/queries/studentCourseQueryRout
 const studentExamQueryRoute = require("./routes/queries/studentExamQueryRoutes");
 
 // ----- Command APIs -----
-app.use("/api/commands/upload", uploadCommandRoute);
+app.use("/api/commands/upload", uploadRoutes);
 app.use("/api/commands/grade", gradeCommandRoute);
 app.use("/api/commands/review", reviewCommandRoute);
 app.use("/api/commands/attendance", attendanceCommandRoute);
@@ -71,7 +71,7 @@ app.use("/api/commands/student-exam", studentExamCommandRoute);
 app.use("/api/commands/student-courses", studentCourseRoutes);
 
 // ----- Query APIs -----
-app.use("/api/queries/upload", uploadQueryRoute);
+app.use("/api/queries/upload", uploadQueryRoutes);
 app.use("/api/queries/grade", gradeQueryRoute);
 app.use("/api/queries/review", reviewQueryRoute);
 app.use("/api/queries/attendance", attendanceQueryRoute);

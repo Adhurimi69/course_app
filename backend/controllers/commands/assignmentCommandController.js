@@ -80,6 +80,12 @@ const deleteAssignment = async (req, res) => {
       return res.status(404).json({ error: "Assignment not found" });
     }
 
+    // Remove uploaded file if exists
+    if (assignment.fileName) {
+      const filePath = path.join(process.cwd(), "uploads/assignments", assignment.fileName);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
+
     await assignment.destroy();
     await AssignmentReadModel.deleteOne({ assignmentId: assignment.id });
 

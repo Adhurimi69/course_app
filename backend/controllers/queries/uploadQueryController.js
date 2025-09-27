@@ -1,38 +1,37 @@
-const Upload = require('../../models/nosql/uploadReadModel');
-const Student = require('../../models/nosql/studentReadModel');
-const Assignment = require('../../models/nosql/assignmentReadModel');
+// backend/controllers/queries/uploadQueryController.js
+const Upload = require("../../models/nosql/uploadReadModel");
+const Student = require("../../models/nosql/studentReadModel");
+const Assignment = require("../../models/nosql/assignmentReadModel");
+const Lecture = require("../../models/nosql/lectureReadModel");
 
-exports.uploadDoc = async (req, res) => {
-  const upload = await Upload.create({
-    file: req.body.file,
-    timeUploaded: new Date(),
-    studentId: req.body.studentId,         // optional
-    assignmentId: req.body.assignmentId    // optional
-  });
-  res.status(201).json(upload);
-};
-
-exports.deleteDoc = async (req, res) => {
-  await Upload.destroy({ where: { id: req.params.id } });
-  res.sendStatus(204);
-};
-
+// Fetch a single upload with populated references
 exports.fetchUpload = async (req, res) => {
-  const upload = await Upload.findByPk(req.params.id, {
-    include: [
-      { model: Student, attributes: ['id', 'name', 'email'] },
-      { model: Assignment, attributes: ['id', 'title', 'dueDate'] }
-    ]
-  });
-  res.json(upload);
+  try {
+    const upload = await Upload.findById(req.params.id)
+      .populate("studentId", "name email")
+      .populate("assignmentId", "title dueDate")
+      .populate("lectureId", "title");
+
+    if (!upload) return res.status(404).json({ error: "Upload not found" });
+    res.json(upload);
+  } catch (e) {
+    console.error("Error fetching upload:", e);
+    res.status(500).json({ error: "Failed to fetch upload" });
+  }
 };
 
+// List all uploads with populated references
 exports.listUploads = async (req, res) => {
-  const uploads = await Upload.findAll({
-    include: [
-      { model: Student, attributes: ['id', 'name', 'email'] },
-      { model: Assignment, attributes: ['id', 'title', 'dueDate'] }
-    ]
-  });
-  res.json(uploads);
+  try {
+    const uploads = await Upload.find()
+      .populate("studentId", "name email")
+      .populate("assignmentId", "title dueDate")
+      .populate("lectureId", "title")
+      .sort({ timeUploaded: -1 }); // newest first for performance
+
+    res.json(uploads);
+  } catch (e) {
+    console.error("Error listing uploads:", e);
+    res.status(500).json({ error: "Failed to list uploads" });
+  }
 };

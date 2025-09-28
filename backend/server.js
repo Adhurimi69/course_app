@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const connectMongo = require("./config/mongo");
 const { sequelize } = require("./config/db");
+const path = require("path");
+
 
 const app = express();
 connectMongo();
@@ -17,6 +19,10 @@ app.use(express.json());
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+
+// Serve uploads folder statically
+app.use("/uploads", express.static(path.join(__dirname, "uploads/misc")));
+
 
 // ----- Command Routes -----
 const courseCommandRoutes = require("./routes/commands/courseCommandRoutes");
@@ -71,7 +77,7 @@ app.use("/api/commands/student-exam", studentExamCommandRoute);
 app.use("/api/commands/student-courses", studentCourseRoutes);
 
 // ----- Query APIs -----
-app.use("/api/queries/upload", uploadQueryRoutes);
+app.use("/api/queries/uploads", uploadQueryRoutes);
 app.use("/api/queries/grade", gradeQueryRoute);
 app.use("/api/queries/review", reviewQueryRoute);
 app.use("/api/queries/attendance", attendanceQueryRoute);

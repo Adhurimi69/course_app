@@ -1,9 +1,11 @@
+// backend/routes/commands/uploadCommandRoutes.js
 const express = require("express");
-const uploadRouter = express.Router();
+const router = express.Router();
 const uploadController = require("../../controllers/commands/uploadController");
 
-uploadRouter.post("/", uploadController.uploadDoc);
-uploadRouter.get("/:id", uploadController.fetchUpload);
-uploadRouter.delete("/:id", uploadController.deleteDoc);
+// Commands (mutations)
+router.post("/", uploadController.uploadDoc);       // Create upload
+router.get("/:id", uploadController.fetchUpload);   // Fetch single upload (for edit)
+router.delete("/:id", uploadController.deleteDoc);  // Delete upload
 
-module.exports = uploadRouter;
+module.exports = router;

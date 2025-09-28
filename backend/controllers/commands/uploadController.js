@@ -1,27 +1,69 @@
-// backend/controllers/commands/uploadCommandController.js
 const Upload = require("../../models/sql/upload");
 const Student = require("../../models/sql/student");
 const Lecture = require("../../models/sql/lecture");
 const Assignment = require("../../models/sql/assignment");
+const UploadReadModel = require("../../models/nosql/uploadReadModel");
 const uploadMiddleware = require("../../middleware/uploadMiddleware");
 const fs = require("fs");
 const path = require("path");
 
-// Upload a file (lecture or assignment)
+// ===== Helper to determine folder =====
+const getUploadFolder = (upload) => {
+  if (upload.lectureId) return "lectures";
+  if (upload.assignmentId) return "assignments";
+  return "misc";
+};
+
+// ===== Helper: delete uploads (single or bulk) =====
+const deleteUploads = async (filter) => {
+  const uploads = await Upload.findAll({ where: filter });
+
+  for (const upload of uploads) {
+    // Determine folder
+    const folder = getUploadFolder(upload);
+
+    // Delete file from disk
+    const filePath = path.join(process.cwd(), "uploads", folder, upload.file);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+    // Delete from SQL
+    await upload.destroy();
+
+    // Delete from Mongo
+    await UploadReadModel.deleteOne({ file: upload.file });
+  }
+};
+
+// ===== Upload a file (lecture or assignment) =====
 exports.uploadDoc = (req, res) => {
   uploadMiddleware(req, res, async (err) => {
     if (err) return res.status(500).json({ error: err.message });
 
     try {
+      const { lectureId, assignmentId, studentId } = req.body;
+
+      // Ensure upload belongs to either lecture or assignment, not both
+      if (lectureId && assignmentId) {
+        return res.status(400).json({ error: "Upload must belong to either lecture OR assignment, not both" });
+      }
+
+      // Save to SQL (write model)
       const upload = await Upload.create({
-        file: req.file.filename, // store only the file name
+        file: req.file.filename,
         timeUploaded: new Date(),
-        lectureId: req.body.lectureId || null,
-        assignmentId: req.body.assignmentId || null,
-        studentId: req.body.studentId || null,
+        lectureId: lectureId || null,
+        assignmentId: assignmentId || null,
+        studentId: studentId || null,
       });
 
-      // Optionally: trigger background sync to Mongo here if needed
+      // Project to MongoDB (read model)
+      await UploadReadModel.create({
+        file: req.file.filename,
+        timeUploaded: upload.timeUploaded,
+        lectureId: lectureId || null,
+        assignmentId: assignmentId || null,
+        studentId: studentId || null,
+      });
 
       res.status(201).json(upload);
     } catch (e) {
@@ -31,23 +73,16 @@ exports.uploadDoc = (req, res) => {
   });
 };
 
-// Delete a file
+// ===== Delete a single upload by ID =====
 exports.deleteDoc = async (req, res) => {
   try {
-    const upload = await Upload.findByPk(req.params.id);
+    const uploadId = req.params.id;
+
+    const upload = await Upload.findByPk(uploadId);
     if (!upload) return res.status(404).json({ error: "Upload not found" });
 
-    // Delete physical file
-    const filePath = path.join(
-      process.cwd(), // safer than __dirname for dynamic paths
-      "uploads",
-      upload.lectureId ? "lectures" : "assignments",
-      upload.file
-    );
+    await deleteUploads({ id: uploadId });
 
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
-    await upload.destroy();
     res.sendStatus(204);
   } catch (e) {
     console.error("Error deleting upload:", e);
@@ -55,7 +90,12 @@ exports.deleteDoc = async (req, res) => {
   }
 };
 
-// Fetch a single upload with details
+// ===== Delete all uploads linked to a lecture, assignment, or student =====
+exports.deleteUploadsByFilter = async (filter) => {
+  await deleteUploads(filter);
+};
+
+// ===== Fetch a single upload (with related models) =====
 exports.fetchUpload = async (req, res) => {
   try {
     const upload = await Upload.findByPk(req.params.id, {
@@ -73,3 +113,6 @@ exports.fetchUpload = async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 };
+
+// ===== Export helper for use in lecture/assignment deletion =====
+exports.deleteUploads = deleteUploads;

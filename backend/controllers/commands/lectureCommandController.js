@@ -1,6 +1,7 @@
 const Lecture = require("../../models/sql/lecture");
 const Course = require("../../models/sql/course");
 const { LectureReadModel } = require("../../models/nosql/lectureReadModel");
+const { deleteUploads } = require("../commands/uploadController"); // import the helper
 
 const createLecture = async (req, res) => {
   try {
@@ -69,17 +70,24 @@ const deleteLecture = async (req, res) => {
     const lecture = await Lecture.findByPk(req.params.id);
     if (!lecture) return res.status(404).json({ error: "Lecture not found" });
 
-    // Remove uploaded file if exists
-    if (lecture.fileName) { // make sure lecture model has fileName column
+    // 1️⃣ Delete all uploads linked to this lecture (SQL + Mongo + disk)
+    await deleteUploads({ lectureId: lecture.id });
+
+    // 2️⃣ Remove lecture-specific file if exists (optional)
+    if (lecture.fileName) { // make sure your lecture model has fileName column
       const filePath = path.join(process.cwd(), "uploads/lectures", lecture.fileName);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 
+    // 3️⃣ Delete lecture itself from SQL
     await lecture.destroy();
+
+    // 4️⃣ Delete lecture from Mongo
     await LectureReadModel.deleteOne({ lectureId: lecture.id });
 
-    res.json({ message: "Lecture deleted successfully." });
+    res.json({ message: "Lecture and all linked uploads deleted successfully." });
   } catch (error) {
+    console.error("Error deleting lecture:", error);
     res.status(500).json({ error: error.message });
   }
 };

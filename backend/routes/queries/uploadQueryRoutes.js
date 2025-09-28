@@ -1,8 +1,12 @@
+// backend/routes/queries/uploadQueryRoutes.js
 const express = require("express");
-const uploadsMongoRouter = express.Router();
-const uploadsMongoController = require('../../controllers/queries/uploadQueryController');
+const router = express.Router();
+const uploadQueryController = require("../../controllers/queries/uploadQueryController");
 
-uploadsMongoRouter.get("/:id", uploadsMongoController.fetchUpload);
-uploadsMongoRouter.get("/", uploadsMongoController.listUploads);
+// Queries (reads)
+router.get("/", uploadQueryController.listUploads);          // List uploads (with filters)
+router.get("/recent", uploadQueryController.listRecentUploads); // Recent uploads
+router.get("/:id", uploadQueryController.fetchUpload);       // Fetch single upload
+router.get("/course/:courseId", uploadQueryController.getCourseUploads);   // New: Get all uploads for a course (lectures + assignments)
 
-module.exports = uploadsMongoRouter;
+module.exports = router;

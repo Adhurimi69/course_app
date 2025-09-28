@@ -3,6 +3,7 @@ const Lecture = require("../../models/sql/lecture");
 const {
   AssignmentReadModel,
 } = require("../../models/nosql/assignmentReadModel");
+const { deleteUploads } = require("../commands/uploadController"); // import the helper
 
 const createAssignment = async (req, res) => {
   try {
@@ -75,22 +76,26 @@ const updateAssignment = async (req, res) => {
 const deleteAssignment = async (req, res) => {
   try {
     const assignment = await Assignment.findByPk(req.params.id);
+    if (!assignment) return res.status(404).json({ error: "Assignment not found" });
 
-    if (!assignment) {
-      return res.status(404).json({ error: "Assignment not found" });
-    }
+    // 1️⃣ Delete all uploads linked to this assignment (SQL + Mongo + disk)
+    await deleteUploads({ assignmentId: assignment.id });
 
-    // Remove uploaded file if exists
-    if (assignment.fileName) {
+    // 2️⃣ Remove assignment-specific file if exists (optional)
+    if (assignment.fileName) { // make sure your assignment model has fileName column
       const filePath = path.join(process.cwd(), "uploads/assignments", assignment.fileName);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
     }
 
+    // 3️⃣ Delete assignment itself from SQL
     await assignment.destroy();
+
+    // 4️⃣ Delete assignment from Mongo
     await AssignmentReadModel.deleteOne({ assignmentId: assignment.id });
 
-    res.json({ message: "Assignment deleted successfully." });
+    res.json({ message: "Assignment and all linked uploads deleted successfully." });
   } catch (error) {
+    console.error("Error deleting assignment:", error);
     res.status(500).json({ error: error.message });
   }
 };

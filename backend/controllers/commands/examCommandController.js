@@ -2,9 +2,11 @@ const Exam = require("../../models/sql/exam");
 const Course = require("../../models/sql/course");  // <-- Added missing import
 const { ExamReadModel } = require("../../models/nosql/examReadModel");
 
+const { deleteUploads } = require("./uploadController");
+
 const createExam = async (req, res) => {
   try {
-    const { title, date, courseId } = req.body;
+    const { title, date, courseId, points } = req.body;
 
     if (!title || !date || !courseId) {
       return res.status(400).json({ error: "Title, date, and courseId are required." });
@@ -15,7 +17,7 @@ const createExam = async (req, res) => {
       return res.status(404).json({ error: "Course not found." });
     }
 
-    const newExam = await Exam.create({ title, date, courseId });
+  const newExam = await Exam.create({ title, date, courseId, points: points != null ? points : null });
 
     // Sync to MongoDB
     await ExamReadModel.create({
@@ -23,7 +25,8 @@ const createExam = async (req, res) => {
       title: newExam.title,
       date: newExam.date,
       courseId: course.id,
-      courseTitle: course.title, // fixed from course.name to course.title
+      courseTitle: course.title,
+      points: newExam.points,
     });
 
     res.status(201).json(newExam);
@@ -34,7 +37,7 @@ const createExam = async (req, res) => {
 
 const updateExam = async (req, res) => {
   try {
-    const { title, date, courseId } = req.body;
+    const { title, date, courseId, points } = req.body;
     const exam = await Exam.findByPk(req.params.id);
 
     if (!exam) {
@@ -52,8 +55,9 @@ const updateExam = async (req, res) => {
       updatedCourseTitle = course.title; // fixed here as well
     }
 
-    exam.title = title || exam.title;
-    exam.date = date || exam.date;
+  exam.title = title || exam.title;
+  exam.date = date || exam.date;
+  exam.points = points != null ? points : exam.points;
 
     await exam.save();
 
@@ -61,6 +65,7 @@ const updateExam = async (req, res) => {
       title: exam.title,
       date: exam.date,
       courseId: exam.courseId,
+      points: exam.points,
     };
 
     if (updatedCourseTitle) {
@@ -86,6 +91,8 @@ const deleteExam = async (req, res) => {
       return res.status(404).json({ error: "Exam not found" });
     }
 
+    // Delete exam and any linked uploads (SQL, Mongo, disk)
+    await deleteUploads({ examId: exam.id });
     await exam.destroy();
     await ExamReadModel.deleteOne({ examId: exam.id });
 

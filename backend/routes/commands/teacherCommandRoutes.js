@@ -5,9 +5,11 @@ const {
   updateTeacher,
   deleteTeacher,
 } = require("../../controllers/commands/teacherCommandController");
+const requireRole = require('../../middleware/requireRole');
 
-router.post("/", createTeacher);
-router.put("/:id", updateTeacher);
-router.delete("/:id", deleteTeacher);
+// Only admins may create/update/delete teacher records
+router.post("/", requireRole('admin'), createTeacher);
+router.put("/:id", requireRole('admin'), updateTeacher);
+router.delete("/:id", requireRole('admin'), deleteTeacher);
 
 module.exports = router;

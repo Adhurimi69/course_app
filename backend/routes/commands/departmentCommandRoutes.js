@@ -5,9 +5,10 @@ const {
   updateDepartment,
   deleteDepartment,
 } = require("../../controllers/commands/departmentCommandController");
+const requireRole = require('../../middleware/requireRole');
 
-router.post("/", createDepartment);
-router.put("/:id", updateDepartment);
-router.delete("/:id", deleteDepartment);
+router.post("/", requireRole('admin'), createDepartment);
+router.put("/:id", requireRole('admin'), updateDepartment);
+router.delete("/:id", requireRole('admin'), deleteDepartment);
 
 module.exports = router;

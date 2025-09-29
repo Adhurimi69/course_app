@@ -7,7 +7,7 @@ const { deleteUploads } = require("../commands/uploadController"); // import the
 
 const createAssignment = async (req, res) => {
   try {
-    const { title, dueDate, lectureId } = req.body;
+  const { title, dueDate, lectureId, points } = req.body;
 
     if (!title || !lectureId) {
       return res
@@ -24,6 +24,7 @@ const createAssignment = async (req, res) => {
       title,
       dueDate,
       lectureId,
+      points: points != null ? points : null,
     });
 
     // Sync to MongoDB
@@ -34,7 +35,8 @@ const createAssignment = async (req, res) => {
       lectureId: lecture.id,
       lectureTitle: lecture.title,
       courseId: lecture.courseId, // assuming lecture has courseId
-      courseTitle: "Course title placeholder", // You would fetch course title if needed
+      courseTitle: "Course title placeholder",
+      points: newAssignment.points,
     });
 
     res.status(201).json(newAssignment);
@@ -45,16 +47,17 @@ const createAssignment = async (req, res) => {
 
 const updateAssignment = async (req, res) => {
   try {
-    const { title, dueDate, lectureId } = req.body;
+    const { title, dueDate, lectureId, points } = req.body;
     const assignment = await Assignment.findByPk(req.params.id);
 
     if (!assignment) {
       return res.status(404).json({ error: "Assignment not found" });
     }
 
-    assignment.title = title || assignment.title;
-    assignment.dueDate = dueDate || assignment.dueDate;
-    assignment.lectureId = lectureId || assignment.lectureId;
+  assignment.title = title || assignment.title;
+  assignment.dueDate = dueDate || assignment.dueDate;
+  assignment.lectureId = lectureId || assignment.lectureId;
+  assignment.points = points != null ? points : assignment.points;
     await assignment.save();
 
     // Also update Mongo
@@ -64,6 +67,7 @@ const updateAssignment = async (req, res) => {
         title: assignment.title,
         dueDate: assignment.dueDate,
         lectureId: assignment.lectureId,
+        points: assignment.points,
       }
     );
 

@@ -20,13 +20,14 @@ exports.changeGrade = async (req, res) => {
 
 exports.seeGradesTeacher = async (req, res) => {
   const grades = await Grade.find()
-    .populate('studentId', 'name email')
-    .populate('courseId', 'title');
+    .populate('studentId', 'studentId name email')
+    .populate('courseId', 'courseId title');
   res.json(grades);
 };
 
 exports.seeGradesStudent = async (req, res) => {
   const grades = await Grade.find({ studentId: req.params.id })
-    .populate('courseId', 'title');
+    .populate('courseId', 'courseId title')
+    .populate('studentId', 'studentId name email');
   res.json(grades);
 };

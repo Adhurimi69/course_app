@@ -5,8 +5,9 @@ const {
   getAllDepartments,
   getDepartmentById,
 } = require("../../controllers/queries/departmentQueryController");
+const requireRole = require('../../middleware/requireRole');
 
-router.get("/", getAllDepartments);
-router.get("/:id", getDepartmentById);
+router.get("/", requireRole('admin','teacher'), getAllDepartments);
+router.get("/:id", requireRole('admin','teacher'), getDepartmentById);
 
 module.exports = router;

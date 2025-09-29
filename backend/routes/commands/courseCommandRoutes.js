@@ -5,9 +5,11 @@ const {
   updateCourse,
   deleteCourse,
 } = require("../../controllers/commands/courseCommandController");
+const requireRole = require('../../middleware/requireRole');
 
-router.post("/", createCourse);
-router.put("/:id", updateCourse);
-router.delete("/:id", deleteCourse);
+// Allow admins and teachers to manage courses
+router.post("/", requireRole('admin','teacher'), createCourse);
+router.put("/:id", requireRole('admin','teacher'), updateCourse);
+router.delete("/:id", requireRole('admin','teacher'), deleteCourse);
 
 module.exports = router;

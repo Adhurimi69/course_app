@@ -5,9 +5,11 @@ const {
   updateAdmin,
   deleteAdmin,
 } = require("../../controllers/commands/adminCommandController");
+const requireRole = require('../../middleware/requireRole');
 
-router.post("/", createAdmin);
-router.put("/:id", updateAdmin);
-router.delete("/:id", deleteAdmin);
+// Only admins can manage other admins
+router.post("/", requireRole('admin'), createAdmin);
+router.put("/:id", requireRole('admin'), updateAdmin);
+router.delete("/:id", requireRole('admin'), deleteAdmin);
 
 module.exports = router;

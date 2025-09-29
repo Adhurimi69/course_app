@@ -22,6 +22,7 @@ import {
 export default function ExamModal({ open, courseId, exam, onClose, onSave }) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
+  const [points, setPoints] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -29,9 +30,11 @@ export default function ExamModal({ open, courseId, exam, onClose, onSave }) {
     if (exam) {
       setTitle(exam.title);
       setDate(exam.date.slice(0, 10));
+      setPoints(exam.points != null ? String(exam.points) : "");
     } else {
       setTitle("");
       setDate("");
+      setPoints("");
     }
     setError(null);
   }, [exam]);
@@ -47,7 +50,8 @@ export default function ExamModal({ open, courseId, exam, onClose, onSave }) {
         ? `http://localhost:5000/api/commands/exams/${exam.examId}`
         : "http://localhost:5000/api/commands/exams";
       const method = exam ? "put" : "post";
-      const payload = exam ? { title, date } : { courseId, title, date };
+  const basePayload = exam ? { title, date } : { courseId, title, date };
+  const payload = { ...basePayload, points: points !== "" ? Number(points) : null };
       const res = await axios[method](url, payload);
       onSave(res.data);
       onClose();
@@ -79,6 +83,15 @@ export default function ExamModal({ open, courseId, exam, onClose, onSave }) {
             fullWidth
             InputLabelProps={{ shrink: true }}
             required
+          />
+          <TextField
+            label="Points"
+            type="number"
+            value={points}
+            onChange={(e) => setPoints(e.target.value)}
+            fullWidth
+            inputProps={{ min: 0 }}
+            helperText="Total points possible for this exam (optional)"
           />
         </Box>
       </DialogContent>

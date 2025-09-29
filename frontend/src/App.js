@@ -1,6 +1,6 @@
 // src/App.js
 import React from "react";
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 import Home from "./Views/Home";
@@ -24,23 +24,12 @@ import TeacherDashboard from "./Views/TeacherDashboard";
 import StudentDashboard from "./Views/StudentDashboard";
 import StudentCoursesHome from "./Views/StudentCoursesHome";
 import CourseLayout from "./components/CourseLayout";
+import AssignmentSubmissions from './Views/AssignmentSubmissions';
+import ExamSubmissions from './Views/ExamSubmissions';
+import StudentAssignments from './Views/StudentAssignments';
+import StudentExams from './Views/StudentExams';
 
-function RoleLayout({ role }) {
-  return (
-    <div className="App">
-      <h1 className="title">Course Management System</h1>
-      <nav className="nav-bar">
-        <a href={`/${role}/courses`}>Courses</a>
-        <a href={`/${role}/users`}>Users</a>
-        <a href={`/${role}/departments`}>Departments</a>
-        <a href={`/${role}/lectures`}>Lectures</a>
-        <a href={`/${role}/assignments`}>Assignments</a>
-        <a href={`/${role}/exams`}>Exams</a>
-      </nav>
-      <Outlet />
-    </div>
-  );
-}
+// RoleLayout removed (not used)
 
 export default function App() {
   return (
@@ -116,7 +105,9 @@ export default function App() {
             <Route index element={<Navigate to="lectures" replace />} />
             <Route path="lectures" element={<Lectures />} />
             <Route path="assignments" element={<Assignment />} />
+            <Route path="assignments/submissions" element={<AssignmentSubmissions />} />
             <Route path="exams" element={<Exams />} />
+            <Route path="exams/submissions" element={<ExamSubmissions />} />
           </Route>
         </Route>
       </Route>
@@ -155,6 +146,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="assignments/list" element={<ProtectedRoute allowedRoles={["student"]}><StudentAssignments/></ProtectedRoute>} />
         <Route
           path="exams"
           element={
@@ -163,6 +155,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="exams/list" element={<ProtectedRoute allowedRoles={["student"]}><StudentExams/></ProtectedRoute>} />
       </Route>
 
       {/* Fallback */}

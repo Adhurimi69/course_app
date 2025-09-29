@@ -5,9 +5,10 @@ const {
   updateLecture,
   deleteLecture,
 } = require("../../controllers/commands/lectureCommandController");
+const requireRole = require('../../middleware/requireRole');
 
-router.post("/", createLecture);
-router.put("/:id", updateLecture);
-router.delete("/:id", deleteLecture);
+router.post("/", requireRole('admin','teacher'), createLecture);
+router.put("/:id", requireRole('admin','teacher'), updateLecture);
+router.delete("/:id", requireRole('admin','teacher'), deleteLecture);
 
 module.exports = router;

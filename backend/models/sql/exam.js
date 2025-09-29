@@ -13,6 +13,11 @@ const Exam = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    points: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   {
     timestamps: true,

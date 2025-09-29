@@ -23,6 +23,7 @@ const examSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  points: Number,
 }, {
   timestamps: true,
 });

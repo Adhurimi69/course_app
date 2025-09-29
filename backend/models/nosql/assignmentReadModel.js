@@ -8,6 +8,7 @@ const assignmentSchema = new mongoose.Schema({
   lectureTitle: String,
   courseId: Number,
   courseTitle: String,
+  points: Number,
 });
 
 module.exports.AssignmentReadModel = mongoose.model(

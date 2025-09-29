@@ -25,9 +25,8 @@ export default function LectureModal({ open, courseId, lecture, onClose, onSave 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // File state (like CourseLayout: keyed by lectureId)
+  // File state (used only when editing)
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
 
   // Prefill when editing
   useEffect(() => {
@@ -38,26 +37,7 @@ export default function LectureModal({ open, courseId, lecture, onClose, onSave 
     setSelectedFile(null);
   }, [lecture]);
 
-  // ✅ Separate upload function
-  const handleUpload = async (file, lectureId) => {
-    if (!file) return;
-    const fd = new FormData();
-    fd.append("file", file);
-    fd.append("lectureId", lectureId);
-
-    try {
-      setUploading(true);
-      await axios.post("http://localhost:5000/api/commands/upload", fd, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      alert("Lecture file uploaded!");
-    } catch (err) {
-      console.error(err.response?.data || err.message);
-      alert("Lecture upload failed.");
-    } finally {
-      setUploading(false);
-    }
-  };
+  // Uploads are handled after lecture creation in the main CourseLayout UI.
 
   // ✅ Separate submit function
   const handleSubmit = async () => {
@@ -77,12 +57,12 @@ export default function LectureModal({ open, courseId, lecture, onClose, onSave 
 
       const res = await axios[method](url, payload);
 
-      // Always ensure we have lectureId
-      const savedLectureId = lecture?.lectureId || res.data.id || res.data.lectureId;
-      if (!savedLectureId) throw new Error("No lectureId returned from backend");
+  // Always ensure we have lectureId
+  const savedLectureId = lecture?.lectureId || res.data.id || res.data.lectureId;
+  if (!savedLectureId) throw new Error("No lectureId returned from backend");
 
-      // Upload file if chosen (like CourseLayout)
-      if (selectedFile) await handleUpload(selectedFile, savedLectureId);
+  // Note: uploading files during creation is disabled. Users should upload files
+  // after the lecture is created using the lecture upload UI in CourseLayout.
 
       onSave(); // refresh CourseLayout lectures
       onClose();
@@ -107,26 +87,28 @@ export default function LectureModal({ open, courseId, lecture, onClose, onSave 
             required
           />
 
-          {/* File upload */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
-            <Button variant="outlined" component="label">
-              Choose file
-              <input
-                type="file"
-                hidden
-                onChange={(e) => setSelectedFile(e.target.files?.[0])}
-              />
-            </Button>
-            <Typography variant="caption">
-              {selectedFile?.name || "No file chosen"}
-            </Typography>
-            {uploading && <Typography variant="caption">Uploading...</Typography>}
-          </Box>
+          {/* File upload: only allow when editing an existing lecture, not on creation */}
+          {lecture && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
+              <Button variant="outlined" component="label">
+                Choose file
+                <input
+                  type="file"
+                  hidden
+                  onChange={(e) => setSelectedFile(e.target.files?.[0])}
+                />
+              </Button>
+              <Typography variant="caption">
+                {selectedFile?.name || "No file chosen"}
+              </Typography>
+              {/* uploading indicator removed for lecture creation */}
+            </Box>
+          )}
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={loading || uploading}>Cancel</Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={loading || uploading}>
+  <Button onClick={onClose} disabled={loading}>Cancel</Button>
+  <Button onClick={handleSubmit} variant="contained" disabled={loading}>
           {loading ? "Saving..." : lecture ? "Save Changes" : "Create"}
         </Button>
       </DialogActions>

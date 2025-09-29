@@ -1,5 +1,6 @@
 const Upload = require("../../models/sql/upload");
 const Student = require("../../models/sql/student");
+const Teacher = require("../../models/sql/teacher");
 const Lecture = require("../../models/sql/lecture");
 const Assignment = require("../../models/sql/assignment");
 const UploadReadModel = require("../../models/nosql/uploadReadModel");
@@ -11,6 +12,7 @@ const path = require("path");
 const getUploadFolder = (upload) => {
   if (upload.lectureId) return "lectures";
   if (upload.assignmentId) return "assignments";
+  if (upload.examId) return "exams";
   return "misc";
 };
 
@@ -40,11 +42,48 @@ exports.uploadDoc = (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
 
     try {
-      const { lectureId, assignmentId, studentId } = req.body;
+      const { lectureId, assignmentId } = req.body;
 
-      // Ensure upload belongs to either lecture or assignment, not both
-      if (lectureId && assignmentId) {
-        return res.status(400).json({ error: "Upload must belong to either lecture OR assignment, not both" });
+      // Determine studentId or teacherId based on authenticated user role
+      let studentId = null;
+      let teacherId = null;
+
+      if (req.body.studentId) {
+        studentId = req.body.studentId;
+      } else if (req.user && req.user.role === 'student' && req.user.id) {
+        studentId = req.user.id;
+      }
+
+      // If uploader is a teacher, set teacherId automatically (teacher uploads resources)
+      if (req.user && req.user.role === 'teacher' && req.user.id) {
+        teacherId = req.user.id;
+      } else if (req.body.teacherId) {
+        teacherId = req.body.teacherId;
+      }
+
+      // Ensure upload targets only one resource type (lecture, assignment, or exam)
+      if ((!!lectureId + !!assignmentId + !!req.body.examId) > 1) {
+        return res.status(400).json({ error: "Upload must belong to only one of: lecture, assignment, or exam" });
+      }
+
+      const examId = req.body.examId || null;
+
+      // Server-side enforcement: students are not allowed to upload exam files.
+      if (examId && req.user && req.user.role === 'student') {
+        // If multer already saved a file to disk, remove it to avoid orphan files
+        try {
+          if (req.file && req.file.path) {
+            if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+          } else if (req.file && req.file.filename) {
+            // try to remove from uploads/misc or the computed folder as a best-effort
+            const maybePath = path.join(process.cwd(), 'uploads', 'misc', req.file.filename);
+            if (fs.existsSync(maybePath)) fs.unlinkSync(maybePath);
+          }
+        } catch (unlinkErr) {
+          console.error('Failed to remove uploaded file after rejecting exam upload:', unlinkErr);
+        }
+
+        return res.status(403).json({ error: 'Students are not permitted to upload exam files.' });
       }
 
       // Save to SQL (write model)
@@ -53,7 +92,9 @@ exports.uploadDoc = (req, res) => {
         timeUploaded: new Date(),
         lectureId: lectureId || null,
         assignmentId: assignmentId || null,
+        examId: examId,
         studentId: studentId || null,
+        teacherId: teacherId || null,
       });
 
       // Project to MongoDB (read model)
@@ -62,7 +103,9 @@ exports.uploadDoc = (req, res) => {
         timeUploaded: upload.timeUploaded,
         lectureId: lectureId || null,
         assignmentId: assignmentId || null,
+        examId: examId,
         studentId: studentId || null,
+        teacherId: teacherId || null,
       });
 
       res.status(201).json(upload);

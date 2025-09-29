@@ -6,10 +6,12 @@ const COOKIE_NAME = "jwt";
 const IDLE_MS = Number(process.env.IDLE_TIMEOUT_MS || 30 * 60 * 1000);
 
 function setRefreshCookie(res, token) {
+  const sameSite = process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax';
+  const secure = process.env.NODE_ENV === 'production';
   res.cookie(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "Strict",
+    secure,
+    sameSite,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 }
@@ -49,8 +51,8 @@ const handleRefreshToken = async (req, res) => {
   const lastSeen = decoded?.smeta?.lastSeen ?? now;
 
   if (IDLE_MS && now - lastSeen > IDLE_MS) {
-    teacher.refreshToken = null; await teacher.save();
-    res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: "Strict", secure: process.env.NODE_ENV === "production" });
+  teacher.refreshToken = null; await teacher.save();
+  res.clearCookie(COOKIE_NAME, { httpOnly: true, sameSite: process.env.NODE_ENV === 'production' ? 'Strict' : 'Lax', secure: process.env.NODE_ENV === 'production' });
     return res.status(401).json({ message: "Session expired (idle timeout)" });
   }
 

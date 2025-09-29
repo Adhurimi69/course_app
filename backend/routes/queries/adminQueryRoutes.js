@@ -4,8 +4,9 @@ const {
   getAdmins,
   getAdminById,
 } = require("../../controllers/queries/adminQueryController");
+const requireRole = require('../../middleware/requireRole');
 
-router.get("/", getAdmins);
-router.get("/:id", getAdminById);
+router.get("/", requireRole('admin'), getAdmins);
+router.get("/:id", requireRole('admin'), getAdminById);
 
 module.exports = router;

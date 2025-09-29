@@ -9,6 +9,10 @@ const Course = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    teacherId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     enrollment_key: {
       type: DataTypes.STRING,
       allowNull: true,

@@ -22,14 +22,16 @@ exports.changeGrade = async (req, res) => {
 };
 
 exports.seeGradesTeacher = async (req, res) => {
+  // populate the read-models and include the original SQL id fields (assignmentId, studentId)
   const grades = await AssignmentGrade.find()
-    .populate('assignmentId', 'title dueDate')
-    .populate('studentId', 'name');
+    .populate('assignmentId', 'assignmentId title dueDate courseId')
+    .populate('studentId', 'studentId name email');
   res.json(grades);
 };
 
 exports.seeGradesStudent = async (req, res) => {
   const grades = await AssignmentGrade.find({ studentId: req.params.id })
-    .populate('assignmentId', 'title dueDate');
+    .populate('assignmentId', 'assignmentId title dueDate courseId')
+    .populate('studentId', 'studentId name email');
   res.json(grades);
 };

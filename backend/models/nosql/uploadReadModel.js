@@ -7,12 +7,14 @@ const UploadSchema = new mongoose.Schema({
   lectureId: { type: Number, default: null },       // Changed from ObjectId to Number
   assignmentId: { type: Number, default: null },   // Changed from ObjectId to Number
   studentId: { type: Number, default: null},      // Changed from ObjectId to Number
+  teacherId: { type: Number, default: null },
 });
 
 // Indexes to improve query performance
 UploadSchema.index({ lectureId: 1 });
 UploadSchema.index({ assignmentId: 1 });
 UploadSchema.index({ studentId: 1 });
+UploadSchema.index({ teacherId: 1 });
 UploadSchema.index({ timeUploaded: -1 });
 
 module.exports = mongoose.model("Upload", UploadSchema);

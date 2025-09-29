@@ -10,7 +10,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
   TableRow,
   Paper,
@@ -19,8 +18,15 @@ import {
 export default function Assignments() {
   const [assignments, setAssignments] = useState([]);
   const [lectures, setLectures] = useState([]);
+  const parsedUser = JSON.parse(localStorage.getItem('user') || 'null') || {};
+  const currentUser = parsedUser;
+  const currentRole = localStorage.getItem('role') || parsedUser?.role;
+
+  const [selectedFiles, setSelectedFiles] = useState({});
+  const [uploading, setUploading] = useState({});
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [points, setPoints] = useState("");
   const [lectureId, setLectureId] = useState("");
   const [editingId, setEditingId] = useState(null);
 
@@ -51,7 +57,7 @@ export default function Assignments() {
     e.preventDefault();
     if (!lectureId) return alert("Please select a lecture.");
 
-    const data = { title, dueDate, lectureId };
+    const data = { title, dueDate, lectureId, points: points !== "" ? Number(points) : null };
 
     try {
       if (editingId) {
@@ -73,6 +79,7 @@ export default function Assignments() {
     setEditingId(assignment.assignmentId);
     setTitle(assignment.title);
     setDueDate(assignment.dueDate ? assignment.dueDate.slice(0, 10) : "");
+    setPoints(assignment.points != null ? String(assignment.points) : "");
     setLectureId(assignment.lectureId || "");
   };
 
@@ -84,6 +91,39 @@ export default function Assignments() {
       } catch (err) {
         console.error("Error deleting assignment:", err);
       }
+    }
+  };
+
+  const handleSelectFile = (assignmentId, file) => {
+    setSelectedFiles((prev) => ({ ...prev, [assignmentId]: file }));
+  };
+
+  const handleUpload = async (assignmentId) => {
+    const file = selectedFiles[assignmentId];
+    if (!file) return alert('Choose a file first');
+    const token = localStorage.getItem('accessToken');
+    if (!token) return alert('You must be logged in to upload');
+
+    const fd = new FormData();
+    // append metadata before file so multer destination sees it
+    fd.append('assignmentId', assignmentId);
+    if (currentRole === 'student') fd.append('studentId', currentUser.id);
+    fd.append('file', file);
+
+    try {
+      setUploading((s) => ({ ...s, [assignmentId]: true }));
+      const base = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+      await axios.post(`${base}/api/commands/upload`, fd, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('Upload successful');
+      // refresh assignments if needed
+      fetchAssignments();
+    } catch (err) {
+      console.error('Upload failed', err.response?.data || err.message);
+      alert('Upload failed');
+    } finally {
+      setUploading((s) => ({ ...s, [assignmentId]: false }));
     }
   };
 
@@ -124,6 +164,16 @@ export default function Assignments() {
     InputLabelProps={{ shrink: true }}
     size="small"
     sx={{ minWidth: 160, backgroundColor: "#fff" }}
+  />
+  <TextField
+    label="Points"
+    type="number"
+    value={points}
+    onChange={(e) => setPoints(e.target.value)}
+    size="small"
+    sx={{ minWidth: 120, backgroundColor: "#fff" }}
+    InputProps={{ inputProps: { min: 0 } }}
+    helperText="Optional"
   />
   <Select
     value={lectureId}
@@ -204,6 +254,17 @@ export default function Assignments() {
                   >
                     Delete
                   </Button>
+                  {/* Student upload UI */}
+                  {currentRole === 'student' && (
+                    <div style={{ display: 'inline-flex', gap: 8, marginLeft: 12, alignItems: 'center' }}>
+                      <input type="file" id={`file-${a.assignmentId}`} style={{ display: 'none' }} onChange={(e) => handleSelectFile(a.assignmentId, e.target.files?.[0])} />
+                      <label htmlFor={`file-${a.assignmentId}`}>
+                        <Button size="small" variant="outlined" component="span">Choose</Button>
+                      </label>
+                      <span style={{ fontSize: 12 }}>{selectedFiles[a.assignmentId]?.name || 'No file chosen'}</span>
+                      <Button size="small" variant="contained" onClick={() => handleUpload(a.assignmentId)} disabled={!!uploading[a.assignmentId]}>Upload</Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

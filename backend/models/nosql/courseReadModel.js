@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const courseSchema = new mongoose.Schema({
   courseId: Number, // SQL ID
   title: String,
+  teacherId: Number,
   enrollment_key: String,
   departmentId: Number,
   departmentName: String, // Flatten department name

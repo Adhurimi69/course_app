@@ -28,6 +28,7 @@ export default function AssignmentModal({
 }) {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [points, setPoints] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -35,9 +36,11 @@ export default function AssignmentModal({
     if (assignment) {
       setTitle(assignment.title);
       setDueDate(assignment.dueDate.slice(0, 10)); // yyyy-mm-dd
+      setPoints(assignment.points != null ? String(assignment.points) : "");
     } else {
       setTitle("");
       setDueDate("");
+      setPoints("");
     }
     setError(null);
   }, [assignment]);
@@ -54,8 +57,8 @@ export default function AssignmentModal({
         : "http://localhost:5000/api/commands/assignments";
       const method = assignment ? "put" : "post";
       const payload = assignment
-        ? { title, dueDate }
-        : { lectureId, title, dueDate };
+        ? { title, dueDate, points: points !== "" ? Number(points) : null }
+        : { lectureId, title, dueDate, points: points !== "" ? Number(points) : null };
       const res = await axios[method](url, payload);
       onSave(res.data);
       onClose();
@@ -89,6 +92,15 @@ export default function AssignmentModal({
             fullWidth
             InputLabelProps={{ shrink: true }}
             required
+          />
+          <TextField
+            label="Points"
+            type="number"
+            value={points}
+            onChange={(e) => setPoints(e.target.value)}
+            fullWidth
+            InputProps={{ inputProps: { min: 0 } }}
+            helperText="Optional: points or weight for this assignment"
           />
         </Box>
       </DialogContent>

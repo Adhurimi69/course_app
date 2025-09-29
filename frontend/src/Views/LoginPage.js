@@ -44,6 +44,8 @@ const LoginPage = () => {
           role: decoded?.role,
         })
       );
+      // Persist role so other components can read it from localStorage
+      if (decoded?.role) localStorage.setItem('role', decoded.role);
 
       const role = decoded?.role;
       if (["admin", "teacher", "student"].includes(role)) {

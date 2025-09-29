@@ -5,9 +5,12 @@ const {
   getExamById,
   getExamByCourse,
 } = require("../../controllers/queries/examQueryController");
+const requireRole = require('../../middleware/requireRole');
 
-router.get("/", getAllExams);
-router.get("/:id", getExamById);
-router.get("/course/:courseId", getExamByCourse);
+router.get("/", requireRole('admin','teacher','student'), getAllExams);
+router.get("/course/:courseId", requireRole('admin','teacher','student'), getExamByCourse);
+router.get("/:id", requireRole('admin','teacher','student'), getExamById);
+
+module.exports = router;
 
 module.exports = router;

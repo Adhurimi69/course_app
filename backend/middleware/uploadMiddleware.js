@@ -5,17 +5,34 @@ const fs = require("fs");
 // Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    // Debug: print content-type and body keys in non-production
+    try {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('--- uploadMiddleware incoming ---');
+        console.log('content-type:', req.headers['content-type']);
+        console.log('body keys:', req.body ? Object.keys(req.body).join(',') : '<none>');
+      }
+    } catch (e) {
+      console.error('Error printing upload debug:', e);
+    }
     // Determine folder based on lectureId or assignmentId
     let folder;
 
-    if (req.body.lectureId && req.body.assignmentId) {
-      return cb(new Error("Upload must belong to either lecture OR assignment, not both"));
+    // Validate that the upload targets only one resource type
+    const hasLecture = !!req.body.lectureId;
+    const hasAssignment = !!req.body.assignmentId;
+    const hasExam = !!req.body.examId;
+
+    if ((hasLecture + hasAssignment + hasExam) > 1) {
+      return cb(new Error("Upload must belong to only one of: lecture, assignment, or exam"));
     }
 
-    if (req.body.lectureId) {
+    if (hasLecture) {
       folder = path.join(process.cwd(), "uploads/lectures");
-    } else if (req.body.assignmentId) {
+    } else if (hasAssignment) {
       folder = path.join(process.cwd(), "uploads/assignments");
+    } else if (hasExam) {
+      folder = path.join(process.cwd(), "uploads/exams");
     } else {
       folder = path.join(process.cwd(), "uploads/misc");
     }

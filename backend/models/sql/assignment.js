@@ -13,6 +13,12 @@ const Assignment = sequelize.define(
       type: DataTypes.DATE,
       allowNull: true,
     },
+    // points (weight/value) for the assignment
+    points: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      defaultValue: null,
+    },
   },
   {
     timestamps: false,

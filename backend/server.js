@@ -20,8 +20,8 @@ app.use(express.json());
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
-// Serve uploads folder statically
-app.use("/uploads", express.static(path.join(__dirname, "uploads/misc")));
+// Serve uploads folder statically (exposes /uploads/lectures, /uploads/assignments, /uploads/exams, /uploads/misc)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 // ----- Command Routes -----
